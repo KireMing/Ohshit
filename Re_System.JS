@@ -14,8 +14,8 @@
 // @grant        GM_saveTab
 // @grant        GM_getTabs
 // @connect      *
-// @updateURL    https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
-// @downloadURL  https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
+// @updateURL    https://ghfast.top/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
+// @downloadURL  https://ghfast.top/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
 // ==/UserScript==
 
 (function() {
