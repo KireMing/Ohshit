@@ -5,8 +5,6 @@
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
-// @updateURL    https://cdn.jsdelivr.net/gh/KireMing/Ohshit@main/Re_System.JS
-// @downloadURL  https://cdn.jsdelivr.net/gh/KireMing/Ohshit@main/Re_System.JS
 // @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -16,6 +14,8 @@
 // @grant        GM_saveTab
 // @grant        GM_getTabs
 // @connect      *
+// @updateURL    https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
+// @downloadURL  https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
 // ==/UserScript==
 
 (function() {
