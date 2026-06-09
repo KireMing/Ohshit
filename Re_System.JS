@@ -5,6 +5,8 @@
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
+// @updateURL    https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
+// @downloadURL  https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
 // @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        GM_getValue
