@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -41,17 +41,12 @@
                 name: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[1]/text()',
                 idCard: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[6]/span',
                 model: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[9]/text()',
-                shop: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[8]/text()',
                 orderCountContainer: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]',
-                td4: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]',
                 productModel: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[2]',
                 minDownPayment: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[6]/p[5]',
                 packageInfo1: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[3]',
                 packageInfo2: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[5]/span',
                 shopCategory: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[8]',
-                overdueBtn: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[11]/a',
-                offlineBtn: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/a',
-                orderNo: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[1]/text()',
                 link: '/html/body/div[2]/div[2]/form/table/tbody/tr/td[1]/a[1]',
                 newChainLink: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]',
                 valueAddedServiceCheck: '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[2]'
@@ -249,6 +244,18 @@
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-flow" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
+                                        <label class="re-form-label">微信分付</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-wechat-fenfu" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
+                                        <label class="re-form-label">美团月付</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-meituan-pay" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
+                                        <label class="re-form-label">支付分</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-wechat-credit-score" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
                                         <label class="re-form-label">支宝流水</label>
                                         <input type="text" class="re-input re-input-mini" id="re-alipay-flow" placeholder="请输入">
                                     </div>
@@ -259,10 +266,6 @@
                                     <div class="re-flow-item">
                                         <label class="re-form-label">花呗情况</label>
                                         <input type="text" class="re-input re-input-mini" id="re-huabei-status" placeholder="请输入">
-                                    </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">微信分付</label>
-                                        <input type="text" class="re-input re-input-mini" id="re-wechat-fenfu" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
                                         <label class="re-form-label">抖音月付</label>
@@ -278,6 +281,10 @@
                                     <div class="re-flow-item">
                                         <label class="re-form-label">指导价格</label>
                                         <input type="text" class="re-input re-input-mini re-guide-price-input" id="re-guide-price" value="¥1,999.00" readonly>
+                                    </div>
+                                    <div class="re-flow-item re-flow-item-full">
+                                        <label class="re-form-label">共租情况</label>
+                                        <input type="text" class="re-input" id="re-share-rent" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item re-flow-item-full">
                                         <label class="re-form-label">其他备注</label>
@@ -535,6 +542,16 @@
                                                     <span class="re-switch-slider"></span>
                                                 </label>
                                             </div>
+                                            <div class="re-setting-card re-setting-card-action" id="re-check-update-card">
+                                                <div class="re-setting-icon re-setting-icon-blue">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                                                </div>
+                                                <div class="re-setting-info">
+                                                    <span class="re-setting-name">检查更新</span>
+                                                    <span class="re-setting-desc" id="re-update-desc">当前版本 v1.3.0</span>
+                                                </div>
+                                                <button class="re-check-update-btn" id="re-check-update-btn">检查</button>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="re-settings-panel" id="re-settings-appearance">
@@ -660,6 +677,82 @@
                                     <span>更新日志</span>
                                 </div>
                                 <div class="re-changelog-list" id="re-changelog-list">
+                                    <div class="re-changelog-item">
+                                        <div class="re-changelog-version">
+                                            <span class="re-version-badge">v1.3.0</span>
+                                            <span class="re-changelog-date">2026-06-13</span>
+                                        </div>
+                                        <div class="re-changelog-content">
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-feature">新增</span>
+                                                <span class="re-category-text">检查更新功能：设置页新增检查更新按钮，支持自动检测并跳转更新</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-feature">新增</span>
+                                                <span class="re-category-text">流水区新增美团月付、支付分、共租情况输入字段</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-feature">新增</span>
+                                                <span class="re-category-text">面审风控字段独立填充：芝麻信用、花呗额度、支付宝流水、微信流水、分付额度、抖音月付、美团月付、支付分、工作情况、共租情况、旧机处理分别填入对应字段</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-fix">修复</span>
+                                                <span class="re-category-text">历史记录店铺名丢失：新增店铺名缓存机制，不再从界面反向解析</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-fix">修复</span>
+                                                <span class="re-category-text">风控预览未显示支付分、美团月付、共租情况</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-fix">修复</span>
+                                                <span class="re-category-text">手机成本和指导价获取方式改为匹配表头字段名，不再依赖硬编码XPath</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">5折/6折订单最低结果直接取最低首付，不参与折扣计算</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">价格显示去除千位分隔符</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">占位文本统一为【无参数】，备注字段只传其他备注内容</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">流水区排版调整：第一行微信流水/微信分付/美团月付/支付分，第二行支付宝流水/芝麻信用/花呗情况/抖音月付</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">清理未使用的XPath配置和调试残留代码</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="re-changelog-item">
+                                        <div class="re-changelog-version">
+                                            <span class="re-version-badge">v1.3.0</span>
+                                            <span class="re-changelog-date">2026-06-09</span>
+                                        </div>
+                                        <div class="re-changelog-content">
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-fix">修复</span>
+                                                <span class="re-category-text">历史记录店铺名丢失：新增店铺名缓存机制，不再从界面反向解析</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">5折/6折订单最低结果直接取最低首付</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">价格显示去除千位分隔符，占位文本统一为【无参数】</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">清理调试残留代码，新增更新地址配置</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="re-changelog-item">
                                         <div class="re-changelog-version">
                                             <span class="re-version-badge">v1.0.0</span>
@@ -1669,7 +1762,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
-        
+
         .re-stat-card {
             background: #fff;
             border-radius: 8px;
@@ -1735,11 +1828,11 @@
             height: 10px;
             border-radius: 2px;
         }
-        
+
         .re-modal-day-edit {
             width: 320px;
         }
-        
+
         .re-day-edit-info {
             display: flex;
             align-items: center;
@@ -2089,6 +2182,48 @@
             color: #9ca3af;
             display: block;
             margin-top: 2px;
+        }
+
+        .re-check-update-btn {
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .re-check-update-btn:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .re-check-update-btn:active {
+            transform: scale(0.95);
+        }
+
+        .re-check-update-btn:disabled {
+            color: #9ca3af;
+            background: rgba(156, 163, 175, 0.08);
+            border-color: rgba(156, 163, 175, 0.2);
+            cursor: not-allowed;
+        }
+
+        .re-check-update-btn.re-update-found {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .re-check-update-btn.re-update-latest {
+            color: #6b7280;
+            background: rgba(107, 114, 128, 0.08);
+            border-color: rgba(107, 114, 128, 0.2);
         }
 
         .re-switch-small {
@@ -5446,7 +5581,7 @@
                     const month = this.getAttribute('data-month');
                     const monthObj = new Date(month + '-01');
                     const monthStr = `${monthObj.getFullYear()}年${monthObj.getMonth() + 1}月`;
-                    
+
                     if (confirm(`确定删除 ${monthStr} 的所有记录？`)) {
                         deleteHistoryRecordsByMonth(month).then(() => {
                             const searchInput = document.getElementById('re-history-search');
@@ -6444,7 +6579,7 @@
 
     window.addEventListener('beforeunload', function(e) {
         if (!preventRefreshEnabled) return;
-        
+
         const zhimaCreditInput = document.getElementById('re-zhima-credit');
         if (zhimaCreditInput && zhimaCreditInput.value.trim() !== '') {
             e.preventDefault();
@@ -7592,11 +7727,35 @@
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(response.responseText, 'text/html');
 
-                        const phoneCostEl = doc.evaluate('/html/body/div[2]/table[4]/tbody/tr/td[6]/span', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                        const phoneCost = phoneCostEl ? phoneCostEl.textContent.trim() : '';
-
-                        const guidePriceEl = doc.evaluate('/html/body/div[2]/table[4]/tbody/tr/td[4]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                        const guidePrice = guidePriceEl ? guidePriceEl.textContent.trim() : '';
+                        // 通过匹配表头字段获取手机成本和指导价
+                        let phoneCost = '';
+                        let guidePrice = '';
+                        const feeH3s = doc.querySelectorAll('h3');
+                        for (let i = 0; i < feeH3s.length; i++) {
+                            if (feeH3s[i].textContent.includes('费用信息')) {
+                                let feeTable = feeH3s[i].nextElementSibling;
+                                while (feeTable && feeTable.tagName !== 'TABLE') {
+                                    feeTable = feeTable.nextElementSibling;
+                                }
+                                if (feeTable) {
+                                    const headers = feeTable.querySelectorAll('thead tr th');
+                                    const headerTexts = Array.from(headers).map(th => th.textContent.trim());
+                                    const phoneCostIdx = headerTexts.findIndex(t => t === '商品售价');
+                                    const guidePriceIdx = headerTexts.findIndex(t => t === '指导价');
+                                    const tbodyRow = feeTable.querySelector('tbody tr');
+                                    if (tbodyRow) {
+                                        const tds = tbodyRow.querySelectorAll('td');
+                                        if (phoneCostIdx >= 0 && tds[phoneCostIdx]) {
+                                            phoneCost = tds[phoneCostIdx].textContent.trim();
+                                        }
+                                        if (guidePriceIdx >= 0 && tds[guidePriceIdx]) {
+                                            guidePrice = tds[guidePriceIdx].textContent.trim();
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
 
                         let contactName = '';
                         let contactRelation = '';
@@ -7864,13 +8023,13 @@
         const expandResultInput = document.getElementById('re-expand-result');
         const phoneCostEl = document.getElementById('re-phone-cost');
         const minDownPaymentEl = document.getElementById('re-min-down-payment');
-        
+
         if (!phoneCostEl || cachedDiscount === null) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
             if (expandResultInput) expandResultInput.placeholder = '请输入';
             return;
         }
-        
+
         const costText = phoneCostEl.value.replace('¥', '').replace(/,/g, '').trim();
         const cost = parseFloat(costText);
         if (isNaN(cost)) {
@@ -7878,9 +8037,9 @@
             if (expandResultInput) expandResultInput.placeholder = '请输入';
             return;
         }
-        
+
         const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
-        
+
         let minDownPayment = 0;
         if (minDownPaymentEl) {
             const downPaymentText = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
@@ -7903,7 +8062,7 @@
             finalMinPrice = Math.max(calculatedMinPrice, minDownPayment);
         }
         const placeholderText = '最低结果：¥' + finalMinPrice;
-        
+
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
         if (expandResultInput) expandResultInput.placeholder = placeholderText;
     }
@@ -7911,15 +8070,15 @@
     function getMinPrice() {
         const phoneCostEl = document.getElementById('re-phone-cost');
         const minDownPaymentEl = document.getElementById('re-min-down-payment');
-        
+
         if (!phoneCostEl || cachedDiscount === null) return null;
-        
+
         const costText = phoneCostEl.value.replace('¥', '').replace(/,/g, '').trim();
         const cost = parseFloat(costText);
         if (isNaN(cost) || isNaN(cachedDiscount)) return null;
-        
+
         const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
-        
+
         let minDownPayment = 0;
         if (minDownPaymentEl) {
             const downPaymentText = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
@@ -8302,12 +8461,18 @@
         if (!cachedElements.flowInputs) {
             cachedElements.flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
         }
-        const flowLabels = ['微信流水', '支付宝流水', '芝麻信用', '花呗情况', '分付', '抖音（美团）月付'];
+        const flowLabels = ['微信流水', '微信分付', '美团月付', '支付分', '支宝流水', '芝麻信用', '花呗情况', '抖音月付'];
+        const excludeLabels = ['芝麻信用', '分付'];
         cachedElements.flowInputs.forEach((input, index) => {
             if (index < flowLabels.length && input.value.trim()) {
-                parts.push(flowLabels[index] + '：' + input.value.trim());
+                if (!excludeLabels.includes(flowLabels[index])) {
+                    parts.push(flowLabels[index] + '：' + input.value.trim());
+                }
             }
         });
+
+        const shareRent = document.getElementById('re-share-rent')?.value?.trim() || '';
+        if (shareRent) parts.push('共租情况：' + shareRent);
 
         const otherRemark = getCachedElement('otherRemark', '.re-other-remark-input')?.value || '';
         if (otherRemark) parts.push('其他备注：' + otherRemark);
@@ -9025,6 +9190,89 @@
         });
     }
 
+    // 检查更新
+    const checkUpdateBtn = document.getElementById('re-check-update-btn');
+    const updateDescEl = document.getElementById('re-update-desc');
+    let updateAvailable = false;
+    if (checkUpdateBtn) {
+        checkUpdateBtn.addEventListener('click', function() {
+            if (updateAvailable) {
+                GM_openInTab('https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS');
+                return;
+            }
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = '检查中...';
+            btn.classList.remove('re-update-found', 're-update-latest');
+
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: 'https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS',
+                timeout: 10000,
+                onload: function(response) {
+                    const versionMatch = response.responseText.match(/@version\s+([\d.]+)/);
+                    if (!versionMatch) {
+                        btn.textContent = '检查';
+                        btn.disabled = false;
+                        if (updateDescEl) updateDescEl.textContent = '无法获取版本信息';
+                        setTimeout(() => {
+                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                        }, 3000);
+                        return;
+                    }
+                    const remoteVersion = versionMatch[1];
+                    const currentVersion = '1.2.0';
+                    if (compareVersion(remoteVersion, currentVersion) > 0) {
+                        updateAvailable = true;
+                        btn.textContent = '更新';
+                        btn.classList.add('re-update-found');
+                        btn.disabled = false;
+                        if (updateDescEl) updateDescEl.textContent = '发现新版本 v' + remoteVersion;
+                    } else {
+                        btn.textContent = '最新';
+                        btn.classList.add('re-update-latest');
+                        if (updateDescEl) updateDescEl.textContent = '已是最新版本';
+                        setTimeout(() => {
+                            btn.textContent = '检查';
+                            btn.classList.remove('re-update-latest');
+                            btn.disabled = false;
+                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                        }, 3000);
+                    }
+                },
+                onerror: function() {
+                    btn.textContent = '检查';
+                    btn.disabled = false;
+                    if (updateDescEl) updateDescEl.textContent = '网络异常，请重试';
+                    setTimeout(() => {
+                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                    }, 3000);
+                },
+                ontimeout: function() {
+                    btn.textContent = '检查';
+                    btn.disabled = false;
+                    if (updateDescEl) updateDescEl.textContent = '请求超时，请重试';
+                    setTimeout(() => {
+                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                    }, 3000);
+                }
+            });
+        });
+    }
+
+    function compareVersion(v1, v2) {
+        const parts1 = v1.split('.').map(Number);
+        const parts2 = v2.split('.').map(Number);
+        const len = Math.max(parts1.length, parts2.length);
+        for (let i = 0; i < len; i++) {
+            const p1 = parts1[i] || 0;
+            const p2 = parts2[i] || 0;
+            if (p1 > p2) return 1;
+            if (p1 < p2) return -1;
+        }
+        return 0;
+    }
+
     const staffRemarkBtn = document.getElementById('re-btn-staff-remark');
     if (staffRemarkBtn) {
         staffRemarkBtn.addEventListener('click', function() {
@@ -9136,7 +9384,55 @@
                 method: 'GET',
                 url: remarkUrl,
                 onload: function(response) {
-                    const postData = 'operator=1&budget=&alipay_credit_score=&wechat_credit_score=&salary=&remark=' + encodeURIComponent(riskPreviewContent) + '&out_order_no=' + encodeURIComponent(orderNo);
+                    // 独立填充面审风控表单对应字段
+                    const wechatBill = (document.getElementById('re-wechat-flow')?.value || '').trim();
+                    const alipayBill = (document.getElementById('re-alipay-flow')?.value || '').trim();
+                    const alipayCreditScore = (document.getElementById('re-zhima-credit')?.value || '').trim();
+                    const huabeiLimit = (document.getElementById('re-huabei-status')?.value || '').trim();
+                    const fenfuLimit = (document.getElementById('re-wechat-fenfu')?.value || '').trim();
+                    const douyinPay = (document.getElementById('re-douyin-pay')?.value || '').trim();
+                    const meituanPay = (document.getElementById('re-meituan-pay')?.value || '').trim();
+                    const wechatCreditScore = (document.getElementById('re-wechat-credit-score')?.value || '').trim();
+                    const shareRent = (document.getElementById('re-share-rent')?.value || '').trim();
+
+                    let salary = '';
+                    const workContent = (document.getElementById('re-work-content')?.value || '').trim();
+                    const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
+                    const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
+                    if (workContent || workAmount) {
+                        salary = workContent;
+                        if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
+                        else if (workAmount) salary += '，' + workAmount;
+                    }
+
+                    // 旧机处理
+                    let oldDevice = '';
+                    const oldDeviceChecked = document.getElementById('re-old-device')?.checked;
+                    if (oldDeviceChecked) {
+                        oldDevice = '旧机保留';
+                    } else {
+                        const oldDeviceType = (document.getElementById('re-old-device-type')?.value || '').trim();
+                        oldDevice = oldDeviceType || '旧机不保留';
+                    }
+
+                    const params = {
+                        operator: '1',
+                        budget: '',
+                        old_device: oldDevice,
+                        alipay_credit_score: alipayCreditScore,
+                        wechat_credit_score: wechatCreditScore,
+                        huabei_limit: huabeiLimit,
+                        alipay_bill: alipayBill,
+                        meituan_pay: meituanPay,
+                        fenfu_limit: fenfuLimit,
+                        wechat_bill: wechatBill,
+                        douyin_pay: douyinPay,
+                        salary: salary,
+                        share_rent: shareRent,
+                        remark: (document.getElementById('re-other-remark')?.value || '').trim(),
+                        out_order_no: orderNo
+                    };
+                    const postData = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
 
                     GM_xmlhttpRequest({
                         method: 'POST',
@@ -9266,7 +9562,7 @@
                                     autoProcessBtn.classList.remove('completed');
                                     autoProcessBtn.innerHTML = originalContent;
                                     autoProcessBtn.disabled = false;
-                                    
+
                                     if (autoRefreshEnabled) {
                                         showSuccessToast('页面即将刷新...');
                                         setTimeout(() => {
@@ -9380,7 +9676,7 @@
         }
 
         const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        const flowLabels = ['微信流水', '支付宝流水', '芝麻信用', '花呗情况', '分付', '抖音（美团）月付'];
+        const flowLabels = ['微信流水', '微信分付', '美团月付', '支付分', '支宝流水', '芝麻信用', '花呗情况', '抖音月付'];
         const excludeLabels = ['芝麻信用', '分付'];
         flowInputs.forEach((input, index) => {
             if (index < flowLabels.length && input.value.trim()) {
@@ -9389,6 +9685,10 @@
                 }
             }
         });
+
+        const shareRentEl = document.getElementById('re-share-rent');
+        const shareRent = shareRentEl ? shareRentEl.value.trim() : '';
+        if (shareRent) remarkParts.push('共租情况：' + shareRent);
 
         const otherRemarkEl = document.querySelector('.re-other-remark-input');
         const otherRemark = otherRemarkEl ? otherRemarkEl.value.trim() : '';
@@ -9450,7 +9750,7 @@
             out_order_no: orderNo
         };
 
-        const dataStr = Object.keys(dataParams).map(key => 
+        const dataStr = Object.keys(dataParams).map(key =>
             key + '=' + encodeURIComponent(dataParams[key])
         ).join('&');
 
