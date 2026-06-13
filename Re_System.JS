@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
+// @version      1.4.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -548,7 +548,7 @@
                                                 </div>
                                                 <div class="re-setting-info">
                                                     <span class="re-setting-name">检查更新</span>
-                                                    <span class="re-setting-desc" id="re-update-desc">当前版本 v1.3.0</span>
+                                                    <span class="re-setting-desc" id="re-update-desc">当前版本 v1.4.0</span>
                                                 </div>
                                                 <button class="re-check-update-btn" id="re-check-update-btn">检查</button>
                                             </div>
@@ -679,6 +679,18 @@
                                 <div class="re-changelog-list" id="re-changelog-list">
                                     <div class="re-changelog-item">
                                         <div class="re-changelog-version">
+                                            <span class="re-version-badge">v1.4.0</span>
+                                            <span class="re-changelog-date">2026-06-13</span>
+                                        </div>
+                                        <div class="re-changelog-content">
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">自动处理风控字段与风控备注统一：所有字段独立填充，remark只传其他备注内容</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="re-changelog-item">
+                                        <div class="re-changelog-version">
                                             <span class="re-version-badge">v1.3.0</span>
                                             <span class="re-changelog-date">2026-06-13</span>
                                         </div>
@@ -731,7 +743,7 @@
                                     </div>
                                     <div class="re-changelog-item">
                                         <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.3.0</span>
+                                            <span class="re-version-badge">v1.4.0</span>
                                             <span class="re-changelog-date">2026-06-09</span>
                                         </div>
                                         <div class="re-changelog-content">
@@ -1762,7 +1774,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
-
+        
         .re-stat-card {
             background: #fff;
             border-radius: 8px;
@@ -1828,11 +1840,11 @@
             height: 10px;
             border-radius: 2px;
         }
-
+        
         .re-modal-day-edit {
             width: 320px;
         }
-
+        
         .re-day-edit-info {
             display: flex;
             align-items: center;
@@ -5581,7 +5593,7 @@
                     const month = this.getAttribute('data-month');
                     const monthObj = new Date(month + '-01');
                     const monthStr = `${monthObj.getFullYear()}年${monthObj.getMonth() + 1}月`;
-
+                    
                     if (confirm(`确定删除 ${monthStr} 的所有记录？`)) {
                         deleteHistoryRecordsByMonth(month).then(() => {
                             const searchInput = document.getElementById('re-history-search');
@@ -6579,7 +6591,7 @@
 
     window.addEventListener('beforeunload', function(e) {
         if (!preventRefreshEnabled) return;
-
+        
         const zhimaCreditInput = document.getElementById('re-zhima-credit');
         if (zhimaCreditInput && zhimaCreditInput.value.trim() !== '') {
             e.preventDefault();
@@ -8023,13 +8035,13 @@
         const expandResultInput = document.getElementById('re-expand-result');
         const phoneCostEl = document.getElementById('re-phone-cost');
         const minDownPaymentEl = document.getElementById('re-min-down-payment');
-
+        
         if (!phoneCostEl || cachedDiscount === null) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
             if (expandResultInput) expandResultInput.placeholder = '请输入';
             return;
         }
-
+        
         const costText = phoneCostEl.value.replace('¥', '').replace(/,/g, '').trim();
         const cost = parseFloat(costText);
         if (isNaN(cost)) {
@@ -8037,9 +8049,9 @@
             if (expandResultInput) expandResultInput.placeholder = '请输入';
             return;
         }
-
+        
         const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
-
+        
         let minDownPayment = 0;
         if (minDownPaymentEl) {
             const downPaymentText = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
@@ -8062,7 +8074,7 @@
             finalMinPrice = Math.max(calculatedMinPrice, minDownPayment);
         }
         const placeholderText = '最低结果：¥' + finalMinPrice;
-
+        
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
         if (expandResultInput) expandResultInput.placeholder = placeholderText;
     }
@@ -8070,15 +8082,15 @@
     function getMinPrice() {
         const phoneCostEl = document.getElementById('re-phone-cost');
         const minDownPaymentEl = document.getElementById('re-min-down-payment');
-
+        
         if (!phoneCostEl || cachedDiscount === null) return null;
-
+        
         const costText = phoneCostEl.value.replace('¥', '').replace(/,/g, '').trim();
         const cost = parseFloat(costText);
         if (isNaN(cost) || isNaN(cachedDiscount)) return null;
-
+        
         const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
-
+        
         let minDownPayment = 0;
         if (minDownPaymentEl) {
             const downPaymentText = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
@@ -9216,7 +9228,7 @@
                         btn.disabled = false;
                         if (updateDescEl) updateDescEl.textContent = '无法获取版本信息';
                         setTimeout(() => {
-                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
                         }, 3000);
                         return;
                     }
@@ -9236,7 +9248,7 @@
                             btn.textContent = '检查';
                             btn.classList.remove('re-update-latest');
                             btn.disabled = false;
-                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
                         }, 3000);
                     }
                 },
@@ -9245,7 +9257,7 @@
                     btn.disabled = false;
                     if (updateDescEl) updateDescEl.textContent = '网络异常，请重试';
                     setTimeout(() => {
-                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
                     }, 3000);
                 },
                 ontimeout: function() {
@@ -9253,7 +9265,7 @@
                     btn.disabled = false;
                     if (updateDescEl) updateDescEl.textContent = '请求超时，请重试';
                     setTimeout(() => {
-                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.3.0';
+                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
                     }, 3000);
                 }
             });
@@ -9562,7 +9574,7 @@
                                     autoProcessBtn.classList.remove('completed');
                                     autoProcessBtn.innerHTML = originalContent;
                                     autoProcessBtn.disabled = false;
-
+                                    
                                     if (autoRefreshEnabled) {
                                         showSuccessToast('页面即将刷新...');
                                         setTimeout(() => {
@@ -9633,6 +9645,24 @@
         const wechatFenfuInput = document.getElementById('re-wechat-fenfu');
         const wechatCreditScore = wechatFenfuInput ? wechatFenfuInput.value.trim() : '';
 
+        const huabeiInput = document.getElementById('re-huabei');
+        const huabeiLimit = huabeiInput ? huabeiInput.value.trim() : '';
+
+        const alipayFlowInput = document.getElementById('re-alipay-flow');
+        const alipayBill = alipayFlowInput ? alipayFlowInput.value.trim() : '';
+
+        const meituanPayInput = document.getElementById('re-meituan-pay');
+        const meituanPay = meituanPayInput ? meituanPayInput.value.trim() : '';
+
+        const fenfuInput = document.getElementById('re-wechat-fenfu');
+        const fenfuLimit = fenfuInput ? fenfuInput.value.trim() : '';
+
+        const wechatFlowInput = document.getElementById('re-wechat-flow');
+        const wechatBill = wechatFlowInput ? wechatFlowInput.value.trim() : '';
+
+        const douyinPayInput = document.getElementById('re-douyin-pay');
+        const douyinPay = douyinPayInput ? douyinPayInput.value.trim() : '';
+
         const workOptionEl = document.getElementById('re-work-option');
         const workOptionChecked = workOptionEl ? workOptionEl.checked : false;
 
@@ -9646,107 +9676,57 @@
             const workAmount = workAmountEl ? workAmountEl.value.trim() : '';
             const salaryType = salaryTypeEl ? salaryTypeEl.value : '';
 
-            const workProofValues = getMultiSelectValues('re-work-proof');
-
-            const salaryParts = [];
-            if (workContent) salaryParts.push(workContent);
-            if (salaryType && workAmount) salaryParts.push(salaryType + workAmount);
-            if (workProofValues.length > 0) salaryParts.push(workProofValues.join('、'));
-
-            salary = salaryParts.join('，');
-        }
-
-        const remarkParts = [];
-
-        const oldDeviceEl = document.getElementById('re-old-device');
-        const oldDeviceChecked = oldDeviceEl ? oldDeviceEl.checked : false;
-        const oldDeviceSelectEl = panel.querySelector('.re-old-device-select');
-        const oldDeviceSelect = oldDeviceSelectEl ? oldDeviceSelectEl.value : '';
-        const oldDeviceAmountEl = oldDeviceEl ? oldDeviceEl.closest('.re-form-inline')?.querySelector('.re-switch-content input') : null;
-        const oldDeviceAmount = oldDeviceAmountEl ? oldDeviceAmountEl.value : '';
-
-        if (oldDeviceChecked) {
-            if (oldDeviceAmount) remarkParts.push('旧机置换：' + oldDeviceAmount);
-        } else {
-            if (oldDeviceSelect) remarkParts.push('旧机选项：' + oldDeviceSelect);
-        }
-
-        if (!workOptionChecked) {
-            remarkParts.push('无任何工作记录');
-        }
-
-        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        const flowLabels = ['微信流水', '微信分付', '美团月付', '支付分', '支宝流水', '芝麻信用', '花呗情况', '抖音月付'];
-        const excludeLabels = ['芝麻信用', '分付'];
-        flowInputs.forEach((input, index) => {
-            if (index < flowLabels.length && input.value.trim()) {
-                if (!excludeLabels.includes(flowLabels[index])) {
-                    remarkParts.push(flowLabels[index] + '：' + input.value.trim());
-                }
+            if (workContent || workAmount) {
+                salary = workContent;
+                if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
+                else if (workAmount) salary += '，' + workAmount;
             }
-        });
+        }
 
         const shareRentEl = document.getElementById('re-share-rent');
         const shareRent = shareRentEl ? shareRentEl.value.trim() : '';
-        if (shareRent) remarkParts.push('共租情况：' + shareRent);
 
-        const otherRemarkEl = document.querySelector('.re-other-remark-input');
-        const otherRemark = otherRemarkEl ? otherRemarkEl.value.trim() : '';
-        if (otherRemark) remarkParts.push('其他备注：' + otherRemark);
-
-        const auditPriceEl = document.getElementById('re-audit-result');
-        const auditPrice = auditPriceEl ? auditPriceEl.value.trim() : '';
-        const orderResultEl = document.getElementById('re-order-result');
-        const orderResult = orderResultEl ? orderResultEl.value : '';
-        if (auditPrice) remarkParts.push('手机妈妈 ' + auditPrice + ' ' + orderResult);
-
-        const rentExpandEl = document.getElementById('re-rent-expand');
-        const expandChecked = rentExpandEl ? rentExpandEl.checked : false;
-        if (expandChecked) {
-            const expandTypeEl = document.getElementById('re-expand-type');
-            const expandType = expandTypeEl ? expandTypeEl.value : '';
-            const expandPriceEl = document.getElementById('re-expand-result');
-            const expandPrice = expandPriceEl ? expandPriceEl.value.trim() : '';
-            const expandOrderResultEl = document.getElementById('re-expand-order-result');
-            const expandOrderResult = expandOrderResultEl ? expandOrderResultEl.value : '';
-            if (expandType && expandPrice) {
-                remarkParts.push(expandType + '：' + expandPrice + ' ' + expandOrderResult);
-            }
+        let oldDevice = '';
+        const oldDeviceChecked = document.getElementById('re-old-device')?.checked;
+        if (oldDeviceChecked) {
+            oldDevice = '旧机保留';
+        } else {
+            const oldDeviceType = (document.getElementById('re-old-device-type')?.value || '').trim();
+            oldDevice = oldDeviceType || '旧机不保留';
         }
-
-        const specialRemarkEl = document.getElementById('re-special-remark');
-        const specialRemark = specialRemarkEl ? specialRemarkEl.value.trim() : '';
-        if (specialRemark) remarkParts.push('客服备注：' + specialRemark);
-
-        const reductionEl = document.getElementById('re-risk-reduction');
-        const reductionText = reductionEl ? reductionEl.textContent.trim() : '';
-        if (reductionText) remarkParts.push(reductionText);
-
-        const handleMethodEl = document.getElementById('re-handle-method');
-        const handleMethod = handleMethodEl ? handleMethodEl.value.trim() : '';
-        if (handleMethod) remarkParts.push('办理方式：' + handleMethod);
-
-        const remark = remarkParts.length > 0 ? remarkParts.join('；') : '暂无数据';
 
         return {
             alipayCreditScore: alipayCreditScore,
             wechatCreditScore: wechatCreditScore,
+            huabeiLimit: huabeiLimit,
+            alipayBill: alipayBill,
+            meituanPay: meituanPay,
+            fenfuLimit: fenfuLimit,
+            wechatBill: wechatBill,
+            douyinPay: douyinPay,
             salary: salary,
-            remark: remark
+            shareRent: shareRent,
+            oldDevice: oldDevice,
+            remark: (document.getElementById('re-other-remark')?.value || '').trim()
         };
     }
 
     function doRiskRemark(orderNo, riskData, callback) {
-        const content = riskData.remark || '';
-        if (!content || content === '暂无数据') { callback(false); return; }
-
         const dataParams = {
             operator: '1',
             budget: '',
+            old_device: riskData.oldDevice || '',
             alipay_credit_score: riskData.alipayCreditScore || '',
             wechat_credit_score: riskData.wechatCreditScore || '',
+            huabei_limit: riskData.huabeiLimit || '',
+            alipay_bill: riskData.alipayBill || '',
+            meituan_pay: riskData.meituanPay || '',
+            fenfu_limit: riskData.fenfuLimit || '',
+            wechat_bill: riskData.wechatBill || '',
+            douyin_pay: riskData.douyinPay || '',
             salary: riskData.salary || '',
-            remark: content,
+            share_rent: riskData.shareRent || '',
+            remark: riskData.remark || '',
             out_order_no: orderNo
         };
 
