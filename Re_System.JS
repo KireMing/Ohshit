@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.5.0
+// @version      1.5.1
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -9,7 +9,6 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
-
 // @grant        GM_getTab
 // @grant        GM_saveTab
 // @grant        GM_getTabs
@@ -667,6 +666,18 @@
                                     <span>更新日志</span>
                                 </div>
                                 <div class="re-changelog-list" id="re-changelog-list">
+                                    <div class="re-changelog-item">
+                                        <div class="re-changelog-version">
+                                            <span class="re-version-badge">v1.5.1</span>
+                                            <span class="re-changelog-date">2026-06-13</span>
+                                        </div>
+                                        <div class="re-changelog-content">
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-fix">修复</span>
+                                                <span class="re-category-text">旧机选项未正确填入旧机处理字段：开关开启时同步额度信息，开关关闭时同步选项值</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="re-changelog-item">
                                         <div class="re-changelog-version">
                                             <span class="re-version-badge">v1.5.0</span>
@@ -9310,7 +9321,8 @@
                     let oldDevice = '';
                     const oldDeviceChecked = document.getElementById('re-old-device')?.checked;
                     if (oldDeviceChecked) {
-                        oldDevice = '旧机保留';
+                        const oldDeviceAmount = (document.getElementById('re-old-device-amount')?.value || '').trim();
+                        oldDevice = oldDeviceAmount ? '旧机置换：' + oldDeviceAmount : '旧机保留';
                     } else {
                         const oldDeviceType = (document.getElementById('re-old-device-type')?.value || '').trim();
                         oldDevice = oldDeviceType || '旧机不保留';
@@ -9580,7 +9592,8 @@
         let oldDevice = '';
         const oldDeviceChecked = document.getElementById('re-old-device')?.checked;
         if (oldDeviceChecked) {
-            oldDevice = '旧机保留';
+            const oldDeviceAmount = (document.getElementById('re-old-device-amount')?.value || '').trim();
+            oldDevice = oldDeviceAmount ? '旧机置换：' + oldDeviceAmount : '旧机保留';
         } else {
             const oldDeviceType = (document.getElementById('re-old-device-type')?.value || '').trim();
             oldDevice = oldDeviceType || '旧机不保留';
