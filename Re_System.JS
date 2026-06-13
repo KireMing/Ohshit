@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
+// @version      1.5.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -9,7 +9,7 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
-// @grant        GM_openInTab
+
 // @grant        GM_getTab
 // @grant        GM_saveTab
 // @grant        GM_getTabs
@@ -244,18 +244,6 @@
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-flow" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
-                                        <label class="re-form-label">微信分付</label>
-                                        <input type="text" class="re-input re-input-mini" id="re-wechat-fenfu" placeholder="请输入">
-                                    </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">美团月付</label>
-                                        <input type="text" class="re-input re-input-mini" id="re-meituan-pay" placeholder="请输入">
-                                    </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">支付分</label>
-                                        <input type="text" class="re-input re-input-mini" id="re-wechat-credit-score" placeholder="请输入">
-                                    </div>
-                                    <div class="re-flow-item">
                                         <label class="re-form-label">支宝流水</label>
                                         <input type="text" class="re-input re-input-mini" id="re-alipay-flow" placeholder="请输入">
                                     </div>
@@ -268,8 +256,20 @@
                                         <input type="text" class="re-input re-input-mini" id="re-huabei-status" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
+                                        <label class="re-form-label">微信分付</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-wechat-fenfu" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
                                         <label class="re-form-label">抖音月付</label>
                                         <input type="text" class="re-input re-input-mini" id="re-douyin-pay" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
+                                        <label class="re-form-label">美团月付</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-meituan-pay" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
+                                        <label class="re-form-label">支付分</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-wechat-credit-score" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
                                         <label class="re-form-label">手机成本</label>
@@ -542,16 +542,6 @@
                                                     <span class="re-switch-slider"></span>
                                                 </label>
                                             </div>
-                                            <div class="re-setting-card re-setting-card-action" id="re-check-update-card">
-                                                <div class="re-setting-icon re-setting-icon-blue">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">检查更新</span>
-                                                    <span class="re-setting-desc" id="re-update-desc">当前版本 v1.4.0</span>
-                                                </div>
-                                                <button class="re-check-update-btn" id="re-check-update-btn">检查</button>
-                                            </div>
                                         </div>
                                     </div>
                                     <div class="re-settings-panel" id="re-settings-appearance">
@@ -679,6 +669,30 @@
                                 <div class="re-changelog-list" id="re-changelog-list">
                                     <div class="re-changelog-item">
                                         <div class="re-changelog-version">
+                                            <span class="re-version-badge">v1.5.0</span>
+                                            <span class="re-changelog-date">2026-06-13</span>
+                                        </div>
+                                        <div class="re-changelog-content">
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">自动处理风控字段与风控备注统一：所有字段独立填充，remark只传其他备注内容</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">工作证明（选择证明）同步填入后台工作情况字段</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">流水区排版调整：第一行微信流水/支宝流水/芝麻信用/花呗情况，第二行微信分付/抖音月付/美团月付/支付分</span>
+                                            </div>
+                                            <div class="re-changelog-category">
+                                                <span class="re-category-badge re-category-update">优化</span>
+                                                <span class="re-category-text">移除检查更新功能</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="re-changelog-item">
+                                        <div class="re-changelog-version">
                                             <span class="re-version-badge">v1.4.0</span>
                                             <span class="re-changelog-date">2026-06-13</span>
                                         </div>
@@ -695,10 +709,6 @@
                                             <span class="re-changelog-date">2026-06-13</span>
                                         </div>
                                         <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-feature">新增</span>
-                                                <span class="re-category-text">检查更新功能：设置页新增检查更新按钮，支持自动检测并跳转更新</span>
-                                            </div>
                                             <div class="re-changelog-category">
                                                 <span class="re-category-badge re-category-feature">新增</span>
                                                 <span class="re-category-text">流水区新增美团月付、支付分、共租情况输入字段</span>
@@ -743,7 +753,7 @@
                                     </div>
                                     <div class="re-changelog-item">
                                         <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.4.0</span>
+                                            <span class="re-version-badge">v1.5.0</span>
                                             <span class="re-changelog-date">2026-06-09</span>
                                         </div>
                                         <div class="re-changelog-content">
@@ -2196,47 +2206,7 @@
             margin-top: 2px;
         }
 
-        .re-check-update-btn {
-            padding: 6px 16px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #3b82f6;
-            background: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
 
-        .re-check-update-btn:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.35);
-        }
-
-        .re-check-update-btn:active {
-            transform: scale(0.95);
-        }
-
-        .re-check-update-btn:disabled {
-            color: #9ca3af;
-            background: rgba(156, 163, 175, 0.08);
-            border-color: rgba(156, 163, 175, 0.2);
-            cursor: not-allowed;
-        }
-
-        .re-check-update-btn.re-update-found {
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.08);
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .re-check-update-btn.re-update-latest {
-            color: #6b7280;
-            background: rgba(107, 114, 128, 0.08);
-            border-color: rgba(107, 114, 128, 0.2);
-        }
 
         .re-switch-small {
             transform: scale(0.85);
@@ -8473,7 +8443,7 @@
         if (!cachedElements.flowInputs) {
             cachedElements.flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
         }
-        const flowLabels = ['微信流水', '微信分付', '美团月付', '支付分', '支宝流水', '芝麻信用', '花呗情况', '抖音月付'];
+        const flowLabels = ['微信流水', '支宝流水', '芝麻信用', '花呗情况', '微信分付', '抖音月付', '美团月付', '支付分'];
         const excludeLabels = ['芝麻信用', '分付'];
         cachedElements.flowInputs.forEach((input, index) => {
             if (index < flowLabels.length && input.value.trim()) {
@@ -9202,89 +9172,6 @@
         });
     }
 
-    // 检查更新
-    const checkUpdateBtn = document.getElementById('re-check-update-btn');
-    const updateDescEl = document.getElementById('re-update-desc');
-    let updateAvailable = false;
-    if (checkUpdateBtn) {
-        checkUpdateBtn.addEventListener('click', function() {
-            if (updateAvailable) {
-                GM_openInTab('https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS');
-                return;
-            }
-            const btn = this;
-            btn.disabled = true;
-            btn.textContent = '检查中...';
-            btn.classList.remove('re-update-found', 're-update-latest');
-
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: 'https://gh-proxy.com/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS',
-                timeout: 10000,
-                onload: function(response) {
-                    const versionMatch = response.responseText.match(/@version\s+([\d.]+)/);
-                    if (!versionMatch) {
-                        btn.textContent = '检查';
-                        btn.disabled = false;
-                        if (updateDescEl) updateDescEl.textContent = '无法获取版本信息';
-                        setTimeout(() => {
-                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
-                        }, 3000);
-                        return;
-                    }
-                    const remoteVersion = versionMatch[1];
-                    const currentVersion = '1.2.0';
-                    if (compareVersion(remoteVersion, currentVersion) > 0) {
-                        updateAvailable = true;
-                        btn.textContent = '更新';
-                        btn.classList.add('re-update-found');
-                        btn.disabled = false;
-                        if (updateDescEl) updateDescEl.textContent = '发现新版本 v' + remoteVersion;
-                    } else {
-                        btn.textContent = '最新';
-                        btn.classList.add('re-update-latest');
-                        if (updateDescEl) updateDescEl.textContent = '已是最新版本';
-                        setTimeout(() => {
-                            btn.textContent = '检查';
-                            btn.classList.remove('re-update-latest');
-                            btn.disabled = false;
-                            if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
-                        }, 3000);
-                    }
-                },
-                onerror: function() {
-                    btn.textContent = '检查';
-                    btn.disabled = false;
-                    if (updateDescEl) updateDescEl.textContent = '网络异常，请重试';
-                    setTimeout(() => {
-                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
-                    }, 3000);
-                },
-                ontimeout: function() {
-                    btn.textContent = '检查';
-                    btn.disabled = false;
-                    if (updateDescEl) updateDescEl.textContent = '请求超时，请重试';
-                    setTimeout(() => {
-                        if (updateDescEl) updateDescEl.textContent = '当前版本 v1.4.0';
-                    }, 3000);
-                }
-            });
-        });
-    }
-
-    function compareVersion(v1, v2) {
-        const parts1 = v1.split('.').map(Number);
-        const parts2 = v2.split('.').map(Number);
-        const len = Math.max(parts1.length, parts2.length);
-        for (let i = 0; i < len; i++) {
-            const p1 = parts1[i] || 0;
-            const p2 = parts2[i] || 0;
-            if (p1 > p2) return 1;
-            if (p1 < p2) return -1;
-        }
-        return 0;
-    }
-
     const staffRemarkBtn = document.getElementById('re-btn-staff-remark');
     if (staffRemarkBtn) {
         staffRemarkBtn.addEventListener('click', function() {
@@ -9411,10 +9298,12 @@
                     const workContent = (document.getElementById('re-work-content')?.value || '').trim();
                     const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
                     const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
-                    if (workContent || workAmount) {
+                    const workProofValues = getMultiSelectValues('re-work-proof');
+                    if (workContent || workAmount || workProofValues.length > 0) {
                         salary = workContent;
                         if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
                         else if (workAmount) salary += '，' + workAmount;
+                        if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
                     }
 
                     // 旧机处理
@@ -9675,11 +9564,13 @@
             const workContent = workContentEl ? workContentEl.value.trim() : '';
             const workAmount = workAmountEl ? workAmountEl.value.trim() : '';
             const salaryType = salaryTypeEl ? salaryTypeEl.value : '';
+            const workProofValues = getMultiSelectValues('re-work-proof');
 
-            if (workContent || workAmount) {
+            if (workContent || workAmount || workProofValues.length > 0) {
                 salary = workContent;
                 if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
                 else if (workAmount) salary += '，' + workAmount;
+                if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
             }
         }
 
