@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.5.1
+// @version      1.7.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -12,13 +12,21 @@
 // @grant        GM_getTab
 // @grant        GM_saveTab
 // @grant        GM_getTabs
-// @connect      *
 // @updateURL    https://ghfast.top/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
 // @downloadURL  https://ghfast.top/https://raw.githubusercontent.com/KireMing/Ohshit/main/Re_System.JS
+// @connect      *
 // ==/UserScript==
 
 (function() {
     'use strict';
+
+    try {
+        if (localStorage.getItem('OpenBoard') === 'False') {
+            return;
+        }
+    } catch (e) {
+        // localStorage 不可用——正常运行脚本
+    }
 
     const CONFIG = {
         API: {
@@ -30,7 +38,7 @@
                 staffRemark: '/order-staff-remark/add',
                 riskRemark: '/replenish-audit-data/add-risk-answer',
                 riskQuestion: '/replenish-audit-data/show-risk-question',
-                mobileUseTime: '/mobile-use-time/search',
+                mobileUseTime: '/mobile-use-time/search-v2',
                 replenishAudit: '/replenish-audit-data/add',
                 paylogAllot: '/paylog/allot'
             }
@@ -153,17 +161,11 @@
                             <li class="re-nav-item" data-page="settings" title="设置">
                                 <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                             </li>
-                            <li class="re-nav-item" data-page="user" title="用户">
-                                <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            </li>
                             <li class="re-nav-item" data-page="history" title="历史">
                                 <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                             </li>
                             <li class="re-nav-item" data-page="analysis" title="分析">
                                 <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                            </li>
-                            <li class="re-nav-item" data-page="changelog" title="日志">
-                                <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                             </li>
                         </ul>
                     </div>
@@ -380,7 +382,7 @@
                                                 <label class="re-form-label">审核结果</label>
                                                 <select class="re-select" id="re-order-result">
                                                     <option>通过</option>
-                                                    <option>考虑</option>
+                                                    <option selected>考虑</option>
                                                     <option>取消</option>
                                                     <option>支付不了</option>
                                                 </select>
@@ -393,7 +395,7 @@
                                                 <label class="re-form-label">拓展结果</label>
                                                 <select class="re-select" id="re-expand-order-result">
                                                     <option>通过</option>
-                                                    <option>考虑</option>
+                                                    <option selected>考虑</option>
                                                     <option>取消</option>
                                                     <option>支付不了</option>
                                                 </select>
@@ -541,6 +543,16 @@
                                                     <span class="re-switch-slider"></span>
                                                 </label>
                                             </div>
+                                            <div class="re-setting-card" id="re-setting-staff-name-card" style="cursor:pointer;">
+                                                <div class="re-setting-icon re-setting-icon-indigo">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                                </div>
+                                                <div class="re-setting-info">
+                                                    <span class="re-setting-name">修改姓名</span>
+                                                    <span class="re-setting-desc" id="re-setting-staff-desc">当前：未设置</span>
+                                                </div>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;"><polyline points="15 3 21 9 9 21H3v-6L15 3z"/></svg>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="re-settings-panel" id="re-settings-appearance">
@@ -587,14 +599,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="re-form-section" id="re-page-user" style="display: none;">
-                            <div class="re-settings-group">
-                                <div class="re-empty-state">
-                                    <svg class="re-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                                    <div class="re-empty-text">正在基建中（用户中心）</div>
                                 </div>
                             </div>
                         </div>
@@ -651,157 +655,6 @@
                                         <div id="re-model-tooltip" class="re-chart-tooltip" style="display: none;"></div>
                                     </div>
                                     <div class="re-model-legend" id="re-model-legend"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="re-form-section" id="re-page-changelog" style="display: none;">
-                            <div class="re-changelog-container">
-                                <div class="re-changelog-header">
-                                    <svg class="re-changelog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                        <polyline points="14 2 14 8 20 8"/>
-                                        <line x1="16" y1="13" x2="8" y2="13"/>
-                                        <line x1="16" y1="17" x2="8" y2="17"/>
-                                    </svg>
-                                    <span>更新日志</span>
-                                </div>
-                                <div class="re-changelog-list" id="re-changelog-list">
-                                    <div class="re-changelog-item">
-                                        <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.5.1</span>
-                                            <span class="re-changelog-date">2026-06-13</span>
-                                        </div>
-                                        <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-fix">修复</span>
-                                                <span class="re-category-text">旧机选项未正确填入旧机处理字段：开关开启时同步额度信息，开关关闭时同步选项值</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="re-changelog-item">
-                                        <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.5.0</span>
-                                            <span class="re-changelog-date">2026-06-13</span>
-                                        </div>
-                                        <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">自动处理风控字段与风控备注统一：所有字段独立填充，remark只传其他备注内容</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">工作证明（选择证明）同步填入后台工作情况字段</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">流水区排版调整：第一行微信流水/支宝流水/芝麻信用/花呗情况，第二行微信分付/抖音月付/美团月付/支付分</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">移除检查更新功能</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="re-changelog-item">
-                                        <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.4.0</span>
-                                            <span class="re-changelog-date">2026-06-13</span>
-                                        </div>
-                                        <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">自动处理风控字段与风控备注统一：所有字段独立填充，remark只传其他备注内容</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="re-changelog-item">
-                                        <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.3.0</span>
-                                            <span class="re-changelog-date">2026-06-13</span>
-                                        </div>
-                                        <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-feature">新增</span>
-                                                <span class="re-category-text">流水区新增美团月付、支付分、共租情况输入字段</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-feature">新增</span>
-                                                <span class="re-category-text">面审风控字段独立填充：芝麻信用、花呗额度、支付宝流水、微信流水、分付额度、抖音月付、美团月付、支付分、工作情况、共租情况、旧机处理分别填入对应字段</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-fix">修复</span>
-                                                <span class="re-category-text">历史记录店铺名丢失：新增店铺名缓存机制，不再从界面反向解析</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-fix">修复</span>
-                                                <span class="re-category-text">风控预览未显示支付分、美团月付、共租情况</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-fix">修复</span>
-                                                <span class="re-category-text">手机成本和指导价获取方式改为匹配表头字段名，不再依赖硬编码XPath</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">5折/6折订单最低结果直接取最低首付，不参与折扣计算</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">价格显示去除千位分隔符</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">占位文本统一为【无参数】，备注字段只传其他备注内容</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">流水区排版调整：第一行微信流水/微信分付/美团月付/支付分，第二行支付宝流水/芝麻信用/花呗情况/抖音月付</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">清理未使用的XPath配置和调试残留代码</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="re-changelog-item">
-                                        <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.5.0</span>
-                                            <span class="re-changelog-date">2026-06-09</span>
-                                        </div>
-                                        <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-fix">修复</span>
-                                                <span class="re-category-text">历史记录店铺名丢失：新增店铺名缓存机制，不再从界面反向解析</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">5折/6折订单最低结果直接取最低首付</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">价格显示去除千位分隔符，占位文本统一为【无参数】</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-update">优化</span>
-                                                <span class="re-category-text">清理调试残留代码，新增更新地址配置</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="re-changelog-item">
-                                        <div class="re-changelog-version">
-                                            <span class="re-version-badge">v1.0.0</span>
-                                            <span class="re-changelog-date">2025-05-10</span>
-                                        </div>
-                                        <div class="re-changelog-content">
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-feature">新增</span>
-                                                <span class="re-category-text">风控备注字段扩展：支持芝麻信用、微信分付、工作收入等字段独立填充</span>
-                                            </div>
-                                            <div class="re-changelog-category">
-                                                <span class="re-category-badge re-category-feature">新增</span>
-                                                <span class="re-category-text">更新日志模块：记录版本迭代历史</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1394,7 +1247,7 @@
             border-radius: 6px;
         }
 
-        .re-history-month-delete {
+        .re-history-month-export {
             width: 28px;
             height: 28px;
             border: none;
@@ -1406,6 +1259,29 @@
             align-items: center;
             justify-content: center;
             margin-left: auto;
+        }
+
+        .re-history-month-export:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .re-history-month-export svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .re-history-month-delete {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            color: #9ca3af;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .re-history-month-delete:hover {
@@ -1795,7 +1671,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
-        
+
         .re-stat-card {
             background: #fff;
             border-radius: 8px;
@@ -1861,11 +1737,11 @@
             height: 10px;
             border-radius: 2px;
         }
-        
+
         .re-modal-day-edit {
             width: 320px;
         }
-        
+
         .re-day-edit-info {
             display: flex;
             align-items: center;
@@ -1917,128 +1793,6 @@
         .re-day-edit-input:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
-        }
-
-        .re-changelog-container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .re-changelog-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(107, 114, 128, 0.15);
-        }
-
-        .re-changelog-icon {
-            width: 24px;
-            height: 24px;
-            stroke: #6b7280;
-        }
-
-        .re-changelog-header span {
-            font-size: 18px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .re-changelog-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .re-changelog-item {
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(107, 114, 128, 0.1);
-            overflow: hidden;
-        }
-
-        .re-changelog-item:hover {
-            border-color: rgba(107, 114, 128, 0.2);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .re-changelog-version {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 18px;
-            background: rgba(107, 114, 128, 0.04);
-            border-bottom: 1px solid rgba(107, 114, 128, 0.08);
-        }
-
-        .re-version-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            background: #374151;
-            color: #fff;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-        }
-
-        .re-changelog-date {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-
-        .re-changelog-content {
-            padding: 16px 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .re-changelog-category {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .re-category-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            font-size: 11px;
-            font-weight: 500;
-            border-radius: 4px;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .re-category-badge.re-category-feature {
-            background: rgba(34, 197, 94, 0.12);
-            color: #16a34a;
-        }
-
-        .re-category-badge.re-category-fix {
-            background: rgba(239, 68, 68, 0.12);
-            color: #dc2626;
-        }
-
-        .re-category-badge.re-category-optimize {
-            background: rgba(59, 130, 246, 0.12);
-            color: #2563eb;
-        }
-
-        .re-category-badge.re-category-style {
-            background: rgba(168, 85, 247, 0.12);
-            color: #9333ea;
-        }
-
-        .re-category-text {
-            font-size: 13px;
-            color: #4b5563;
-            line-height: 1.5;
-            flex: 1;
         }
 
         .re-settings-container {
@@ -4664,6 +4418,40 @@
         URL.revokeObjectURL(link.href);
     }
 
+    function exportMonthToExcel(month, records, staffName) {
+        const monthObj = new Date(month + '-01');
+        const monthStr = `${monthObj.getFullYear()}${String(monthObj.getMonth() + 1).padStart(2, '0')}`;
+        const fileName = `${staffName}_${monthStr}.xlsx`;
+
+        const headers = ['序号', '姓名', '机型', '店铺', '风控预览', '日期', '时间'];
+        const rows = records.map((r, idx) => [
+            idx + 1,
+            r.name || '',
+            r.model || '',
+            r.shop || '',
+            r.preview || '',
+            r.date || '',
+            r.time || ''
+        ]);
+
+        let tableHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+        tableHtml += '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+        tableHtml += '<x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>';
+        tableHtml += '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1">';
+        tableHtml += '<tr>' + headers.map(h => `<th style="background:#3b82f6;color:#fff;font-weight:bold;padding:8px;">${h}</th>`).join('') + '</tr>';
+        rows.forEach(row => {
+            tableHtml += '<tr>' + row.map(cell => `<td style="padding:6px;border:1px solid #ddd;">${String(cell).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`).join('') + '</tr>';
+        });
+        tableHtml += '</table></body></html>';
+
+        const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
     const MODEL_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
     function renderAnalysisData() {
@@ -5527,6 +5315,13 @@
                             </button>
                             <span class="re-history-month-title">${monthStr}</span>
                             <span class="re-history-month-count">共 ${monthTotalCount} 条</span>
+                            <button class="re-history-month-export" data-month="${month}" title="导出整月数据">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                            </button>
                             <button class="re-history-month-delete" data-month="${month}" title="删除此月份所有记录">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -5567,6 +5362,26 @@
                 });
             });
 
+            // 月份导出交互
+            container.querySelectorAll('.re-history-month-export').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const month = this.getAttribute('data-month');
+                    const monthRecords = [];
+                    const monthData = groupedByMonth[month];
+                    if (monthData) {
+                        Object.keys(monthData).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+                            monthRecords.push(...monthData[date]);
+                        });
+                    }
+                    if (monthRecords.length > 0) {
+                        getStaffName().then(staffName => {
+                            exportMonthToExcel(month, monthRecords, staffName || '客服');
+                        });
+                    }
+                });
+            });
+
             // 月份删除交互
             container.querySelectorAll('.re-history-month-delete').forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -5574,7 +5389,7 @@
                     const month = this.getAttribute('data-month');
                     const monthObj = new Date(month + '-01');
                     const monthStr = `${monthObj.getFullYear()}年${monthObj.getMonth() + 1}月`;
-                    
+
                     if (confirm(`确定删除 ${monthStr} 的所有记录？`)) {
                         deleteHistoryRecordsByMonth(month).then(() => {
                             const searchInput = document.getElementById('re-history-search');
@@ -6310,10 +6125,17 @@
         const cancelBtn = document.getElementById('re-staff-cancel');
         const confirmBtn = document.getElementById('re-staff-confirm');
 
-        if (modal && input) {
-            input.value = '';
+        if (modal && input && cancelBtn && confirmBtn) {
             modal.classList.add('re-modal-visible');
+            input.value = '';
             input.focus();
+
+            getStaffName().then(currentName => {
+                if (currentName) {
+                    input.value = currentName;
+                    input.setSelectionRange(currentName.length, currentName.length);
+                }
+            }).catch(() => {});
 
             const handleConfirm = () => {
                 const name = input.value.trim();
@@ -6323,8 +6145,10 @@
                         if (staffNameEl) {
                             staffNameEl.textContent = name;
                         }
+                        updateStaffNameDesc(name);
                         modal.classList.remove('re-modal-visible');
-                    }).catch(err => {
+                    }).catch(() => {
+                        alert('保存姓名失败，请重试');
                     });
                 }
             };
@@ -6346,6 +6170,13 @@
         }
     }
 
+    function updateStaffNameDesc(name) {
+        const staffDesc = document.getElementById('re-setting-staff-desc');
+        if (staffDesc) {
+            staffDesc.textContent = name ? '当前：' + name : '当前：未设置';
+        }
+    }
+
     function initStaffName() {
         getStaffName().then(name => {
             const staffNameEl = document.getElementById('re-staff-name');
@@ -6353,10 +6184,20 @@
                 if (staffNameEl) {
                     staffNameEl.textContent = name;
                 }
+                updateStaffNameDesc(name);
             } else {
+                if (staffNameEl) {
+                    staffNameEl.textContent = '';
+                }
+                updateStaffNameDesc('');
                 showStaffInputModal();
             }
         }).catch(err => {
+            const staffNameEl = document.getElementById('re-staff-name');
+            if (staffNameEl) {
+                staffNameEl.textContent = '';
+            }
+            updateStaffNameDesc('');
             showStaffInputModal();
         });
     }
@@ -6570,9 +6411,16 @@
         });
     }
 
+    const staffNameCard = document.getElementById('re-setting-staff-name-card');
+    if (staffNameCard) {
+        staffNameCard.addEventListener('click', function() {
+            showStaffInputModal();
+        });
+    }
+
     window.addEventListener('beforeunload', function(e) {
         if (!preventRefreshEnabled) return;
-        
+
         const zhimaCreditInput = document.getElementById('re-zhima-credit');
         if (zhimaCreditInput && zhimaCreditInput.value.trim() !== '') {
             e.preventDefault();
@@ -6950,7 +6798,7 @@
             navItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
 
-            const pages = ['re-page-data', 're-page-settings', 're-page-user', 're-page-history', 're-page-analysis', 're-page-changelog'];
+            const pages = ['re-page-data', 're-page-settings', 're-page-history', 're-page-analysis'];
             const rightColumn = document.getElementById('re-right-column');
             const pageType = this.getAttribute('data-page') || 'data';
 
@@ -8016,13 +7864,13 @@
         const expandResultInput = document.getElementById('re-expand-result');
         const phoneCostEl = document.getElementById('re-phone-cost');
         const minDownPaymentEl = document.getElementById('re-min-down-payment');
-        
+
         if (!phoneCostEl || cachedDiscount === null) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
             if (expandResultInput) expandResultInput.placeholder = '请输入';
             return;
         }
-        
+
         const costText = phoneCostEl.value.replace('¥', '').replace(/,/g, '').trim();
         const cost = parseFloat(costText);
         if (isNaN(cost)) {
@@ -8030,9 +7878,9 @@
             if (expandResultInput) expandResultInput.placeholder = '请输入';
             return;
         }
-        
+
         const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
-        
+
         let minDownPayment = 0;
         if (minDownPaymentEl) {
             const downPaymentText = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
@@ -8055,7 +7903,7 @@
             finalMinPrice = Math.max(calculatedMinPrice, minDownPayment);
         }
         const placeholderText = '最低结果：¥' + finalMinPrice;
-        
+
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
         if (expandResultInput) expandResultInput.placeholder = placeholderText;
     }
@@ -8063,15 +7911,15 @@
     function getMinPrice() {
         const phoneCostEl = document.getElementById('re-phone-cost');
         const minDownPaymentEl = document.getElementById('re-min-down-payment');
-        
+
         if (!phoneCostEl || cachedDiscount === null) return null;
-        
+
         const costText = phoneCostEl.value.replace('¥', '').replace(/,/g, '').trim();
         const cost = parseFloat(costText);
         if (isNaN(cost) || isNaN(cachedDiscount)) return null;
-        
+
         const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
-        
+
         let minDownPayment = 0;
         if (minDownPaymentEl) {
             const downPaymentText = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
@@ -9475,7 +9323,7 @@
                                     autoProcessBtn.classList.remove('completed');
                                     autoProcessBtn.innerHTML = originalContent;
                                     autoProcessBtn.disabled = false;
-                                    
+
                                     if (autoRefreshEnabled) {
                                         showSuccessToast('页面即将刷新...');
                                         setTimeout(() => {
@@ -9540,54 +9388,27 @@
     }
 
     function collectRiskRemarkData() {
-        const zhimaCreditInput = document.getElementById('re-zhima-credit');
-        const alipayCreditScore = zhimaCreditInput ? zhimaCreditInput.value.trim() : '';
-
-        const wechatFenfuInput = document.getElementById('re-wechat-fenfu');
-        const wechatCreditScore = wechatFenfuInput ? wechatFenfuInput.value.trim() : '';
-
-        const huabeiInput = document.getElementById('re-huabei');
-        const huabeiLimit = huabeiInput ? huabeiInput.value.trim() : '';
-
-        const alipayFlowInput = document.getElementById('re-alipay-flow');
-        const alipayBill = alipayFlowInput ? alipayFlowInput.value.trim() : '';
-
-        const meituanPayInput = document.getElementById('re-meituan-pay');
-        const meituanPay = meituanPayInput ? meituanPayInput.value.trim() : '';
-
-        const fenfuInput = document.getElementById('re-wechat-fenfu');
-        const fenfuLimit = fenfuInput ? fenfuInput.value.trim() : '';
-
-        const wechatFlowInput = document.getElementById('re-wechat-flow');
-        const wechatBill = wechatFlowInput ? wechatFlowInput.value.trim() : '';
-
-        const douyinPayInput = document.getElementById('re-douyin-pay');
-        const douyinPay = douyinPayInput ? douyinPayInput.value.trim() : '';
-
-        const workOptionEl = document.getElementById('re-work-option');
-        const workOptionChecked = workOptionEl ? workOptionEl.checked : false;
+        const wechatBill = (document.getElementById('re-wechat-flow')?.value || '').trim();
+        const alipayBill = (document.getElementById('re-alipay-flow')?.value || '').trim();
+        const alipayCreditScore = (document.getElementById('re-zhima-credit')?.value || '').trim();
+        const huabeiLimit = (document.getElementById('re-huabei-status')?.value || '').trim();
+        const fenfuLimit = (document.getElementById('re-wechat-fenfu')?.value || '').trim();
+        const douyinPay = (document.getElementById('re-douyin-pay')?.value || '').trim();
+        const meituanPay = (document.getElementById('re-meituan-pay')?.value || '').trim();
+        const wechatCreditScore = (document.getElementById('re-wechat-credit-score')?.value || '').trim();
+        const shareRent = (document.getElementById('re-share-rent')?.value || '').trim();
 
         let salary = '';
-        if (workOptionChecked) {
-            const workContentEl = document.getElementById('re-work-content');
-            const workAmountEl = document.getElementById('re-work-amount');
-            const salaryTypeEl = document.getElementById('re-salary-type');
-
-            const workContent = workContentEl ? workContentEl.value.trim() : '';
-            const workAmount = workAmountEl ? workAmountEl.value.trim() : '';
-            const salaryType = salaryTypeEl ? salaryTypeEl.value : '';
-            const workProofValues = getMultiSelectValues('re-work-proof');
-
-            if (workContent || workAmount || workProofValues.length > 0) {
-                salary = workContent;
-                if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
-                else if (workAmount) salary += '，' + workAmount;
-                if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
-            }
+        const workContent = (document.getElementById('re-work-content')?.value || '').trim();
+        const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
+        const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
+        const workProofValues = getMultiSelectValues('re-work-proof');
+        if (workContent || workAmount || workProofValues.length > 0) {
+            salary = workContent;
+            if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
+            else if (workAmount) salary += '，' + workAmount;
+            if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
         }
-
-        const shareRentEl = document.getElementById('re-share-rent');
-        const shareRent = shareRentEl ? shareRentEl.value.trim() : '';
 
         let oldDevice = '';
         const oldDeviceChecked = document.getElementById('re-old-device')?.checked;
