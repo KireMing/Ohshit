@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.7.0
+// @version      1.7.1
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -8303,12 +8303,9 @@
             cachedElements.flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
         }
         const flowLabels = ['微信流水', '支宝流水', '芝麻信用', '花呗情况', '微信分付', '抖音月付', '美团月付', '支付分'];
-        const excludeLabels = ['芝麻信用', '分付'];
         cachedElements.flowInputs.forEach((input, index) => {
             if (index < flowLabels.length && input.value.trim()) {
-                if (!excludeLabels.includes(flowLabels[index])) {
-                    parts.push(flowLabels[index] + '：' + input.value.trim());
-                }
+                parts.push(flowLabels[index] + '：' + input.value.trim());
             }
         });
 
