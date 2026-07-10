@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.7.1
-// @description  一个素雅的系统管理面板，包含左中右三个板块
+// @version      1.8.1
+// @description  [视频面审部-御用面板]
+// @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
 // @grant        GM_addStyle
@@ -9151,15 +9152,20 @@
                     const shareRent = (document.getElementById('re-share-rent')?.value || '').trim();
 
                     let salary = '';
-                    const workContent = (document.getElementById('re-work-content')?.value || '').trim();
-                    const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
-                    const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
-                    const workProofValues = getMultiSelectValues('re-work-proof');
-                    if (workContent || workAmount || workProofValues.length > 0) {
-                        salary = workContent;
-                        if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
-                        else if (workAmount) salary += '，' + workAmount;
-                        if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
+                    const workOptionChecked = document.getElementById('re-work-option')?.checked || false;
+                    if (!workOptionChecked) {
+                        salary = '无任何工作情况证明';
+                    } else {
+                        const workContent = (document.getElementById('re-work-content')?.value || '').trim();
+                        const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
+                        const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
+                        const workProofValues = getMultiSelectValues('re-work-proof');
+                        if (workContent || workAmount || workProofValues.length > 0) {
+                            salary = workContent;
+                            if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
+                            else if (workAmount) salary += '，' + workAmount;
+                            if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
+                        }
                     }
 
                     // 旧机处理
@@ -9172,6 +9178,59 @@
                         const oldDeviceType = (document.getElementById('re-old-device-type')?.value || '').trim();
                         oldDevice = oldDeviceType || '旧机不保留';
                     }
+
+                    // 收集备注信息（包含审核结果、降低幅度、办理方式）
+                    let remarkParts = [];
+                    const otherRemark = (document.getElementById('re-other-remark')?.value || '').trim();
+                    if (otherRemark) {
+                        remarkParts.push(otherRemark);
+                    }
+
+                    // 添加审核结果
+                    const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
+                    const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
+                    if (auditPrice && auditResult) {
+                        remarkParts.push('手机妈妈 ' + auditPrice + ' ' + auditResult);
+                    }
+
+                    // 添加拓展业务
+                    const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
+                    if (expandChecked) {
+                        const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
+                        const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
+                        const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
+                        if (expandType && expandPrice) {
+                            remarkParts.push(expandType + '：' + expandPrice + ' ' + expandResult);
+                        }
+                    }
+
+                    // 添加降低幅度
+                    const phoneCostText = (document.getElementById('re-phone-cost')?.value || '').trim();
+                    const phoneCost = parseFloat(phoneCostText.replace(/[¥,]/g, '')) || 0;
+                    const auditPriceNum = parseFloat(auditPrice) || 0;
+                    const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
+                    const v4Risk = parseFloat(v4RiskText) || 0;
+                    
+                    if (phoneCost > 0 && auditPriceNum > 0 && v4Risk > 0) {
+                        const ratio1 = auditPriceNum / phoneCost;
+                        const ratio2 = v4Risk / phoneCost;
+                        const reductionPercent = ((ratio1 - ratio2) * 100).toFixed(1);
+                        
+                        if (parseFloat(reductionPercent) < 0) {
+                            remarkParts.push('降低幅度：降低' + Math.abs(reductionPercent) + '%');
+                        } else {
+                            remarkParts.push('降低幅度：提高' + reductionPercent + '%');
+                        }
+                    }
+
+                    // 添加办理方式
+                    const handleMethod = (document.getElementById('re-handle-method')?.value || '').trim();
+                    if (handleMethod) {
+                        remarkParts.push('办理方式：' + handleMethod);
+                    }
+
+                    // 用分号连接所有备注部分
+                    const finalRemark = remarkParts.join('；');
 
                     const params = {
                         operator: '1',
@@ -9187,7 +9246,7 @@
                         douyin_pay: douyinPay,
                         salary: salary,
                         share_rent: shareRent,
-                        remark: (document.getElementById('re-other-remark')?.value || '').trim(),
+                        remark: finalRemark,
                         out_order_no: orderNo
                     };
                     const postData = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
@@ -9417,6 +9476,59 @@
             oldDevice = oldDeviceType || '旧机不保留';
         }
 
+        // 收集原始备注
+        let remarkParts = [];
+        const otherRemark = (document.getElementById('re-other-remark')?.value || '').trim();
+        if (otherRemark) {
+            remarkParts.push(otherRemark);
+        }
+
+        // 添加审核结果
+        const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
+        const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
+        if (auditPrice && auditResult) {
+            remarkParts.push('手机妈妈 ' + auditPrice + ' ' + auditResult);
+        }
+
+        // 添加拓展业务
+        const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
+        if (expandChecked) {
+            const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
+            const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
+            const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
+            if (expandType && expandPrice) {
+                remarkParts.push(expandType + '：' + expandPrice + ' ' + expandResult);
+            }
+        }
+
+        // 添加降低幅度
+        const phoneCostText = (document.getElementById('re-phone-cost')?.value || '').trim();
+        const phoneCost = parseFloat(phoneCostText.replace(/[¥,]/g, '')) || 0;
+        const auditPriceNum = parseFloat(auditPrice) || 0;
+        const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
+        const v4Risk = parseFloat(v4RiskText) || 0;
+        
+        if (phoneCost > 0 && auditPriceNum > 0 && v4Risk > 0) {
+            const ratio1 = auditPriceNum / phoneCost;
+            const ratio2 = v4Risk / phoneCost;
+            const reductionPercent = ((ratio1 - ratio2) * 100).toFixed(1);
+            
+            if (parseFloat(reductionPercent) < 0) {
+                remarkParts.push('降低幅度：降低' + Math.abs(reductionPercent) + '%');
+            } else {
+                remarkParts.push('降低幅度：提高' + reductionPercent + '%');
+            }
+        }
+
+        // 添加办理方式
+        const handleMethod = (document.getElementById('re-handle-method')?.value || '').trim();
+        if (handleMethod) {
+            remarkParts.push('办理方式：' + handleMethod);
+        }
+
+        // 用分号连接所有备注部分
+        const finalRemark = remarkParts.join('；');
+
         return {
             alipayCreditScore: alipayCreditScore,
             wechatCreditScore: wechatCreditScore,
@@ -9429,7 +9541,7 @@
             salary: salary,
             shareRent: shareRent,
             oldDevice: oldDevice,
-            remark: (document.getElementById('re-other-remark')?.value || '').trim()
+            remark: finalRemark
         };
     }
 
