@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.8.1
-// @description  [视频面审部-御用面板]
+// @version      1.8.3
+// @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -6241,6 +6241,7 @@
     const confirmOkBtn = document.getElementById('re-confirm-ok');
     const confirmCancelBtn = document.getElementById('re-confirm-cancel');
     let pendingShowPanel = false;
+    let currentOrderRow = document.querySelector('#table tbody tr');
     let autoAgeEnabled = false;
     let autoFetchEnabled = false;
     let autoContactQueryEnabled = false;
@@ -6430,6 +6431,29 @@
         }
     });
 
+    function getCurrentOrderRow() {
+        return currentOrderRow || document.querySelector('#table tbody tr');
+    }
+
+    function getCurrentCustomerCell() {
+        const row = getCurrentOrderRow();
+        return row ? row.querySelector('td:nth-child(3)') : null;
+    }
+
+    function getCurrentIdCardElement() {
+        const customerCell = getCurrentCustomerCell();
+        return customerCell ? customerCell.querySelector('.id-card span') : null;
+    }
+
+    function getCurrentModelText() {
+        const customerCell = getCurrentCustomerCell();
+        if (!customerCell) return '';
+
+        const modelParagraph = Array.from(customerCell.querySelectorAll('p'))
+            .find(p => p.textContent.includes('用户机型：'));
+        return modelParagraph ? modelParagraph.textContent.trim() : '';
+    }
+
     function togglePanel(show) {
         if (show) {
             if (!lazyInit.appearance) {
@@ -6437,8 +6461,7 @@
                 initAppearanceSettings();
             }
 
-            const idCardXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[6]/span';
-            const idCardEl = getElementByXPath(idCardXPath);
+            const idCardEl = getCurrentIdCardElement();
             const idCard = idCardEl ? idCardEl.textContent.trim() : '';
 
             if (idCard.includes('*') && cachedAge === null) {
@@ -6499,13 +6522,13 @@
                 confirmModal.classList.remove('re-modal-visible');
             }
 
-            const showIdCardBtn = document.querySelector("#table > tbody > tr > td:nth-child(3) > p:nth-child(1) > button");
+            const currentRow = getCurrentOrderRow();
+            const showIdCardBtn = currentRow ? currentRow.querySelector('button.show-sensitive-data[data-id]') : null;
             if (showIdCardBtn) {
                 showIdCardBtn.click();
 
                 setTimeout(() => {
-                    const idCardXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[6]/span';
-                    const idCardEl = getElementByXPath(idCardXPath);
+                    const idCardEl = getCurrentIdCardElement();
                     const idCard = idCardEl ? idCardEl.textContent.trim() : '';
 
                     if (!idCard.includes('*')) {
@@ -6919,16 +6942,21 @@
                 cachedNewChainLink = null;
             }
 
-            const nameXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[1]/text()';
-            const idCardXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[6]/span';
-            const modelXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]/p[9]/text()';
-            const shopContainerXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]';
-            const orderCountContainerXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[3]';
-
-            const name = getPageDataByXPath(nameXPath);
-            const idCardEl = getElementByXPath(idCardXPath);
+            const customerCell = getCurrentCustomerCell();
+            const nameParagraph = customerCell
+                ? Array.from(customerCell.querySelectorAll('p')).find(p => p.textContent.includes('姓名：'))
+                : null;
+            const name = nameParagraph
+                ? Array.from(nameParagraph.childNodes)
+                    .filter(node => node.nodeType === Node.TEXT_NODE)
+                    .map(node => node.textContent)
+                    .join('')
+                    .trim()
+                : '';
+            const idCardEl = getCurrentIdCardElement();
             const idCard = idCardEl ? idCardEl.textContent.trim() : '';
-            const model = getPageDataByXPath(modelXPath);
+            const model = getCurrentModelText();
+            const shopContainerXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]';
 
             // 店铺名：匹配"店铺："后面的文本，过滤【】括号内容
             const shopContainerEl = getElementByXPath(shopContainerXPath);
@@ -6962,7 +6990,7 @@
 
             let orderCount = '156';
             try {
-                const containerEl = getElementByXPath(orderCountContainerXPath);
+                const containerEl = customerCell;
                 if (containerEl) {
                     const containerText = containerEl.textContent || containerEl.innerText || '';
                     const match = containerText.match(/待审核订单数[：:]\s*(\d+)/);
@@ -9210,12 +9238,12 @@
                     const auditPriceNum = parseFloat(auditPrice) || 0;
                     const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
                     const v4Risk = parseFloat(v4RiskText) || 0;
-                    
+
                     if (phoneCost > 0 && auditPriceNum > 0 && v4Risk > 0) {
                         const ratio1 = auditPriceNum / phoneCost;
                         const ratio2 = v4Risk / phoneCost;
                         const reductionPercent = ((ratio1 - ratio2) * 100).toFixed(1);
-                        
+
                         if (parseFloat(reductionPercent) < 0) {
                             remarkParts.push('降低幅度：降低' + Math.abs(reductionPercent) + '%');
                         } else {
@@ -9507,12 +9535,12 @@
         const auditPriceNum = parseFloat(auditPrice) || 0;
         const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
         const v4Risk = parseFloat(v4RiskText) || 0;
-        
+
         if (phoneCost > 0 && auditPriceNum > 0 && v4Risk > 0) {
             const ratio1 = auditPriceNum / phoneCost;
             const ratio2 = v4Risk / phoneCost;
             const reductionPercent = ((ratio1 - ratio2) * 100).toFixed(1);
-            
+
             if (parseFloat(reductionPercent) < 0) {
                 remarkParts.push('降低幅度：降低' + Math.abs(reductionPercent) + '%');
             } else {
@@ -9773,6 +9801,7 @@
 
         panelBtn.addEventListener('click', function(e) {
             e.stopPropagation();
+            currentOrderRow = viewButton.closest('#table tbody tr');
             const orderNo = viewButton.dataset.id;
             if (orderNo) {
                 if (window.rePanelOrderNo) {
