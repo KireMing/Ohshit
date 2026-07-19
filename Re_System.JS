@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.8.3
+// @version      1.8.4
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -8322,8 +8322,12 @@
             let workText = '工作内容：';
             if (workContent) workText += workContent;
             if (workSalaryType && workAmount) workText += '，' + workSalaryType + workAmount;
-            if (workProofValues.length > 0) workText += '，' + workProofValues.join('、');
-            if (workText !== '工作内容：') parts.push(workText);
+            if (workProofValues.length > 0) {
+                workText += '，' + workProofValues.join('、');
+            } else {
+                workText += (workText === '工作内容：' ? '' : '，') + '无任何工作材料证明此工作';
+            }
+            parts.push(workText);
         } else {
             parts.push('无任何工作记录');
         }
@@ -9188,11 +9192,13 @@
                         const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
                         const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
                         const workProofValues = getMultiSelectValues('re-work-proof');
-                        if (workContent || workAmount || workProofValues.length > 0) {
-                            salary = workContent;
-                            if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
-                            else if (workAmount) salary += '，' + workAmount;
-                            if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
+                        salary = workContent;
+                        if (workAmount && salaryType) salary += (salary ? '，' : '') + salaryType + workAmount;
+                        else if (workAmount) salary += (salary ? '，' : '') + workAmount;
+                        if (workProofValues.length > 0) {
+                            salary += (salary ? '，' : '') + workProofValues.join('、');
+                        } else {
+                            salary += (salary ? '，' : '') + '无任何工作材料证明此工作';
                         }
                     }
 
@@ -9483,15 +9489,22 @@
         const shareRent = (document.getElementById('re-share-rent')?.value || '').trim();
 
         let salary = '';
-        const workContent = (document.getElementById('re-work-content')?.value || '').trim();
-        const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
-        const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
-        const workProofValues = getMultiSelectValues('re-work-proof');
-        if (workContent || workAmount || workProofValues.length > 0) {
+        const workOptionChecked = document.getElementById('re-work-option')?.checked || false;
+        if (!workOptionChecked) {
+            salary = '无任何工作情况证明';
+        } else {
+            const workContent = (document.getElementById('re-work-content')?.value || '').trim();
+            const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
+            const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
+            const workProofValues = getMultiSelectValues('re-work-proof');
             salary = workContent;
-            if (workAmount && salaryType) salary += '，' + salaryType + workAmount;
-            else if (workAmount) salary += '，' + workAmount;
-            if (workProofValues.length > 0) salary += '，' + workProofValues.join('、');
+            if (workAmount && salaryType) salary += (salary ? '，' : '') + salaryType + workAmount;
+            else if (workAmount) salary += (salary ? '，' : '') + workAmount;
+            if (workProofValues.length > 0) {
+                salary += (salary ? '，' : '') + workProofValues.join('、');
+            } else {
+                salary += (salary ? '，' : '') + '无任何工作材料证明此工作';
+            }
         }
 
         let oldDevice = '';
