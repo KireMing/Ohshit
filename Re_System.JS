@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      1.8.4
+// @version      2.0.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -125,7 +125,10 @@
     const panelHTML = `
         <div id="re-system-panel" class="re-panel-hidden">
             <div class="re-panel-header">
-                <span class="re-panel-title">系统管理面板</span>
+                <div class="re-panel-header-left">
+                    <span class="re-panel-title">系统管理面板</span>
+                    <span class="re-panel-version">v2.0.0</span>
+                </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
             <div class="re-panel-resize-handle"></div>
@@ -150,6 +153,77 @@
             <div class="re-drag-ghost">
                 <span class="re-drag-ghost-text">移动中...</span>
                 <button class="re-drag-cancel" id="re-drag-cancel-btn">取消移动</button>
+            </div>
+            <div class="re-no-lock-panel" id="re-no-lock-panel">
+                <div class="re-no-lock-header">
+                    <span class="re-no-lock-title">无锁判断</span>
+                    <span class="re-no-lock-status" id="re-nl-status">待计算</span>
+                    <button class="re-no-lock-close" id="re-no-lock-close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="re-no-lock-content">
+                    <div class="re-no-lock-grid">
+                        <div class="re-no-lock-item">
+                            <span class="re-no-lock-label">分付:</span>
+                            <span class="re-no-lock-value" id="re-nl-fenfu">未开通</span>
+                        </div>
+                        <div class="re-no-lock-item">
+                            <span class="re-no-lock-label">花呗:</span>
+                            <span class="re-no-lock-value" id="re-nl-huabei">未开通</span>
+                        </div>
+                        <div class="re-no-lock-item">
+                            <span class="re-no-lock-label">抖音:</span>
+                            <span class="re-no-lock-value" id="re-nl-douyin">未开通</span>
+                        </div>
+                        <div class="re-no-lock-item">
+                            <span class="re-no-lock-label">美团:</span>
+                            <span class="re-no-lock-value" id="re-nl-meituan">未开通</span>
+                        </div>
+                    </div>
+                    <div class="re-no-lock-divider"></div>
+                    <div class="re-no-lock-row">
+                        <span class="re-no-lock-label">总计额度:</span>
+                        <span class="re-no-lock-value" id="re-nl-total">0.00</span>
+                    </div>
+                    <div class="re-no-lock-row">
+                        <span class="re-no-lock-label">有锁结果:</span>
+                        <span class="re-no-lock-value" id="re-nl-v4">0.00</span>
+                    </div>
+                    <div class="re-no-lock-row re-no-lock-editable">
+                        <span class="re-no-lock-label">手机成本:</span>
+                        <input type="text" class="re-no-lock-input" id="re-nl-cost-input" placeholder="请输入成本">
+                        <button class="re-no-lock-recalc" id="re-nl-recalc">重算</button>
+                    </div>
+                    <div class="re-no-lock-divider"></div>
+                    <div class="re-no-lock-row">
+                        <span class="re-no-lock-label">额度比例:</span>
+                        <span class="re-no-lock-value" id="re-nl-ratio">0.00%</span>
+                    </div>
+                    <div class="re-no-lock-row">
+                        <span class="re-no-lock-label">无锁最低:</span>
+                        <span class="re-no-lock-value" id="re-nl-min">0.00</span>
+                    </div>
+                    <div class="re-no-lock-divider"></div>
+                    <div class="re-no-lock-preview">
+                        <div class="re-no-lock-preview-header">
+                            <div class="re-no-lock-preview-title">备注预览</div>
+                            <button class="re-no-lock-copy-btn" id="re-nl-copy-remark" title="复制">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            </button>
+                        </div>
+                        <textarea class="re-no-lock-preview-text" id="re-nl-preview-remark" readonly></textarea>
+                    </div>
+                    <div class="re-no-lock-preview">
+                        <div class="re-no-lock-preview-header">
+                            <div class="re-no-lock-preview-title">登记Excel预览</div>
+                            <button class="re-no-lock-copy-btn" id="re-nl-copy-excel" title="复制">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            </button>
+                        </div>
+                        <textarea class="re-no-lock-preview-text" id="re-nl-preview-excel" readonly></textarea>
+                    </div>
+                </div>
             </div>
             <div class="re-panel-content">
                 <div class="re-column re-column-left">
@@ -698,9 +772,9 @@
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"/><circle cx="12" cy="12" r="10"/></svg>
                                 自动处理
                             </button>
-                            <button class="re-action-btn">
+                            <button class="re-action-btn" id="re-btn-no-lock">
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                                备用按钮
+                                无锁操作
                             </button>
                         </div>
                         <div class="re-contact-info" id="re-contact-section">
@@ -905,7 +979,7 @@
             position: relative;
             z-index: 10;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             padding: 10px 16px;
             background: linear-gradient(135deg, rgba(107, 114, 128, 0.95) 0%, rgba(75, 85, 99, 0.95) 100%);
@@ -915,11 +989,29 @@
             user-select: none;
         }
 
+        .re-panel-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .re-panel-title {
             font-size: 14px;
             font-weight: 500;
             color: #ffffff;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .re-panel-version {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #ffffff;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 6px rgba(251, 191, 36, 0.3);
+            white-space: nowrap;
         }
 
         .re-panel-staff {
@@ -4143,6 +4235,294 @@
 
         .re-risk-item.re-risk-normal .re-risk-item-detail span {
             color: #10b981;
+        }
+
+        .re-risk-empty span {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* 无锁判断面板样式 */
+        .re-no-lock-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 360px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 2147483646;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(100%);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            backface-visibility: hidden;
+        }
+
+        .re-no-lock-panel.re-no-lock-visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0) translateZ(0);
+        }
+
+        .re-no-lock-header {
+            padding: 14px 18px;
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.95) 0%, rgba(75, 85, 99, 0.95) 100%);
+            border-radius: 16px 16px 0 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .re-no-lock-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .re-no-lock-status {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(8px);
+        }
+
+        .re-no-lock-status.satisfied {
+            color: #ffffff;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+
+        .re-no-lock-status.unsatisfied {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ffffff;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: pulse-red 2s ease-in-out infinite;
+        }
+
+        .re-no-lock-status.pending {
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse-green {
+            0%, 100% {
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4), 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            50% {
+                box-shadow: 0 2px 12px rgba(16, 185, 129, 0.6), 0 0 0 4px rgba(16, 185, 129, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% {
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 2px 12px rgba(239, 68, 68, 0.6), 0 0 0 4px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .re-no-lock-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s ease;
+        }
+
+        .re-no-lock-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        .re-no-lock-close svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .re-no-lock-content {
+            padding: 16px 18px;
+            background: rgba(248, 250, 252, 0.5);
+        }
+
+        .re-no-lock-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .re-no-lock-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .re-no-lock-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        .re-no-lock-label {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .re-no-lock-value {
+            font-size: 13px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .re-no-lock-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(107, 114, 128, 0.2), transparent);
+            margin: 8px 0;
+        }
+
+        .re-no-lock-editable {
+            gap: 8px;
+        }
+
+        .re-no-lock-input {
+            flex: 1;
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            color: #374151;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .re-no-lock-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .re-no-lock-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .re-no-lock-recalc {
+            height: 32px;
+            padding: 0 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #ffffff;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .re-no-lock-recalc:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .re-no-lock-recalc:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .re-no-lock-preview {
+            margin-top: 12px;
+        }
+
+        .re-no-lock-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .re-no-lock-preview-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .re-no-lock-copy-btn {
+            width: 24px;
+            height: 24px;
+            padding: 4px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            transition: all 0.2s ease;
+        }
+
+        .re-no-lock-copy-btn:hover {
+            background: rgba(107, 114, 128, 0.1);
+            color: #374151;
+        }
+
+        .re-no-lock-copy-btn:active {
+            background: rgba(107, 114, 128, 0.2);
+        }
+
+        .re-no-lock-copy-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .re-no-lock-preview-text {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 10px;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            color: #374151;
+            background: #ffffff;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .re-no-lock-preview-text:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .re-risk-empty {
@@ -9313,6 +9693,243 @@
                     showTooltip('访问备注页面失败', window.innerWidth / 2, window.innerHeight / 2);
                 }
             });
+        });
+    }
+
+    // 无锁操作按钮功能
+    const noLockBtn = document.getElementById('re-btn-no-lock');
+    const noLockPanel = document.getElementById('re-no-lock-panel');
+    const noLockClose = document.getElementById('re-no-lock-close');
+    const noLockHeader = noLockPanel?.querySelector('.re-no-lock-header');
+
+    // 无锁面板拖动功能
+    let isNoLockDragging = false;
+    let noLockCurrentX, noLockCurrentY, noLockInitialX, noLockInitialY;
+
+    if (noLockHeader && noLockPanel) {
+        noLockHeader.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.re-no-lock-close') || e.target.closest('.re-no-lock-status')) {
+                return;
+            }
+            isNoLockDragging = true;
+            noLockInitialX = e.clientX - (parseInt(noLockPanel.style.left) || 0);
+            noLockInitialY = e.clientY - (parseInt(noLockPanel.style.top) || 0);
+            noLockPanel.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isNoLockDragging) {
+                e.preventDefault();
+                noLockCurrentX = e.clientX - noLockInitialX;
+                noLockCurrentY = e.clientY - noLockInitialY;
+                noLockPanel.style.left = noLockCurrentX + 'px';
+                noLockPanel.style.top = noLockCurrentY + 'px';
+                noLockPanel.style.right = 'auto';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isNoLockDragging) {
+                isNoLockDragging = false;
+                noLockPanel.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+                
+                // 保存拖动后的位置
+                const currentLeft = noLockPanel.style.left;
+                const currentTop = noLockPanel.style.top;
+                GM_setValue('noLockPanelPosition', {
+                    left: currentLeft,
+                    top: currentTop
+                });
+            }
+        });
+    }
+
+    // 数据解析函数
+    function parseCredit(val) {
+        if (!val || val.trim() === '') return 0;
+        const num = parseFloat(val.replace(/[^\d.]/g, ''));
+        return isNaN(num) ? 0 : num;
+    }
+
+    function parseAmount(val) {
+        if (!val) return 0;
+        const num = parseFloat(val.replace(/[^\d.]/g, ''));
+        return isNaN(num) ? 0 : num;
+    }
+
+    // 计算和更新无锁判断
+    function calculateNoLock() {
+        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
+        
+        // 读取四项信用工具额度
+        const huabei = parseCredit(flowInputs[3]?.value);
+        const fenfu = parseCredit(flowInputs[4]?.value);
+        const douyin = parseCredit(flowInputs[5]?.value);
+        const meituan = parseCredit(flowInputs[6]?.value);
+
+        // 读取V4风控结果
+        const v4RiskEl = document.getElementById('re-v4-risk');
+        const v4Risk = parseFloat(v4RiskEl?.textContent) || 0;
+
+        // 读取手机成本
+        const costInput = document.getElementById('re-nl-cost-input');
+        let phoneCost = parseAmount(costInput?.value);
+
+        // 如果成本为0，从面板读取
+        if (phoneCost === 0) {
+            const phoneCostEl = document.getElementById('re-phone-cost');
+            phoneCost = parseAmount(phoneCostEl?.value);
+            if (costInput) {
+                costInput.value = phoneCost > 0 ? phoneCost : '';
+            }
+        }
+
+        // 更新显示值
+        document.getElementById('re-nl-fenfu').textContent = fenfu > 0 ? fenfu.toFixed(2) : '未开通';
+        document.getElementById('re-nl-huabei').textContent = huabei > 0 ? huabei.toFixed(2) : '未开通';
+        document.getElementById('re-nl-douyin').textContent = douyin > 0 ? douyin.toFixed(2) : '未开通';
+        document.getElementById('re-nl-meituan').textContent = meituan > 0 ? meituan.toFixed(2) : '未开通';
+
+        // 总计额度只计入分付和花呗，抖音和美团仅展示
+        const totalCredit = huabei + fenfu;
+        document.getElementById('re-nl-total').textContent = totalCredit.toFixed(2);
+        document.getElementById('re-nl-v4').textContent = v4Risk.toFixed(2);
+
+        // 计算结果
+        const statusEl = document.getElementById('re-nl-status');
+        
+        if (phoneCost === 0) {
+            document.getElementById('re-nl-ratio').textContent = '—';
+            document.getElementById('re-nl-min').textContent = '成本未知';
+            statusEl.textContent = '请输入成本';
+            statusEl.className = 're-no-lock-status pending';
+            return;
+        }
+
+        const creditRatio = (totalCredit / phoneCost * 100).toFixed(2);
+        const noLockMin = ((0.9 - totalCredit / phoneCost) * phoneCost).toFixed(2);
+        const satisfied = (totalCredit + v4Risk) / phoneCost >= 0.9;
+
+        document.getElementById('re-nl-ratio').textContent = creditRatio + '%';
+        document.getElementById('re-nl-min').textContent = noLockMin;
+
+        if (satisfied) {
+            statusEl.textContent = '✓ 满足无锁';
+            statusEl.className = 're-no-lock-status satisfied';
+        } else {
+            statusEl.textContent = '✗ 不满足无锁';
+            statusEl.className = 're-no-lock-status unsatisfied';
+        }
+
+        // 更新预览框
+        updatePreviews(satisfied, fenfu, huabei, douyin, meituan, v4Risk, phoneCost, totalCredit);
+    }
+
+    // 更新预览框内容
+    function updatePreviews(satisfied, fenfu, huabei, douyin, meituan, v4Risk, phoneCost, totalCredit) {
+        // 获取客户姓名
+        const customerName = cachedName || document.getElementById('re-contact-name')?.textContent || '【无参数】';
+        
+        // 获取客服姓名
+        const staffNameEl = document.getElementById('re-staff-name');
+        const staffName = staffNameEl?.textContent || '未知客服';
+        
+        // 获取订单号
+        const orderNoEl = document.getElementById('re-order-no');
+        const orderNo = orderNoEl?.textContent || '【无参数】';
+        
+        // 获取机型
+        const productInfoEl = document.getElementById('re-product-info');
+        const productInfo = productInfoEl?.textContent || 'iPhone 15 Pro Max 256GB';
+        
+        // 获取套餐信息
+        const packageInfoEl = document.getElementById('re-package-info');
+        const packageInfo = packageInfoEl?.textContent || '12期免息套餐';
+
+        // 备注预览框1
+        const lockStatus = satisfied ? '无锁通过' : '手机妈妈有锁通过';
+        const remarkPreview = `${customerName} 分付额度:${fenfu.toFixed(2)} 花呗额度:${huabei.toFixed(2)} 抖音月付:${douyin.toFixed(2)} 美团月付:${meituan.toFixed(2)} ${lockStatus} 首付:${v4Risk.toFixed(2)}`;
+        document.getElementById('re-nl-preview-remark').value = remarkPreview;
+
+        // 登记Excel预览框2 - 0显示为"未开通"
+        const fenfuDisplay = fenfu > 0 ? fenfu.toFixed(2) : '未开通';
+        const huabeiDisplay = huabei > 0 ? huabei.toFixed(2) : '未开通';
+        const douyinDisplay = douyin > 0 ? douyin.toFixed(2) : '未开通';
+        const meituanDisplay = meituan > 0 ? meituan.toFixed(2) : '未开通';
+        
+        // 合计：如果全部为0则显示0，否则显示实际相加值
+        const totalDisplay = totalCredit > 0 ? totalCredit.toFixed(2) : '0';
+        
+        const excelPreview = `${staffName}\t${customerName}\t${orderNo}\t${productInfo}\t${packageInfo}\t${phoneCost.toFixed(2)}\t${fenfuDisplay}\t${huabeiDisplay}\t${douyinDisplay}\t${meituanDisplay}\t${totalDisplay}`;
+        document.getElementById('re-nl-preview-excel').value = excelPreview;
+    }
+
+    // 打开弹窗
+    if (noLockBtn) {
+        noLockBtn.addEventListener('click', function() {
+            if (noLockPanel) {
+                // 恢复上次保存的位置
+                const savedPos = GM_getValue('noLockPanelPosition');
+                if (savedPos) {
+                    noLockPanel.style.left = savedPos.left;
+                    noLockPanel.style.top = savedPos.top;
+                    noLockPanel.style.right = 'auto';
+                }
+                calculateNoLock();
+                noLockPanel.classList.add('re-no-lock-visible');
+            }
+        });
+    }
+
+    // 关闭弹窗
+    if (noLockClose) {
+        noLockClose.addEventListener('click', function() {
+            if (noLockPanel) {
+                // 保存当前位置
+                const currentLeft = noLockPanel.style.left || 'auto';
+                const currentTop = noLockPanel.style.top || '80px';
+                if (currentLeft !== 'auto') {
+                    GM_setValue('noLockPanelPosition', {
+                        left: currentLeft,
+                        top: currentTop
+                    });
+                }
+                noLockPanel.classList.remove('re-no-lock-visible');
+            }
+        });
+    }
+
+    // 重新计算按钮
+    const recalcBtn = document.getElementById('re-nl-recalc');
+    if (recalcBtn) {
+        recalcBtn.addEventListener('click', function() {
+            calculateNoLock();
+        });
+    }
+
+    // 复制按钮功能
+    const copyRemarkBtn = document.getElementById('re-nl-copy-remark');
+    const copyExcelBtn = document.getElementById('re-nl-copy-excel');
+
+    if (copyRemarkBtn) {
+        copyRemarkBtn.addEventListener('click', function() {
+            const textArea = document.getElementById('re-nl-preview-remark');
+            if (textArea) {
+                textArea.select();
+                document.execCommand('copy');
+                showSuccessToast('备注预览已复制');
+            }
+        });
+    }
+
+    if (copyExcelBtn) {
+        copyExcelBtn.addEventListener('click', function() {
+            const textArea = document.getElementById('re-nl-preview-excel');
+            if (textArea) {
+                textArea.select();
+                document.execCommand('copy');
+                showSuccessToast('Excel预览已复制');
+            }
         });
     }
 
