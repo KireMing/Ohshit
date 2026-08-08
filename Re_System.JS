@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.0.0
+// @version      2.1.4
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -127,7 +127,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">v2.0.0</span>
+                    <span class="re-panel-version">v2.1.4</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -208,9 +208,14 @@
                     <div class="re-no-lock-preview">
                         <div class="re-no-lock-preview-header">
                             <div class="re-no-lock-preview-title">备注预览</div>
-                            <button class="re-no-lock-copy-btn" id="re-nl-copy-remark" title="复制">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                            </button>
+                            <div class="re-no-lock-preview-actions">
+                                <button class="re-no-lock-action-btn" id="re-nl-submit-remark" title="提交客服备注">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                </button>
+                                <button class="re-no-lock-copy-btn" id="re-nl-copy-remark" title="复制">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <textarea class="re-no-lock-preview-text" id="re-nl-preview-remark" readonly></textarea>
                     </div>
@@ -4476,6 +4481,42 @@
             color: #374151;
         }
 
+        .re-no-lock-preview-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .re-no-lock-action-btn {
+            width: 28px;
+            height: 28px;
+            padding: 5px;
+            border: none;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .re-no-lock-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .re-no-lock-action-btn:active {
+            transform: translateY(0);
+        }
+
+        .re-no-lock-action-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
         .re-no-lock-copy-btn {
             width: 24px;
             height: 24px;
@@ -4578,6 +4619,7 @@
     document.body.appendChild(staffNameInputModal);
 
     let staffDb = null;
+    let cachedStaffName = '';
     const STAFF_DB_NAME = 'ReSystemDB';
     const STAFF_STORE_NAME = 'settings';
     const STAFF_KEY = 'staffName';
@@ -6559,27 +6601,38 @@
     }
 
     function initStaffName() {
+        const staffNameEl = document.getElementById('re-staff-name');
+        if (cachedStaffName && staffNameEl) {
+            staffNameEl.textContent = cachedStaffName;
+            updateStaffNameDesc(cachedStaffName);
+        }
+        const shouldPrompt = () => panel && !panel.classList.contains('re-panel-hidden');
         getStaffName().then(name => {
-            const staffNameEl = document.getElementById('re-staff-name');
+            cachedStaffName = name || '';
+            const el = document.getElementById('re-staff-name');
             if (name) {
-                if (staffNameEl) {
-                    staffNameEl.textContent = name;
+                if (el) {
+                    el.textContent = name;
                 }
                 updateStaffNameDesc(name);
             } else {
-                if (staffNameEl) {
-                    staffNameEl.textContent = '';
+                if (el) {
+                    el.textContent = '';
                 }
                 updateStaffNameDesc('');
-                showStaffInputModal();
+                if (shouldPrompt()) {
+                    showStaffInputModal();
+                }
             }
         }).catch(err => {
-            const staffNameEl = document.getElementById('re-staff-name');
-            if (staffNameEl) {
-                staffNameEl.textContent = '';
+            const el = document.getElementById('re-staff-name');
+            if (el) {
+                el.textContent = '';
             }
             updateStaffNameDesc('');
-            showStaffInputModal();
+            if (shouldPrompt()) {
+                showStaffInputModal();
+            }
         });
     }
 
@@ -6735,6 +6788,12 @@
     loadAutoRefreshSetting();
     loadLowPerfSetting();
 
+    openStaffDB().then(() => {
+        return getStaffName();
+    }).then(name => {
+        cachedStaffName = name || '';
+    }).catch(() => {});
+
     const settingsTabs = document.querySelectorAll('.re-settings-tab');
     settingsTabs.forEach(tab => {
         tab.addEventListener('click', function() {
@@ -6841,6 +6900,8 @@
                 initAppearanceSettings();
             }
 
+            initStaffName();
+
             const idCardEl = getCurrentIdCardElement();
             const idCard = idCardEl ? idCardEl.textContent.trim() : '';
 
@@ -6862,7 +6923,6 @@
             panel.classList.add('re-panel-visible');
             panel.classList.remove('re-panel-closing');
             restorePanelPosition();
-            initStaffName();
             initEditableSelects();
             fetchPageData();
             fetchProductData();
@@ -6922,6 +6982,7 @@
                         panel.classList.add('re-panel-visible');
                         panel.classList.remove('re-panel-closing');
                         restorePanelPosition();
+                        initStaffName();
                         initEditableSelects();
                         fetchPageData();
                         fetchProductData();
@@ -6954,6 +7015,7 @@
                     panel.classList.add('re-panel-visible');
                     panel.classList.remove('re-panel-closing');
                     restorePanelPosition();
+                    initStaffName();
                     fetchPageData();
                     fetchProductData();
                     fetchOrderData();
@@ -9757,6 +9819,13 @@
         return isNaN(num) ? 0 : num;
     }
 
+    // 格式化展示：整数显示整数，小数最多2位
+    function formatDisplay(num) {
+        if (!num || num === 0) return num === 0 ? '0' : '';
+        const rounded = Math.round(num * 100) / 100;
+        return String(rounded);
+    }
+
     // 计算和更新无锁判断
     function calculateNoLock() {
         const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
@@ -9785,15 +9854,15 @@
         }
 
         // 更新显示值
-        document.getElementById('re-nl-fenfu').textContent = fenfu > 0 ? fenfu.toFixed(2) : '未开通';
-        document.getElementById('re-nl-huabei').textContent = huabei > 0 ? huabei.toFixed(2) : '未开通';
-        document.getElementById('re-nl-douyin').textContent = douyin > 0 ? douyin.toFixed(2) : '未开通';
-        document.getElementById('re-nl-meituan').textContent = meituan > 0 ? meituan.toFixed(2) : '未开通';
+        document.getElementById('re-nl-fenfu').textContent = fenfu > 0 ? formatDisplay(fenfu) : '未开通';
+        document.getElementById('re-nl-huabei').textContent = huabei > 0 ? formatDisplay(huabei) : '未开通';
+        document.getElementById('re-nl-douyin').textContent = douyin > 0 ? formatDisplay(douyin) : '未开通';
+        document.getElementById('re-nl-meituan').textContent = meituan > 0 ? formatDisplay(meituan) : '未开通';
 
         // 总计额度只计入分付和花呗，抖音和美团仅展示
         const totalCredit = huabei + fenfu;
-        document.getElementById('re-nl-total').textContent = totalCredit.toFixed(2);
-        document.getElementById('re-nl-v4').textContent = v4Risk.toFixed(2);
+        document.getElementById('re-nl-total').textContent = formatDisplay(totalCredit);
+        document.getElementById('re-nl-v4').textContent = formatDisplay(v4Risk);
 
         // 计算结果
         const statusEl = document.getElementById('re-nl-status');
@@ -9846,21 +9915,28 @@
         const packageInfoEl = document.getElementById('re-package-info');
         const packageInfo = packageInfoEl?.textContent || '12期免息套餐';
 
-        // 备注预览框1
-        const lockStatus = satisfied ? '无锁通过' : '手机妈妈有锁通过';
-        const remarkPreview = `${customerName} 分付额度:${fenfu.toFixed(2)} 花呗额度:${huabei.toFixed(2)} 抖音月付:${douyin.toFixed(2)} 美团月付:${meituan.toFixed(2)} ${lockStatus} 首付:${v4Risk.toFixed(2)}`;
+        // 备注预览框1 - 仅显示已开通项，未开通不显示
+        const creditParts = [];
+        if (fenfu > 0) creditParts.push(`分付额度：${formatDisplay(fenfu)}`);
+        if (huabei > 0) creditParts.push(`花呗额度：${formatDisplay(huabei)}`);
+        if (douyin > 0) creditParts.push(`抖音月付：${formatDisplay(douyin)}`);
+        if (meituan > 0) creditParts.push(`美团月付：${formatDisplay(meituan)}`);
+        const creditSegment = creditParts.length > 0 ? creditParts.join('、') + ' ' : '没有相关额度 ';
+
+        const lockStatus = satisfied ? '无锁通过' : '正常办理上锁通过';
+        const remarkPreview = `${customerName} ${creditSegment}手机妈妈 ${formatDisplay(v4Risk)} [${lockStatus}]`;
         document.getElementById('re-nl-preview-remark').value = remarkPreview;
 
         // 登记Excel预览框2 - 0显示为"未开通"
-        const fenfuDisplay = fenfu > 0 ? fenfu.toFixed(2) : '未开通';
-        const huabeiDisplay = huabei > 0 ? huabei.toFixed(2) : '未开通';
-        const douyinDisplay = douyin > 0 ? douyin.toFixed(2) : '未开通';
-        const meituanDisplay = meituan > 0 ? meituan.toFixed(2) : '未开通';
-        
+        const fenfuDisplay = fenfu > 0 ? formatDisplay(fenfu) : '未开通';
+        const huabeiDisplay = huabei > 0 ? formatDisplay(huabei) : '未开通';
+        const douyinDisplay = douyin > 0 ? formatDisplay(douyin) : '未开通';
+        const meituanDisplay = meituan > 0 ? formatDisplay(meituan) : '未开通';
+
         // 合计：如果全部为0则显示0，否则显示实际相加值
-        const totalDisplay = totalCredit > 0 ? totalCredit.toFixed(2) : '0';
-        
-        const excelPreview = `${staffName}\t${customerName}\t${orderNo}\t${productInfo}\t${packageInfo}\t${phoneCost.toFixed(2)}\t${fenfuDisplay}\t${huabeiDisplay}\t${douyinDisplay}\t${meituanDisplay}\t${totalDisplay}`;
+        const totalDisplay = totalCredit > 0 ? formatDisplay(totalCredit) : '0';
+
+        const excelPreview = `${staffName}\t${customerName}\t${orderNo}\t${productInfo}\t${packageInfo}\t${formatDisplay(phoneCost)}\t${fenfuDisplay}\t${huabeiDisplay}\t${douyinDisplay}\t${meituanDisplay}\t${totalDisplay}`;
         document.getElementById('re-nl-preview-excel').value = excelPreview;
     }
 
@@ -9910,6 +9986,7 @@
     // 复制按钮功能
     const copyRemarkBtn = document.getElementById('re-nl-copy-remark');
     const copyExcelBtn = document.getElementById('re-nl-copy-excel');
+    const submitRemarkBtn = document.getElementById('re-nl-submit-remark');
 
     if (copyRemarkBtn) {
         copyRemarkBtn.addEventListener('click', function() {
@@ -9930,6 +10007,59 @@
                 document.execCommand('copy');
                 showSuccessToast('Excel预览已复制');
             }
+        });
+    }
+
+    // 提交客服备注按钮
+    if (submitRemarkBtn) {
+        submitRemarkBtn.addEventListener('click', function() {
+            const remarkContent = document.getElementById('re-nl-preview-remark')?.value;
+            const orderNoEl = document.getElementById('re-order-no');
+            const outOrderNo = orderNoEl?.textContent?.trim();
+
+            if (!remarkContent || remarkContent.trim() === '') {
+                showErrorToast('备注内容为空');
+                return;
+            }
+
+            if (!outOrderNo) {
+                showErrorToast('订单号获取失败');
+                return;
+            }
+
+            // 禁用按钮防止重复点击
+            submitRemarkBtn.disabled = true;
+            submitRemarkBtn.style.opacity = '0.6';
+
+            // 提交备注
+            GM_xmlhttpRequest({
+                method: 'POST',
+                url: CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.staffRemark,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                data: `classify=0&content=${encodeURIComponent(remarkContent)}&out_order_no=${outOrderNo}`,
+                onload: function(response) {
+                    submitRemarkBtn.disabled = false;
+                    submitRemarkBtn.style.opacity = '1';
+                    
+                    try {
+                        const result = JSON.parse(response.responseText);
+                        if (result.status) {
+                            showSuccessToast('客服备注提交成功');
+                        } else {
+                            showErrorToast(result.msg || '备注提交失败');
+                        }
+                    } catch (e) {
+                        showErrorToast('响应解析失败');
+                    }
+                },
+                onerror: function() {
+                    submitRemarkBtn.disabled = false;
+                    submitRemarkBtn.style.opacity = '1';
+                    showErrorToast('网络请求失败');
+                }
+            });
         });
     }
 
