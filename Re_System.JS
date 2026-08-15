@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.1.9
+// @version      2.2.1
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -113,7 +113,9 @@
         },
         DEFAULTS: {
             bgColor: '#e8eaed',
-            bgOpacity: 80
+            bgOpacity: 80,
+            fontSize: 14,
+            fontBold: false
         },
         CHART: {
             hitRadius: 15,
@@ -127,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">v2.1.9</span>
+                    <span class="re-panel-version">v2.2.1</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -669,6 +671,28 @@
                                                 <div class="re-appearance-control">
                                                     <input type="range" id="re-setting-bg-opacity" min="0" max="100" value="80" class="re-range-slider">
                                                     <span id="re-opacity-value" class="re-opacity-text">80%</span>
+                                                </div>
+                                            </div>
+                                            <div class="re-appearance-item">
+                                                <div class="re-appearance-header">
+                                                    <span class="re-appearance-title">字体大小</span>
+                                                    <span class="re-appearance-desc">调整面板文字大小</span>
+                                                </div>
+                                                <div class="re-appearance-control">
+                                                    <input type="range" id="re-setting-font-size" min="12" max="18" step="1" value="14" class="re-range-slider">
+                                                    <span id="re-font-size-value" class="re-opacity-text">14px</span>
+                                                </div>
+                                            </div>
+                                            <div class="re-appearance-item">
+                                                <div class="re-appearance-header">
+                                                    <span class="re-appearance-title">字体加粗</span>
+                                                    <span class="re-appearance-desc">面板文字加粗显示</span>
+                                                </div>
+                                                <div class="re-appearance-control">
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-font-bold">
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
                                                 </div>
                                             </div>
                                             <div class="re-appearance-preview">
@@ -4591,7 +4615,7 @@
         }
     `;
 
-    GM_addStyle(styles);
+    GM_addStyle(styles.replace(/font-size:\s*(\d+(?:\.\d+)?)px/g, 'font-size: calc($1px * var(--re-fs-scale, 1))'));
 
     document.body.insertAdjacentHTML('beforeend', panelHTML);
 
@@ -8583,13 +8607,13 @@
             if (this.checked) {
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
-                // 默认写入并选中"方案2"
-                if (!Array.from(rentExpandSelect.options).some(o => o.value === '方案2')) {
+                // 默认写入并选中"方案二："
+                if (!Array.from(rentExpandSelect.options).some(o => o.value === '方案二：')) {
                     const opt = document.createElement('option');
-                    opt.textContent = '方案2';
+                    opt.textContent = '方案二：';
                     rentExpandSelect.appendChild(opt);
                 }
-                rentExpandSelect.value = '方案2';
+                rentExpandSelect.value = '方案二：';
                 rentExpandSelect.dispatchEvent(new Event('change'));
             } else {
                 rentExpandSelect.classList.remove('re-visible');
@@ -8656,9 +8680,9 @@
             } else {
                 let previewText = '';
                 if (cachedName) {
-                    previewText = cachedName + '：方案1 ' + auditText + ' ' + orderResult;
+                    previewText = cachedName + '：方案一：' + auditText + ' ' + orderResult;
                 } else {
-                    previewText = '方案1：' + auditText + ' ' + orderResult;
+                    previewText = '方案一：' + auditText + ' ' + orderResult;
                 }
                 previewMain.textContent = previewText;
             }
@@ -8666,7 +8690,7 @@
 
         if (previewExpand) {
             if (expandChecked && expandResult) {
-                const typeText = expandType ? expandType + '：' : '';
+                const typeText = expandType ? expandType.replace(/：$/, '') + '：' : '';
                 previewExpand.textContent = ' | ' + typeText + expandResult + ' ' + expandOrderResult;
                 previewExpand.style.display = 'inline';
             } else {
@@ -8815,7 +8839,7 @@
 
         const auditPrice = getCachedElement('auditResult', '#re-audit-result')?.value || '';
         const auditResult = getCachedElement('orderResult', '#re-order-result')?.value || '';
-        if (auditPrice) parts.push('方案1 ' + auditPrice + ' ' + auditResult);
+        if (auditPrice) parts.push('方案一：' + auditPrice + ' ' + auditResult);
 
         const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
         if (expandChecked) {
@@ -8823,7 +8847,7 @@
             const expandPrice = getCachedElement('expandResult', '#re-expand-result')?.value || '';
             const expandResult = getCachedElement('expandOrderResult', '#re-expand-order-result')?.value || '';
             if (expandType && expandPrice) {
-                parts.push(expandType + '：' + expandPrice + ' ' + expandResult);
+                parts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
             }
         }
 
@@ -9689,7 +9713,7 @@
                     const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
                     const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
                     if (auditPrice && auditResult) {
-                        remarkParts.push('方案1 ' + auditPrice + ' ' + auditResult);
+                        remarkParts.push('方案一：' + auditPrice + ' ' + auditResult);
                     }
 
                     // 添加拓展业务
@@ -9699,7 +9723,7 @@
                         const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
                         const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
                         if (expandType && expandPrice) {
-                            remarkParts.push(expandType + '：' + expandPrice + ' ' + expandResult);
+                            remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
                         }
                     }
 
@@ -10298,7 +10322,7 @@
         const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
         const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
         if (auditPrice && auditResult) {
-            remarkParts.push('方案1 ' + auditPrice + ' ' + auditResult);
+            remarkParts.push('方案一：' + auditPrice + ' ' + auditResult);
         }
 
         // 添加拓展业务
@@ -10308,7 +10332,7 @@
             const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
             const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
             if (expandType && expandPrice) {
-                remarkParts.push(expandType + '：' + expandPrice + ' ' + expandResult);
+                remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
             }
         }
 
@@ -10407,6 +10431,22 @@
         try {
             localStorage.setItem(CONFIG.STORAGE.appearanceKey, JSON.stringify(settings));
         } catch (e) {}
+    }
+
+    let reFontStyleEl = null;
+
+    function applyFontSettings() {
+        const settings = getAppearanceSettings();
+        const fontSize = settings.fontSize !== undefined ? settings.fontSize : CONFIG.DEFAULTS.fontSize;
+        const fontBold = settings.fontBold !== undefined ? settings.fontBold : CONFIG.DEFAULTS.fontBold;
+
+        document.documentElement.style.setProperty('--re-fs-scale', fontSize / 14);
+
+        if (!reFontStyleEl) {
+            reFontStyleEl = document.createElement('style');
+            document.head.appendChild(reFontStyleEl);
+        }
+        reFontStyleEl.textContent = fontBold ? '#re-system-panel, #re-system-panel *, [id^="re-"], [id^="re-"] * { font-weight: 600; }' : '';
     }
 
     function applyBackgroundSettings() {
@@ -10562,6 +10602,38 @@
             });
         }
 
+        const fontSizeInput = document.getElementById('re-setting-font-size');
+        const fontSizeValue = document.getElementById('re-font-size-value');
+        const fontBoldInput = document.getElementById('re-setting-font-bold');
+
+        if (fontSizeInput && fontSizeValue) {
+            fontSizeInput.value = settings.fontSize !== undefined ? settings.fontSize : CONFIG.DEFAULTS.fontSize;
+            fontSizeValue.textContent = fontSizeInput.value + 'px';
+
+            fontSizeInput.addEventListener('input', function() {
+                const value = parseInt(this.value, 10);
+                fontSizeValue.textContent = value + 'px';
+
+                const newSettings = getAppearanceSettings();
+                newSettings.fontSize = value;
+                saveAppearanceSettings(newSettings);
+
+                applyFontSettings();
+            });
+        }
+
+        if (fontBoldInput) {
+            fontBoldInput.checked = settings.fontBold !== undefined ? settings.fontBold : CONFIG.DEFAULTS.fontBold;
+
+            fontBoldInput.addEventListener('change', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.fontBold = this.checked;
+                saveAppearanceSettings(newSettings);
+
+                applyFontSettings();
+            });
+        }
+
         if (settings.bgImage && imageName) {
             imageName.textContent = '已设置背景图片';
             if (clearBtn) clearBtn.style.display = 'inline-flex';
@@ -10616,6 +10688,7 @@
     document.head.appendChild(panelBtnStyle);
 
     addPanelButton();
+    applyFontSettings();
 
     function initAnalysisEvents() {
         const analysisRangeSelect = document.getElementById('re-analysis-range');
