@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.1.4
+// @version      2.1.9
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -127,7 +127,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">v2.1.4</span>
+                    <span class="re-panel-version">v2.1.9</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -6642,6 +6642,20 @@
     let dragStartX, dragStartY;
     let panelStartX, panelStartY;
 
+    function openLayerLink(linkEl) {
+        const panel = document.getElementById('re-system-panel');
+        if (panel) panel.style.zIndex = '100';
+        justFinishedInteraction = true;
+        linkEl.setAttribute('data-width', '700');
+        linkEl.click();
+        const restoreZ = setInterval(() => {
+            if (!document.querySelector('.layui-layer')) {
+                if (panel) panel.style.zIndex = '';
+                clearInterval(restoreZ);
+            }
+        }, 500);
+    }
+
     function savePanelPosition() {
         const rect = panel.getBoundingClientRect();
         GM_setValue('re_panel_left', rect.left);
@@ -7145,8 +7159,9 @@
         const isClickOnOrderDetailModal = orderDetailModal && orderDetailModal.contains(e.target);
         const dayEditModal = document.getElementById('re-day-edit-modal');
         const isClickOnDayEditModal = dayEditModal && dayEditModal.contains(e.target);
+        const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnLayuiLayer) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -7700,7 +7715,7 @@
                             if (p.textContent.includes('店铺逾期率')) {
                                 const viewLink = p.querySelector('a');
                                 if (viewLink && viewLink.textContent.trim() === '查看') {
-                                    viewLink.click();
+                                    openLayerLink(viewLink);
                                     return;
                                 }
                             }
@@ -7733,7 +7748,7 @@
                                     for (let j = i + 1; j < childNodes.length; j++) {
                                         const nextNode = childNodes[j];
                                         if (nextNode.nodeType === Node.ELEMENT_NODE && nextNode.tagName === 'A' && nextNode.textContent.trim() === '查看') {
-                                            nextNode.click();
+                                            openLayerLink(nextNode);
                                             return;
                                         }
                                     }
@@ -8568,6 +8583,14 @@
             if (this.checked) {
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
+                // 默认写入并选中"方案2"
+                if (!Array.from(rentExpandSelect.options).some(o => o.value === '方案2')) {
+                    const opt = document.createElement('option');
+                    opt.textContent = '方案2';
+                    rentExpandSelect.appendChild(opt);
+                }
+                rentExpandSelect.value = '方案2';
+                rentExpandSelect.dispatchEvent(new Event('change'));
             } else {
                 rentExpandSelect.classList.remove('re-visible');
                 expandResultRow.classList.remove('re-visible');
@@ -8633,9 +8656,9 @@
             } else {
                 let previewText = '';
                 if (cachedName) {
-                    previewText = cachedName + '：手机妈妈 ' + auditText + ' ' + orderResult;
+                    previewText = cachedName + '：方案1 ' + auditText + ' ' + orderResult;
                 } else {
-                    previewText = '手机妈妈：' + auditText + ' ' + orderResult;
+                    previewText = '方案1：' + auditText + ' ' + orderResult;
                 }
                 previewMain.textContent = previewText;
             }
@@ -8792,7 +8815,7 @@
 
         const auditPrice = getCachedElement('auditResult', '#re-audit-result')?.value || '';
         const auditResult = getCachedElement('orderResult', '#re-order-result')?.value || '';
-        if (auditPrice) parts.push('手机妈妈 ' + auditPrice + ' ' + auditResult);
+        if (auditPrice) parts.push('方案1 ' + auditPrice + ' ' + auditResult);
 
         const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
         if (expandChecked) {
@@ -9666,7 +9689,7 @@
                     const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
                     const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
                     if (auditPrice && auditResult) {
-                        remarkParts.push('手机妈妈 ' + auditPrice + ' ' + auditResult);
+                        remarkParts.push('方案1 ' + auditPrice + ' ' + auditResult);
                     }
 
                     // 添加拓展业务
@@ -10275,7 +10298,7 @@
         const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
         const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
         if (auditPrice && auditResult) {
-            remarkParts.push('手机妈妈 ' + auditPrice + ' ' + auditResult);
+            remarkParts.push('方案1 ' + auditPrice + ' ' + auditResult);
         }
 
         // 添加拓展业务
