@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.2.1
+// @version      2.4.3
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">v2.2.1</span>
+                    <span class="re-panel-version">V2.4.3 Beta</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -453,7 +453,7 @@
                                     </div>
                                 </div>
                                 <div class="re-data-col">
-                                    <div class="re-card-title" id="re-expand-business-title">拓展业务</div>
+                                    <div class="re-card-title" id="re-expand-business-title"><span class="re-expand-title-text">拓展业务</span><span class="re-expand-badges" id="re-expand-restrict-badge" style="display:none;"></span></div>
                                     <div class="re-data-form">
                                         <div class="re-data-form-row">
                                             <div class="re-data-form-inline">
@@ -875,6 +875,20 @@
                 </div>
             </div>
         </div>
+
+        <div class="re-modal-overlay" id="re-repeat-orders-modal">
+            <div class="re-modal re-modal-model-orders">
+                <div class="re-modal-header">
+                    <span class="re-modal-title" id="re-repeat-orders-title">历史订单列表</span>
+                    <button class="re-modal-close" id="re-repeat-orders-close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="re-modal-content">
+                    <div class="re-model-orders-list" id="re-repeat-orders-list"></div>
+                </div>
+            </div>
+        </div>
     `;
 
     const styles = `
@@ -1158,6 +1172,41 @@
             margin-right: 6px;
             font-weight: 600;
             vertical-align: middle;
+        }
+
+        .re-restrict-appstore {
+            display: inline-block;
+            background: #a78bfa;
+            color: #fff;
+            font-size: 13px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+
+        .re-expand-badges {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .re-expand-badges .re-overage-customer,
+        .re-expand-badges .re-repeat-customer,
+        .re-expand-badges .re-restrict-appstore {
+            margin-right: 0;
+            margin-left: 0;
+        }
+
+        .re-expand-badges .re-repeat-customer {
+            cursor: pointer;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .re-expand-badges .re-repeat-customer:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
         }
 
         .re-column-right {
@@ -2261,6 +2310,44 @@
         .re-btn-sm:hover {
             background: #e5e7eb;
             border-color: #9ca3af;
+        }
+
+        .re-repeat-order-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        .re-repeat-strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .re-repeat-serial {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .re-repeat-order-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .re-btn-sm-primary {
+            color: #fff !important;
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+
+        .re-btn-sm-primary:hover {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
         }
 
         .re-btn-danger {
@@ -7183,9 +7270,11 @@
         const isClickOnOrderDetailModal = orderDetailModal && orderDetailModal.contains(e.target);
         const dayEditModal = document.getElementById('re-day-edit-modal');
         const isClickOnDayEditModal = dayEditModal && dayEditModal.contains(e.target);
+        const repeatOrdersModal = document.getElementById('re-repeat-orders-modal');
+        const isClickOnRepeatOrdersModal = repeatOrdersModal && repeatOrdersModal.contains(e.target);
         const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnLayuiLayer) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnLayuiLayer) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -7405,6 +7494,24 @@
     let cachedNewChainLink = null;
     let cachedDiscount = null;
     let cachedShop = '';
+    let cachedProductModel = '';
+
+    function readProductModel() {
+        try {
+            const checkEl = getElementByXPath(CONFIG.XPATH.MAIN_PAGE.valueAddedServiceCheck);
+            const checkText = checkEl ? checkEl.textContent.trim() : '';
+            const pOffset = checkText.includes('增值服务订单号') ? 1 : 0;
+            const modelEl = getElementByXPath(`/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${2 + pOffset}]`);
+            let model = modelEl ? modelEl.textContent.trim() : '';
+            return model.replace(/^商品信息[：:]\s*/i, '').trim();
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function isRestrictAppStoreModel() {
+        return /17\s*pro/i.test(cachedProductModel) && cachedProductModel.includes('二手');
+    }
 
     function fetchPageData() {
         try {
@@ -7424,6 +7531,7 @@
             }
 
             const customerCell = getCurrentCustomerCell();
+            cachedProductModel = readProductModel();
             const nameParagraph = customerCell
                 ? Array.from(customerCell.querySelectorAll('p')).find(p => p.textContent.includes('姓名：'))
                 : null;
@@ -7519,12 +7627,6 @@
                     if (cachedNewChainLink) {
                         displayText += ' <span class="re-new-chain-link">' + cachedNewChainLink + '</span>';
                     }
-                    if (orderCountNum >= CONFIG.THRESHOLD.repeatCustomer) {
-                        displayText += ' <span class="re-repeat-customer">复购客户</span>';
-                    }
-                    if (ageNum > CONFIG.THRESHOLD.overageAge) {
-                        displayText += ' <span class="re-overage-customer">超龄客户</span>';
-                    }
                     displayText += ' ' + cleanName;
                     if (gender) {
                         displayText += '（' + gender + '）';
@@ -7557,6 +7659,125 @@
         }
     }
 
+    async function queryRepeatOrders() {
+        // 身份证号获取（参考授权页源码 td .id-card span）
+        const idCardEl = getCurrentIdCardElement();
+        const idCard = idCardEl ? idCardEl.textContent.trim() : '';
+
+        if (!idCard) {
+            alert('未获取到顾客身份证号');
+            return;
+        }
+        if (idCard.includes('*')) {
+            alert('身份证号未解密，请先点击原页面「查看」按钮解密后再查询');
+            return;
+        }
+
+        const listEl = document.getElementById('re-repeat-orders-list');
+        const titleEl = document.getElementById('re-repeat-orders-title');
+        const modalEl = document.getElementById('re-repeat-orders-modal');
+        if (!listEl || !modalEl) return;
+
+        if (titleEl) titleEl.textContent = '历史订单查询中...';
+        listEl.innerHTML = '<div class="re-model-order-empty">查询中...</div>';
+        modalEl.classList.add('re-modal-visible');
+
+        try {
+            const url = 'https://backendproenv.aixzu.com/order/index?out_order_no=&sjmm_out_order_no=&name=&mobile=&id_card='
+                + encodeURIComponent(idCard)
+                + '&imei=&serial_number=&min_create_time=';
+            const resp = await fetch(url, { credentials: 'include' });
+            const html = await resp.text();
+
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const rows = doc.querySelectorAll('#table tbody tr');
+            const orders = [];
+
+            rows.forEach(tr => {
+                const orderCell = tr.querySelector('td:nth-child(2)');
+                if (!orderCell) return;
+                const text = orderCell.textContent || '';
+                const orderNoMatch = text.match(/订单号[：:]\s*(\d+)/);
+                if (!orderNoMatch) return;
+                const modelMatch = text.match(/商品信息[：:]\s*([\s\S]*?)(?=IMEI|序列号|来源|$)/);
+                const serialMatch = text.match(/序列号[：:]\s*([^\n]+)/);
+                const shopMatch = text.match(/店铺[：:]\s*([^\n]+)/);
+                const stateMatch = text.match(/状态[：:]\s*([^\n]+)/);
+                orders.push({
+                    orderNo: orderNoMatch[1],
+                    model: modelMatch ? modelMatch[1].trim() : '',
+                    serial: serialMatch ? serialMatch[1].trim() : '',
+                    shop: shopMatch ? shopMatch[1].trim() : '',
+                    state: stateMatch ? stateMatch[1].trim() : ''
+                });
+            });
+
+            if (titleEl) titleEl.textContent = '历史订单（' + orders.length + '条）';
+            listEl.innerHTML = '';
+
+            if (!orders.length) {
+                listEl.innerHTML = '<div class="re-model-order-empty">无历史订单</div>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const item = document.createElement('div');
+                item.className = 're-model-order-item';
+                item.innerHTML = '<div class="re-model-order-info">'
+                    + '<div class="re-model-order-name">订单号：' + order.orderNo + '</div>'
+                    + '<div class="re-repeat-order-fields">'
+                    + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
+                    + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
+                    + '<div>店铺：<span class="re-repeat-strong">' + (order.shop || '—') + '</span></div>'
+                    + '<div>序列号：<span class="re-repeat-serial">' + (order.serial || '—') + '</span></div>'
+                    + '</div></div>'
+                    + '<div class="re-repeat-order-actions">'
+                    + '<button class="re-btn-sm re-btn-sm-primary" data-order="' + order.orderNo + '" data-type="auth">面审</button>'
+                    + '<button class="re-btn-sm" data-order="' + order.orderNo + '" data-type="bill">账单</button>'
+                    + '</div>';
+                listEl.appendChild(item);
+            });
+
+            listEl.querySelectorAll('button[data-order]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const orderNo = this.getAttribute('data-order');
+                    const type = this.getAttribute('data-type');
+                    let targetUrl;
+                    if (type === 'auth') {
+                        targetUrl = 'https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name=&out_order_no='
+                            + encodeURIComponent(orderNo)
+                            + '&mobile=&store_name=&sub_store_name=&salesman=&auth_no=&min_create_time=&max_create_time=';
+                    } else {
+                        targetUrl = 'https://backendproenv.aixzu.com/bill/index?out_order_no='
+                            + encodeURIComponent(orderNo)
+                            + '&mobile=&start_time=&end_time=&create_time=&pay_status=-1';
+                    }
+                    window.open(targetUrl, '_blank');
+                });
+            });
+        } catch (e) {
+            if (titleEl) titleEl.textContent = '历史订单查询失败';
+            listEl.innerHTML = '<div class="re-model-order-empty">查询失败，请重试</div>';
+        }
+    }
+
+    (function initRepeatOrdersModal() {
+        const modalEl = document.getElementById('re-repeat-orders-modal');
+        const closeBtn = document.getElementById('re-repeat-orders-close');
+        if (!modalEl) return;
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modalEl.classList.remove('re-modal-visible');
+            });
+        }
+        modalEl.addEventListener('click', (e) => {
+            if (e.target === modalEl) {
+                modalEl.classList.remove('re-modal-visible');
+            }
+        });
+    })();
+
     function fetchProductData() {
         try {
             const tdXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]';
@@ -7586,15 +7807,13 @@
             const isValueAddedServiceOrder = checkText.includes('增值服务订单号');
             const pOffset = isValueAddedServiceOrder ? 1 : 0;
 
-            const productModelXPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${2 + pOffset}]`;
             const minDownPaymentXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[6]/p[5]';
             const packageInfo1XPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${3 + pOffset}]`;
             const packageInfo2XPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${5 + pOffset}]/span`;
             const shopCategoryXPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${8 + pOffset}]`;
 
-            const productModelEl = getElementByXPath(productModelXPath);
-            let productModel = productModelEl ? productModelEl.textContent.trim() : '';
-            productModel = productModel.replace(/^商品信息[：:]\s*/i, '').trim();
+            const productModel = readProductModel();
+            cachedProductModel = productModel;
 
             const minDownPaymentEl = getElementByXPath(minDownPaymentXPath);
             const minDownPaymentText = minDownPaymentEl ? minDownPaymentEl.textContent.trim() : '';
@@ -7658,25 +7877,48 @@
             }
 
             const expandBusinessTitleEl = document.getElementById('re-expand-business-title');
-            if (expandBusinessTitleEl && packageInfo) {
+            const expandTitleTextEl = expandBusinessTitleEl ? expandBusinessTitleEl.querySelector('.re-expand-title-text') : null;
+            const expandBadgeEl = document.getElementById('re-expand-restrict-badge');
+            let newTitle = '拓展业务';
+            if (packageInfo) {
                 const len = packageInfo.length;
                 if (len >= 3) {
                     const thirdLastChar = packageInfo.charAt(len - 3);
                     const fourthLastChar = packageInfo.charAt(len - 4);
                     if (thirdLastChar === '折' && /\d/.test(fourthLastChar)) {
-                        expandBusinessTitleEl.textContent = '拓展业务（' + fourthLastChar + '折）';
+                        newTitle = '拓展业务（' + fourthLastChar + '折）';
                         cachedDiscount = parseFloat(fourthLastChar) / 10;
                     } else {
-                        expandBusinessTitleEl.textContent = '拓展业务';
                         cachedDiscount = null;
                     }
                 } else {
-                    expandBusinessTitleEl.textContent = '拓展业务';
                     cachedDiscount = null;
                 }
-            } else if (expandBusinessTitleEl) {
-                expandBusinessTitleEl.textContent = '拓展业务';
+            } else {
                 cachedDiscount = null;
+            }
+            if (expandTitleTextEl) expandTitleTextEl.textContent = newTitle;
+            // 标题右侧胶囊：禁止AppStore / 超龄客户 / 复购客户（复购可点击查询历史订单）
+            if (expandBadgeEl) {
+                let badges = '';
+                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore">禁止AppStore</span>';
+                // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
+                const headerText = panel.querySelector('.re-header-data')?.textContent || '';
+                const orderCountMatch = headerText.match(/客户办单[：:](\d+)次/);
+                const orderCountNum = orderCountMatch ? parseInt(orderCountMatch[1], 10) : 0;
+                const ageMatch = headerText.match(/(\d+)岁/);
+                const ageNum = ageMatch ? parseInt(ageMatch[1], 10) : 0;
+                if (ageNum > CONFIG.THRESHOLD.overageAge) badges += '<span class="re-overage-customer">超龄客户</span>';
+                if (orderCountNum >= CONFIG.THRESHOLD.repeatCustomer) badges += '<span class="re-repeat-customer" title="点击查询历史订单">复购客户</span>';
+                expandBadgeEl.innerHTML = badges;
+                expandBadgeEl.style.display = badges ? 'inline-flex' : 'none';
+                expandBadgeEl.style.pointerEvents = 'auto';
+                expandBadgeEl.onclick = null;
+                expandBadgeEl.onclick = function(e) {
+                    if (e.target.classList.contains('re-repeat-customer')) {
+                        queryRepeatOrders();
+                    }
+                };
             }
 
             updatePricePlaceholder();
@@ -8607,13 +8849,14 @@
             if (this.checked) {
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
-                // 默认写入并选中"方案二："
-                if (!Array.from(rentExpandSelect.options).some(o => o.value === '方案二：')) {
+                // 默认写入并选中拓展类型（17Pro/17ProMax 二手机型特殊处理）
+                const defaultExpandType = isRestrictAppStoreModel() ? '禁止AppStore+限制ID：' : '方案二：';
+                if (!Array.from(rentExpandSelect.options).some(o => o.value === defaultExpandType)) {
                     const opt = document.createElement('option');
-                    opt.textContent = '方案二：';
+                    opt.textContent = defaultExpandType;
                     rentExpandSelect.appendChild(opt);
                 }
-                rentExpandSelect.value = '方案二：';
+                rentExpandSelect.value = defaultExpandType;
                 rentExpandSelect.dispatchEvent(new Event('change'));
             } else {
                 rentExpandSelect.classList.remove('re-visible');
@@ -8679,10 +8922,11 @@
                 previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 审核价格</span>';
             } else {
                 let previewText = '';
+                const mainLabel = isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：';
                 if (cachedName) {
-                    previewText = cachedName + '：方案一：' + auditText + ' ' + orderResult;
+                    previewText = cachedName + '：' + mainLabel + auditText + ' ' + orderResult;
                 } else {
-                    previewText = '方案一：' + auditText + ' ' + orderResult;
+                    previewText = mainLabel + auditText + ' ' + orderResult;
                 }
                 previewMain.textContent = previewText;
             }
@@ -8839,7 +9083,7 @@
 
         const auditPrice = getCachedElement('auditResult', '#re-audit-result')?.value || '';
         const auditResult = getCachedElement('orderResult', '#re-order-result')?.value || '';
-        if (auditPrice) parts.push('方案一：' + auditPrice + ' ' + auditResult);
+        if (auditPrice) parts.push((isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
 
         const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
         if (expandChecked) {
@@ -9713,7 +9957,7 @@
                     const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
                     const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
                     if (auditPrice && auditResult) {
-                        remarkParts.push('方案一：' + auditPrice + ' ' + auditResult);
+                        remarkParts.push((isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
                     }
 
                     // 添加拓展业务
@@ -10322,7 +10566,7 @@
         const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
         const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
         if (auditPrice && auditResult) {
-            remarkParts.push('方案一：' + auditPrice + ' ' + auditResult);
+            remarkParts.push((isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
         }
 
         // 添加拓展业务
