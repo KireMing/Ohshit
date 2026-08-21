@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.4.3
+// @version      2.4.4
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V2.4.3 Beta</span>
+                    <span class="re-panel-version">V2.4.4</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -1176,7 +1176,7 @@
 
         .re-restrict-appstore {
             display: inline-block;
-            background: #a78bfa;
+            background: #dc2626;
             color: #fff;
             font-size: 13px;
             padding: 2px 8px;
@@ -1184,6 +1184,11 @@
             margin-left: 6px;
             font-weight: 600;
             vertical-align: middle;
+        }
+
+        #re-expand-business-title {
+            justify-content: flex-start;
+            gap: 8px;
         }
 
         .re-expand-badges {
@@ -3226,6 +3231,76 @@
         .re-contact-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .re-contact-value.re-phone-alert {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .re-alert-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 2147483648;
+            margin: 0;
+            padding: 0;
+        }
+
+        .re-alert-modal.show {
+            display: block !important;
+        }
+
+        .re-alert-modal-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            width: 360px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .re-alert-modal-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 12px;
+            color: #dc2626;
+        }
+
+        .re-alert-modal-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .re-alert-modal-msg {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .re-alert-modal-btn {
+            padding: 7px 32px;
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+            background: #dc2626;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .re-alert-modal-btn:hover {
+            background: #b91c1c;
         }
 
         .re-iframe-modal {
@@ -7272,9 +7347,11 @@
         const isClickOnDayEditModal = dayEditModal && dayEditModal.contains(e.target);
         const repeatOrdersModal = document.getElementById('re-repeat-orders-modal');
         const isClickOnRepeatOrdersModal = repeatOrdersModal && repeatOrdersModal.contains(e.target);
+        const contactAlertModal = document.getElementById('re-contact-alert-modal');
+        const isClickOnContactAlertModal = contactAlertModal && contactAlertModal.contains(e.target);
         const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnLayuiLayer) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnContactAlertModal && !isClickOnLayuiLayer) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -8448,6 +8525,7 @@
                         const contactPhoneEl2 = document.getElementById('re-contact-phone');
                         if (contactPhoneEl2) {
                             contactPhoneEl2.textContent = contactPhone || '【无参数】';
+                            contactPhoneEl2.classList.remove('re-phone-alert');
                         }
 
                         const memberAmountEl = document.getElementById('re-member-amount');
@@ -9205,6 +9283,39 @@
     });
     updateRiskPreview();
 
+    function showContactAlertModal(message) {
+        let alertModal = document.getElementById('re-contact-alert-modal');
+        if (!alertModal) {
+            alertModal = document.createElement('div');
+            alertModal.id = 're-contact-alert-modal';
+            alertModal.className = 're-alert-modal';
+            alertModal.innerHTML = `
+                <div class="re-alert-modal-card">
+                    <div class="re-alert-modal-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="re-alert-modal-msg"></div>
+                    <button class="re-alert-modal-btn">我知道了</button>
+                </div>
+            `;
+            document.body.appendChild(alertModal);
+            alertModal.querySelector('.re-alert-modal-btn').addEventListener('click', function() {
+                alertModal.classList.remove('show');
+            });
+            alertModal.addEventListener('click', function(e) {
+                if (e.target === alertModal) {
+                    alertModal.classList.remove('show');
+                }
+            });
+        }
+        alertModal.querySelector('.re-alert-modal-msg').textContent = message;
+        alertModal.classList.add('show');
+    }
+
     const contactQueryBtn = document.getElementById('re-contact-query');
     const contactEditBtn = document.getElementById('re-contact-edit');
     const phoneDuration = document.getElementById('re-phone-duration');
@@ -9246,9 +9357,11 @@
 
                         if (duration) {
                             phoneDuration.textContent = duration;
+                            contactPhoneEl.classList.remove('re-phone-alert');
                             showSuccessToast('查询成功');
                         } else {
-                            showTooltip('未获取到使用时长', window.innerWidth / 2, window.innerHeight / 2);
+                            contactPhoneEl.classList.add('re-phone-alert');
+                            showContactAlertModal('该手机号未获取到使用时长，请核实真实性');
                         }
                     } catch (e) {
                         showTooltip('解析失败', window.innerWidth / 2, window.innerHeight / 2);
