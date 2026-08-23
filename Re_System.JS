@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.4.4
+// @version      2.5.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V2.4.4</span>
+                    <span class="re-panel-version">V2.5.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -464,6 +464,7 @@
                                                 <label class="re-form-label">审核结果</label>
                                                 <select class="re-select" id="re-order-result">
                                                     <option>通过</option>
+                                                    <option>无锁通过</option>
                                                     <option selected>考虑</option>
                                                     <option>取消</option>
                                                     <option>支付不了</option>
@@ -884,8 +885,14 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </div>
-                <div class="re-modal-content">
+                <div class="re-modal-content re-repeat-modal-content">
                     <div class="re-model-orders-list" id="re-repeat-orders-list"></div>
+                    <div class="re-bill-panel" id="re-bill-panel">
+                        <div class="re-bill-panel-title">账单详情</div>
+                        <div class="re-bill-panel-body" id="re-bill-panel-body">
+                            <div class="re-bill-panel-empty">点击订单卡片右侧「账单」按钮<br>在此查看扣款信息</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1176,14 +1183,33 @@
 
         .re-restrict-appstore {
             display: inline-block;
-            background: #dc2626;
-            color: #fff;
+            background: transparent;
+            color: #9ca3af;
+            border: 1px solid #d1d5db;
             font-size: 13px;
-            padding: 2px 8px;
+            padding: 1px 8px;
             border-radius: 4px;
             margin-left: 6px;
             font-weight: 600;
             vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .re-restrict-appstore:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .re-restrict-appstore.active {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #fff;
+        }
+
+        .re-restrict-appstore.active:hover {
+            opacity: 0.85;
         }
 
         #re-expand-business-title {
@@ -2335,6 +2361,30 @@
         .re-repeat-serial {
             color: #dc2626;
             font-weight: 600;
+        }
+
+        .re-current-order-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 0 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .re-model-order-current {
+            background: rgba(59, 130, 246, 0.06);
+            border-color: rgba(59, 130, 246, 0.35);
+            border-left: 3px solid #3b82f6;
+        }
+
+        .re-model-order-current:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.45);
         }
 
         .re-repeat-order-actions {
@@ -3936,13 +3986,126 @@
         }
 
         .re-modal-model-orders {
-            max-width: 600px;
-            max-height: 70vh;
+            max-width: 980px;
+            max-height: 80vh;
+        }
+
+        .re-repeat-modal-content {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .re-repeat-modal-content .re-model-orders-list {
+            flex: 1;
+            min-width: 0;
         }
 
         .re-model-orders-list {
-            max-height: 50vh;
+            max-height: 56vh;
             overflow-y: auto;
+        }
+
+        .re-bill-panel {
+            flex-shrink: 0;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(107, 114, 128, 0.15);
+            border-radius: 8px;
+            background: rgba(107, 114, 128, 0.03);
+            overflow: hidden;
+        }
+
+        .re-bill-panel-title {
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.15);
+            background: rgba(107, 114, 128, 0.06);
+        }
+
+        .re-bill-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 50vh;
+            padding: 10px 12px;
+            font-size: 11px;
+            color: #6b7280;
+            line-height: 1.7;
+        }
+
+        .re-bill-panel-empty {
+            text-align: center;
+            color: #9ca3af;
+            padding: 40px 12px;
+            font-size: 12px;
+            line-height: 2;
+        }
+
+        .re-bill-order-no {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+            word-break: break-all;
+        }
+
+        .re-bill-item {
+            padding: 6px 0;
+            border-bottom: 1px dashed rgba(107, 114, 128, 0.15);
+            word-break: break-all;
+        }
+
+        .re-bill-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .re-bill-item-head {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+
+        .re-bill-line {
+            padding: 1px 0;
+        }
+
+        .re-bill-jump {
+            margin-top: 10px;
+            text-align: center;
+            color: #2563eb;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 12px;
+        }
+
+        .re-bill-jump:hover {
+            color: #1d4ed8;
+        }
+
+        .re-bill-period {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .re-bill-warn {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .re-bill-paid {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .re-bill-loading {
+            text-align: center;
+            color: #9ca3af;
+            padding: 30px 0;
+            font-size: 12px;
         }
 
         .re-model-order-item {
@@ -7523,6 +7686,44 @@
         return /17\s*pro/i.test(cachedProductModel) && cachedProductModel.includes('二手');
     }
 
+    // 禁止AppStore手动开关（全局记住）：关闭=方案一/方案二，开启=禁止AppStore/禁止AppStore+限制ID
+    let restrictAppStoreEnabled = GM_getValue('re-restrict-appstore-enabled', false);
+    let lastRestrictToastKey = '';
+
+    function isRestrictAppStoreActive() {
+        return isRestrictAppStoreModel() && restrictAppStoreEnabled;
+    }
+
+    function setRestrictAppStoreEnabled(enabled) {
+        restrictAppStoreEnabled = enabled;
+        GM_setValue('re-restrict-appstore-enabled', enabled);
+
+        // 刷新胶囊开关状态
+        const badge = document.querySelector('#re-expand-restrict-badge .re-restrict-appstore');
+        if (badge) badge.classList.toggle('active', enabled);
+
+        // 刷新主预览与风控预览标签
+        if (typeof updatePreview === 'function') updatePreview();
+        if (typeof updateRiskPreview === 'function') updateRiskPreview();
+
+        // 拓展开关已开启且当前为默认类型时，同步切换默认拓展类型
+        const expandSwitch = document.getElementById('re-rent-expand');
+        const expandSelect = expandSwitch?.closest('.re-data-form-inline')?.querySelector('.re-rent-expand-select');
+        if (expandSwitch?.checked && expandSelect) {
+            const cur = expandSelect.value;
+            if (cur === '方案二：' || cur === '禁止AppStore+限制ID：') {
+                const newDefault = enabled ? '禁止AppStore+限制ID：' : '方案二：';
+                if (!Array.from(expandSelect.options).some(o => o.value === newDefault)) {
+                    const opt = document.createElement('option');
+                    opt.textContent = newDefault;
+                    expandSelect.appendChild(opt);
+                }
+                expandSelect.value = newDefault;
+                expandSelect.dispatchEvent(new Event('change'));
+            }
+        }
+    }
+
     function fetchPageData() {
         try {
             const checkEl = getElementByXPath(CONFIG.XPATH.MAIN_PAGE.valueAddedServiceCheck);
@@ -7691,6 +7892,8 @@
         if (titleEl) titleEl.textContent = '历史订单查询中...';
         listEl.innerHTML = '<div class="re-model-order-empty">查询中...</div>';
         modalEl.classList.add('re-modal-visible');
+        document.getElementById('re-bill-panel-body').innerHTML =
+            '<div class="re-bill-panel-empty">点击订单卡片右侧「账单」按钮<br>在此查看扣款信息</div>';
 
         try {
             const url = 'https://backendproenv.aixzu.com/order/index?out_order_no=&sjmm_out_order_no=&name=&mobile=&id_card='
@@ -7730,11 +7933,14 @@
                 return;
             }
 
+            const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
+
             orders.forEach(order => {
+                const isCurrent = order.orderNo === currentOrderNo;
                 const item = document.createElement('div');
-                item.className = 're-model-order-item';
+                item.className = 're-model-order-item' + (isCurrent ? ' re-model-order-current' : '');
                 item.innerHTML = '<div class="re-model-order-info">'
-                    + '<div class="re-model-order-name">订单号：' + order.orderNo + '</div>'
+                    + '<div class="re-model-order-name">订单号：' + order.orderNo + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
                     + '<div class="re-repeat-order-fields">'
                     + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
                     + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
@@ -7749,26 +7955,124 @@
             });
 
             listEl.querySelectorAll('button[data-order]').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', async function(e) {
                     e.stopPropagation();
                     const orderNo = this.getAttribute('data-order');
                     const type = this.getAttribute('data-type');
-                    let targetUrl;
                     if (type === 'auth') {
-                        targetUrl = 'https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name=&out_order_no='
+                        const targetUrl = 'https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name=&out_order_no='
                             + encodeURIComponent(orderNo)
                             + '&mobile=&store_name=&sub_store_name=&salesman=&auth_no=&min_create_time=&max_create_time=';
+                        window.open(targetUrl, '_blank');
                     } else {
-                        targetUrl = 'https://backendproenv.aixzu.com/bill/index?out_order_no='
-                            + encodeURIComponent(orderNo)
-                            + '&mobile=&start_time=&end_time=&create_time=&pay_status=-1';
+                        // 账单：抓取扣款信息展示在弹窗右侧账单详情面板
+                        await showBillPanel(orderNo, this);
                     }
-                    window.open(targetUrl, '_blank');
                 });
             });
         } catch (e) {
             if (titleEl) titleEl.textContent = '历史订单查询失败';
             listEl.innerHTML = '<div class="re-model-order-empty">查询失败，请重试</div>';
+        }
+    }
+
+    // 抓取账单页【扣款信息】列，结构化逐行展示在弹窗右侧账单详情面板；按订单号缓存
+    const billCache = {};
+
+    function billOverdueDays(expected, actual) {
+        if (!expected || !actual) return null;
+        const p = s => { const m = s.match(/(\d{4})-(\d{2})-(\d{2})/); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : null; };
+        const e = p(expected), a = p(actual);
+        if (e === null || a === null) return null;
+        return Math.round((a - e) / 86400000);
+    }
+
+    async function showBillPanel(orderNo, btn) {
+        const bodyEl = document.getElementById('re-bill-panel-body');
+        if (!bodyEl) return;
+
+        const billUrl = 'https://backendproenv.aixzu.com/bill/index?out_order_no='
+            + encodeURIComponent(orderNo)
+            + '&mobile=&start_time=&end_time=&create_time=&pay_status=-1';
+
+        function render(items) {
+            if (!items) {
+                bodyEl.innerHTML = '<div class="re-bill-panel-empty">账单信息获取失败<br>请重试</div>';
+                return;
+            }
+            if (!items.length) {
+                bodyEl.innerHTML = '<div class="re-bill-order-no">订单号：' + orderNo + '</div>'
+                    + '<div class="re-bill-panel-empty">无账单记录</div>';
+                return;
+            }
+            let inner = '<div class="re-bill-order-no">订单号：' + orderNo + '</div>';
+            items.forEach(item => {
+                const statusCls = item.status === '未支付' ? 're-bill-warn' : 're-bill-paid';
+                const od = billOverdueDays(item.expected, item.actual);
+                let odHtml;
+                if (od === null) odHtml = '—';
+                else if (od > 0) odHtml = '<span class="re-bill-warn">' + od + '天</span>';
+                else odHtml = '0天';
+                inner += '<div class="re-bill-item">'
+                    + '<div class="re-bill-item-head"><span class="re-bill-period">' + (item.period || '账单') + '</span><span class="' + statusCls + '">[' + item.status + ']</span></div>'
+                    + '<div class="re-bill-line">预计扣款日：' + (item.expected || '—') + '</div>'
+                    + '<div class="re-bill-line">实际扣款日：' + (item.actual || '—') + '</div>'
+                    + '<div class="re-bill-line">账单金额：' + (item.amount || '—') + '</div>'
+                    + '<div class="re-bill-line">实付金额：' + (item.paid || '—') + '</div>'
+                    + '<div class="re-bill-line">扣款次数：' + (item.attempts || '0') + '</div>'
+                    + '<div class="re-bill-line">逾期天数：' + odHtml + '</div>'
+                    + '</div>';
+            });
+            inner += '<div class="re-bill-jump">点击跳转 查看原账单</div>';
+            bodyEl.innerHTML = inner;
+            bodyEl.querySelector('.re-bill-jump')?.addEventListener('click', function() {
+                window.open(billUrl, '_blank');
+            });
+        }
+
+        if (billCache[orderNo]) {
+            render(billCache[orderNo]);
+            return;
+        }
+
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '查询中...';
+        bodyEl.innerHTML = '<div class="re-bill-loading">账单查询中...</div>';
+
+        try {
+            const resp = await fetch(billUrl, { credentials: 'include' });
+            const html = await resp.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const rows = doc.querySelectorAll('#table tbody tr');
+
+            const get = (text, re) => { const m = text.match(re); return m ? m[1].trim() : ''; };
+            const items = [];
+            rows.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length < 9) return;
+                const period = (tds[3]?.textContent || '').replace(/\s+/g, ' ').trim();
+                const billInfo = (tds[7]?.textContent || '').replace(/\s+/g, ' ').trim();
+                const status = (tds[8]?.textContent || '').trim();
+                if (!billInfo) return;
+                items.push({
+                    period: period,
+                    status: status,
+                    expected: get(billInfo, /预计扣款日[：:]\s*([\d\-:.\s]*\d)/),
+                    actual: get(billInfo, /实际扣款日[：:]\s*([\d\-:.\s]*\d)/),
+                    amount: get(billInfo, /账单金额[：:]\s*([\d.,]+\s*元?)/),
+                    paid: get(billInfo, /实付金额[：:]\s*([\d.,]+\s*元?)/),
+                    attempts: get(billInfo, /扣款次数[：:]\s*(\d+)/)
+                });
+            });
+
+            billCache[orderNo] = items;
+            render(items);
+        } catch (e) {
+            render(null);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
         }
     }
 
@@ -7911,7 +8215,7 @@
             // 标题右侧胶囊：禁止AppStore / 超龄客户 / 复购客户（复购可点击查询历史订单）
             if (expandBadgeEl) {
                 let badges = '';
-                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore">禁止AppStore</span>';
+                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '" title="点击开启/关闭禁止AppStore备注">禁止AppStore</span>';
                 // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
                 const headerText = panel.querySelector('.re-header-data')?.textContent || '';
                 const orderCountMatch = headerText.match(/客户办单[：:](\d+)次/);
@@ -7927,8 +8231,20 @@
                 expandBadgeEl.onclick = function(e) {
                     if (e.target.classList.contains('re-repeat-customer')) {
                         queryRepeatOrders();
+                    } else if (e.target.classList.contains('re-restrict-appstore')) {
+                        setRestrictAppStoreEnabled(!restrictAppStoreEnabled);
+                        showSuccessToast(restrictAppStoreEnabled ? '禁止AppStore备注：已开启' : '禁止AppStore备注：已关闭');
                     }
                 };
+
+                // 检测到禁止AppStore机型且开关为关闭态时提醒（同一客户同机型只提醒一次）
+                if (isRestrictAppStoreModel() && !restrictAppStoreEnabled) {
+                    const toastKey = (cachedName || '') + '|' + (cachedProductModel || '');
+                    if (toastKey !== lastRestrictToastKey) {
+                        lastRestrictToastKey = toastKey;
+                        showErrorToast('此订单检测为 Appstore 机型，请注意点击胶囊开启相关备注');
+                    }
+                }
             }
 
             updatePricePlaceholder();
@@ -8861,7 +9177,7 @@
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
                 // 默认写入并选中拓展类型（17Pro/17ProMax 二手机型特殊处理）
-                const defaultExpandType = isRestrictAppStoreModel() ? '禁止AppStore+限制ID：' : '方案二：';
+                const defaultExpandType = isRestrictAppStoreActive() ? '禁止AppStore+限制ID：' : '方案二：';
                 if (!Array.from(rentExpandSelect.options).some(o => o.value === defaultExpandType)) {
                     const opt = document.createElement('option');
                     opt.textContent = defaultExpandType;
@@ -8933,7 +9249,7 @@
                 previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 审核价格</span>';
             } else {
                 let previewText = '';
-                const mainLabel = isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：';
+                const mainLabel = isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：';
                 if (cachedName) {
                     previewText = cachedName + '：' + mainLabel + auditText + ' ' + orderResult;
                 } else {
@@ -9094,7 +9410,7 @@
 
         const auditPrice = getCachedElement('auditResult', '#re-audit-result')?.value || '';
         const auditResult = getCachedElement('orderResult', '#re-order-result')?.value || '';
-        if (auditPrice) parts.push((isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+        if (auditPrice) parts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
 
         const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
         if (expandChecked) {
@@ -10017,7 +10333,7 @@
                     const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
                     const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
                     if (auditPrice && auditResult) {
-                        remarkParts.push((isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+                        remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
                     }
 
                     // 添加拓展业务
@@ -10626,7 +10942,7 @@
         const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
         const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
         if (auditPrice && auditResult) {
-            remarkParts.push((isRestrictAppStoreModel() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+            remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
         }
 
         // 添加拓展业务
