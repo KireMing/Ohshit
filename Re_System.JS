@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      2.5.0
+// @version      3.0.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V2.5.0</span>
+                    <span class="re-panel-version">V3.0.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -1183,6 +1183,7 @@
 
         .re-restrict-appstore {
             display: inline-block;
+            position: relative;
             background: transparent;
             color: #9ca3af;
             border: 1px solid #d1d5db;
@@ -1209,7 +1210,47 @@
         }
 
         .re-restrict-appstore.active:hover {
-            opacity: 0.85;
+            background: #b91c1c;
+            border-color: #b91c1c;
+        }
+
+        .re-restrict-tip {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            width: 250px;
+            padding: 10px 12px;
+            background: #1f2937;
+            color: #f9fafb;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.7;
+            text-align: left;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            z-index: 10001;
+            pointer-events: none;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+        }
+
+        .re-restrict-tip::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 14px;
+            width: 8px;
+            height: 8px;
+            background: #1f2937;
+            transform: rotate(45deg);
+        }
+
+        .re-restrict-appstore:hover .re-restrict-tip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         #re-expand-business-title {
@@ -4084,6 +4125,38 @@
 
         .re-bill-jump:hover {
             color: #1d4ed8;
+        }
+
+        .re-same-model-badge {
+            display: inline-block;
+            background: #dc2626;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .re-serial-clickable {
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .re-serial-clickable:hover {
+            opacity: 0.75;
+        }
+
+        .re-bill-overdue-click {
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .re-bill-overdue-click:hover {
+            opacity: 0.75;
         }
 
         .re-bill-period {
@@ -7683,7 +7756,8 @@
     }
 
     function isRestrictAppStoreModel() {
-        return /17\s*pro/i.test(cachedProductModel) && cachedProductModel.includes('二手');
+        // 17 Pro / 17 Pro Max 全系（新机 + 二手）
+        return /17\s*pro/i.test(cachedProductModel);
     }
 
     // 禁止AppStore手动开关（全局记住）：关闭=方案一/方案二，开启=禁止AppStore/禁止AppStore+限制ID
@@ -7933,7 +8007,33 @@
                 return;
             }
 
+            // 机型精确匹配：提取核心机型标识（数字+系列后缀，如 16pro/15promax）全等比对，不看是否二手
+            const extractModelToken = s => {
+                const n = (s || '').toLowerCase().replace(/\s+/g, '').replace(/（[^）]*）|\([^)]*\)/g, '');
+                const m = n.match(/(\d{1,2})(promax|pro|plus|mini|ultra)/);
+                if (m) return m[1] + m[2];
+                const d = n.match(/(\d{1,2})/);
+                return d ? d[1] : n;
+            };
+            // 双源比对：本订单机型（cachedProductModel）+ 主面板用户机型（getCurrentModelText 实时读）
+            const userModelText = getCurrentModelText().replace(/^用户机型[：:]\s*/i, '').trim();
+            const matchTokens = [...new Set(
+                [extractModelToken(cachedProductModel), extractModelToken(userModelText)].filter(t => t)
+            )];
             const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
+            const matchedOrders = orders.filter(o => {
+                if (o.orderNo === currentOrderNo) return false;  // 跳过当前单，不自己比自己
+                const t = extractModelToken(o.model);
+                return t && matchTokens.includes(t);
+            });
+            if (matchedOrders.length) {
+                const badge = document.createElement('span');
+                badge.className = 're-same-model-badge';
+                const orderNos = matchedOrders.map(o => o.orderNo).join('、');
+                badge.textContent = '存在相同机型请注意 {' + orderNos + '}';
+                badge.title = '相同机型订单：' + orderNos;
+                titleEl.appendChild(badge);
+            }
 
             orders.forEach(order => {
                 const isCurrent = order.orderNo === currentOrderNo;
@@ -7945,7 +8045,7 @@
                     + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
                     + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
                     + '<div>店铺：<span class="re-repeat-strong">' + (order.shop || '—') + '</span></div>'
-                    + '<div>序列号：<span class="re-repeat-serial">' + (order.serial || '—') + '</span></div>'
+                    + '<div>序列号：<span class="re-repeat-serial re-serial-clickable">' + (order.serial || '—') + '</span></div>'
                     + '</div></div>'
                     + '<div class="re-repeat-order-actions">'
                     + '<button class="re-btn-sm re-btn-sm-primary" data-order="' + order.orderNo + '" data-type="auth">面审</button>'
@@ -7968,6 +8068,25 @@
                         // 账单：抓取扣款信息展示在弹窗右侧账单详情面板
                         await showBillPanel(orderNo, this);
                     }
+                });
+            });
+
+            // 序列号点击 → 追加特殊备注：{序列号} 此序列号不办理
+            listEl.querySelectorAll('.re-serial-clickable').forEach(el => {
+                const serial = el.textContent.trim();
+                if (!serial || serial === '—') return;
+                el.title = '点击追加到特殊备注';
+                el.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const input = document.getElementById('re-special-remark');
+                    if (!input) return;
+                    const entry = serial + ' 此序列号不办理';
+                    if (input.value.includes(entry)) {
+                        showSuccessToast('该序列号已在特殊备注中');
+                        return;
+                    }
+                    input.value = input.value ? input.value.replace(/;\s*$/, '') + ';' + entry : entry;
+                    showSuccessToast('已追加到特殊备注：' + entry);
                 });
             });
         } catch (e) {
@@ -8011,7 +8130,14 @@
                 const od = billOverdueDays(item.expected, item.actual);
                 let odHtml;
                 if (od === null) odHtml = '—';
-                else if (od > 0) odHtml = '<span class="re-bill-warn">' + od + '天</span>';
+                else if (od > 0) {
+                    // 逾期天数可点击 → 追加其他备注：{订单号} {第几期} {逾期几天}
+                    const periodLabel = item.period && /^\d+\s*\/\s*\d+$/.test(item.period)
+                        ? '第' + item.period.split('/')[0].trim() + '期'
+                        : (item.period || '会员期');
+                    const entry = orderNo + ' ' + periodLabel + ' 逾期' + od + '天';
+                    odHtml = '<span class="re-bill-overdue-click" data-entry="' + entry.replace(/"/g, '&quot;') + '" title="点击追加到其他备注">' + od + '天</span>';
+                }
                 else odHtml = '0天';
                 inner += '<div class="re-bill-item">'
                     + '<div class="re-bill-item-head"><span class="re-bill-period">' + (item.period || '账单') + '</span><span class="' + statusCls + '">[' + item.status + ']</span></div>'
@@ -8027,6 +8153,19 @@
             bodyEl.innerHTML = inner;
             bodyEl.querySelector('.re-bill-jump')?.addEventListener('click', function() {
                 window.open(billUrl, '_blank');
+            });
+            bodyEl.querySelectorAll('.re-bill-overdue-click').forEach(el => {
+                el.addEventListener('click', function() {
+                    const entry = this.getAttribute('data-entry');
+                    const input = document.getElementById('re-other-remark');
+                    if (!input || !entry) return;
+                    if (input.value.includes(entry)) {
+                        showSuccessToast('该逾期记录已在其他备注中');
+                        return;
+                    }
+                    input.value = input.value ? input.value.replace(/;\s*$/, '') + ';' + entry : entry;
+                    showSuccessToast('已追加到其他备注：' + entry);
+                });
             });
         }
 
@@ -8215,7 +8354,7 @@
             // 标题右侧胶囊：禁止AppStore / 超龄客户 / 复购客户（复购可点击查询历史订单）
             if (expandBadgeEl) {
                 let badges = '';
-                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '" title="点击开启/关闭禁止AppStore备注">禁止AppStore</span>';
+                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？</span></span>';
                 // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
                 const headerText = panel.querySelector('.re-header-data')?.textContent || '';
                 const orderCountMatch = headerText.match(/客户办单[：:](\d+)次/);
@@ -10461,7 +10600,7 @@
             if (isNoLockDragging) {
                 isNoLockDragging = false;
                 noLockPanel.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
-                
+
                 // 保存拖动后的位置
                 const currentLeft = noLockPanel.style.left;
                 const currentTop = noLockPanel.style.top;
@@ -10496,7 +10635,7 @@
     // 计算和更新无锁判断
     function calculateNoLock() {
         const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        
+
         // 读取四项信用工具额度
         const huabei = parseCredit(flowInputs[3]?.value);
         const fenfu = parseCredit(flowInputs[4]?.value);
@@ -10533,7 +10672,7 @@
 
         // 计算结果
         const statusEl = document.getElementById('re-nl-status');
-        
+
         if (phoneCost === 0) {
             document.getElementById('re-nl-ratio').textContent = '—';
             document.getElementById('re-nl-min').textContent = '成本未知';
@@ -10565,19 +10704,19 @@
     function updatePreviews(satisfied, fenfu, huabei, douyin, meituan, v4Risk, phoneCost, totalCredit) {
         // 获取客户姓名
         const customerName = cachedName || document.getElementById('re-contact-name')?.textContent || '【无参数】';
-        
+
         // 获取客服姓名
         const staffNameEl = document.getElementById('re-staff-name');
         const staffName = staffNameEl?.textContent || '未知客服';
-        
+
         // 获取订单号
         const orderNoEl = document.getElementById('re-order-no');
         const orderNo = orderNoEl?.textContent || '【无参数】';
-        
+
         // 获取机型
         const productInfoEl = document.getElementById('re-product-info');
         const productInfo = productInfoEl?.textContent || 'iPhone 15 Pro Max 256GB';
-        
+
         // 获取套餐信息
         const packageInfoEl = document.getElementById('re-package-info');
         const packageInfo = packageInfoEl?.textContent || '12期免息套餐';
@@ -10709,7 +10848,7 @@
                 onload: function(response) {
                     submitRemarkBtn.disabled = false;
                     submitRemarkBtn.style.opacity = '1';
-                    
+
                     try {
                         const result = JSON.parse(response.responseText);
                         if (result.status) {
