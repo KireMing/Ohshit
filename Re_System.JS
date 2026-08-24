@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.1.0
+// @version      3.2.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V3.0.0</span>
+                    <span class="re-panel-version">V3.2.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -7760,6 +7760,23 @@
         return /17\s*pro/i.test(cachedProductModel);
     }
 
+    // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
+    function extractModelToken(s) {
+        const n = (s || '').toLowerCase().replace(/\s+/g, '').replace(/（[^）]*）|\([^)]*\)/g, '');
+        const m = n.match(/(\d{1,2})(promax|pro|plus|mini|ultra)/);
+        if (m) return m[1] + m[2];
+        const d = n.match(/(\d{1,2})/);
+        return d ? d[1] : n;
+    }
+
+    // 用户机型 vs 本单机型相同（客户疑似办理相同设备）
+    function isSameDeviceModel() {
+        const userModelText = getCurrentModelText().replace(/^用户机型[：:]\s*/i, '').trim();
+        const userToken = extractModelToken(userModelText);
+        const orderToken = extractModelToken(cachedProductModel);
+        return !!(userToken && orderToken && userToken === orderToken);
+    }
+
     // 禁止AppStore手动开关（全局记住）：关闭=方案一/方案二，开启=禁止AppStore/禁止AppStore+限制ID
     let restrictAppStoreEnabled = GM_getValue('re-restrict-appstore-enabled', false);
     let lastRestrictToastKey = '';
@@ -8007,36 +8024,24 @@
                 return;
             }
 
-            // 机型精确匹配：提取核心机型标识（数字+系列后缀，如 16pro/15promax）全等比对，不看是否二手
-            const extractModelToken = s => {
-                const n = (s || '').toLowerCase().replace(/\s+/g, '').replace(/（[^）]*）|\([^)]*\)/g, '');
-                const m = n.match(/(\d{1,2})(promax|pro|plus|mini|ultra)/);
-                if (m) return m[1] + m[2];
-                const d = n.match(/(\d{1,2})/);
-                return d ? d[1] : n;
-            };
-            // 双源比对：本订单机型（cachedProductModel）+ 主面板用户机型（getCurrentModelText 实时读）
-            const userModelText = getCurrentModelText().replace(/^用户机型[：:]\s*/i, '').trim();
-            const matchTokens = [...new Set(
-                [extractModelToken(cachedProductModel), extractModelToken(userModelText)].filter(t => t)
-            )];
-            const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
-            const matchedOrders = orders.filter(o => {
-                if (o.orderNo === currentOrderNo) return false;  // 跳过当前单，不自己比自己
-                const t = extractModelToken(o.model);
-                return t && matchTokens.includes(t);
-            });
-            if (matchedOrders.length) {
+            // 用户机型 vs 下单机型：相同 → 弹窗警示 + 标红历史订单相同机型的序列号（比对逻辑同主面板"设备相同"胶囊）
+            const orderToken = extractModelToken(cachedProductModel);
+            const sameDeviceSuspect = isSameDeviceModel();
+
+            if (sameDeviceSuspect) {
                 const badge = document.createElement('span');
                 badge.className = 're-same-model-badge';
-                const orderNos = matchedOrders.map(o => o.orderNo).join('、');
-                badge.textContent = '存在相同机型请注意 {' + orderNos + '}';
-                badge.title = '相同机型订单：' + orderNos;
+                badge.textContent = '客户疑似办理相同设备';
+                badge.title = '用户机型与本单机型相同：' + orderToken;
                 titleEl.appendChild(badge);
             }
 
+            const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
+
             orders.forEach(order => {
                 const isCurrent = order.orderNo === currentOrderNo;
+                const highlightSerial = sameDeviceSuspect && !isCurrent
+                    && extractModelToken(order.model) === orderToken;
                 const item = document.createElement('div');
                 item.className = 're-model-order-item' + (isCurrent ? ' re-model-order-current' : '');
                 item.innerHTML = '<div class="re-model-order-info">'
@@ -8045,7 +8050,7 @@
                     + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
                     + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
                     + '<div>店铺：<span class="re-repeat-strong">' + (order.shop || '—') + '</span></div>'
-                    + '<div>序列号：<span class="re-repeat-serial re-serial-clickable">' + (order.serial || '—') + '</span></div>'
+                    + '<div>序列号：<span class="re-serial-clickable' + (highlightSerial ? ' re-repeat-serial' : '') + '">' + (order.serial || '—') + '</span></div>'
                     + '</div></div>'
                     + '<div class="re-repeat-order-actions">'
                     + '<button class="re-btn-sm re-btn-sm-primary" data-order="' + order.orderNo + '" data-type="auth">面审</button>'
@@ -8354,7 +8359,8 @@
             // 标题右侧胶囊：禁止AppStore / 超龄客户 / 复购客户（复购可点击查询历史订单）
             if (expandBadgeEl) {
                 let badges = '';
-                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？</span></span>';
+                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">对客户：您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？ 【对商家：您现在办理的是17pro、17promax新机，全新机拆封后退单是需要支付折损费的，您这边需要跟客户沟通好是否能接受限制，若接受限制再办理，若不接受请勿拆封！】</span></span>';
+                if (isSameDeviceModel()) badges += '<span class="re-same-model-badge" title="用户机型与本单机型相同，客户疑似办理相同设备">设备相同</span>';
                 // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
                 const headerText = panel.querySelector('.re-header-data')?.textContent || '';
                 const orderCountMatch = headerText.match(/客户办单[：:](\d+)次/);
