@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.2.0
+// @version      3.3.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V3.2.0</span>
+                    <span class="re-panel-version">V3.2.0 Fix</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -7309,13 +7309,7 @@
             }
             fetchLinkedPageData();
             if (autoContactQueryEnabled) {
-                setTimeout(() => {
-                    const contactQueryBtn = document.getElementById('re-contact-query');
-                    const phoneDuration = document.getElementById('re-phone-duration');
-                    if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
-                        contactQueryBtn.click();
-                    }
-                }, 500);
+                scheduleAutoContactQuery();
             }
         } else {
             panel.classList.add('re-panel-closing');
@@ -7369,13 +7363,7 @@
                         }
                         fetchLinkedPageData();
                         if (autoContactQueryEnabled) {
-                            setTimeout(() => {
-                                const contactQueryBtn = document.getElementById('re-contact-query');
-                                const phoneDuration = document.getElementById('re-phone-duration');
-                                if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
-                                    contactQueryBtn.click();
-                                }
-                            }, 500);
+                            scheduleAutoContactQuery();
                         }
                     }
                 }, 500);
@@ -7401,13 +7389,7 @@
                     }
                     fetchLinkedPageData();
                     if (autoContactQueryEnabled) {
-                        setTimeout(() => {
-                            const contactQueryBtn = document.getElementById('re-contact-query');
-                            const phoneDuration = document.getElementById('re-phone-duration');
-                            if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
-                                contactQueryBtn.click();
-                            }
-                        }, 500);
+                        scheduleAutoContactQuery();
                     }
                 }
             }
@@ -7440,13 +7422,7 @@
                 }
                 fetchLinkedPageData();
                 if (autoContactQueryEnabled) {
-                    setTimeout(() => {
-                        const contactQueryBtn = document.getElementById('re-contact-query');
-                        const phoneDuration = document.getElementById('re-phone-duration');
-                        if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
-                            contactQueryBtn.click();
-                        }
-                    }, 500);
+                    scheduleAutoContactQuery();
                 }
             }
         });
@@ -7476,13 +7452,7 @@
                     }
                     fetchLinkedPageData();
                     if (autoContactQueryEnabled) {
-                        setTimeout(() => {
-                            const contactQueryBtn = document.getElementById('re-contact-query');
-                            const phoneDuration = document.getElementById('re-phone-duration');
-                            if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
-                                contactQueryBtn.click();
-                            }
-                        }, 500);
+                        scheduleAutoContactQuery();
                     }
                 }
             }
@@ -8769,7 +8739,37 @@
         });
     }
 
+    // 自动查询联系人：轮询等待手机号加载完成（有效11位号码）再触发查询，最长等15秒
+    // 避免链接页数据未返回时拿"【无参数】"占位或旧单号码误查、误弹"未获取到使用时长"警告
+    function scheduleAutoContactQuery() {
+        let waited = 0;
+        const timer = setInterval(() => {
+            waited += 400;
+            const contactQueryBtn = document.getElementById('re-contact-query');
+            const phoneDuration = document.getElementById('re-phone-duration');
+            const contactPhoneEl = document.getElementById('re-contact-phone');
+            const phone = contactPhoneEl ? contactPhoneEl.textContent.trim() : '';
+            if (/^1\d{10}$/.test(phone)) {
+                if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
+                    contactQueryBtn.click();
+                }
+                clearInterval(timer);
+                return;
+            }
+            if (waited >= 15000) clearInterval(timer);
+        }, 400);
+    }
+
     function fetchLinkedPageData() {
+        // 重置联系人区：清掉上一单残留的手机号/使用时长，避免自动查询误用旧值
+        const contactPhoneReset = document.getElementById('re-contact-phone');
+        if (contactPhoneReset) {
+            contactPhoneReset.textContent = '【无参数】';
+            contactPhoneReset.classList.remove('re-phone-alert');
+        }
+        const phoneDurationReset = document.getElementById('re-phone-duration');
+        if (phoneDurationReset) phoneDurationReset.textContent = '';
+
         try {
             const linkXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr/td[1]/a[1]';
             const linkEl = getElementByXPath(linkXPath);
