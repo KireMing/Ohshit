@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.0.0
+// @version      3.1.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -8136,7 +8136,7 @@
                         ? '第' + item.period.split('/')[0].trim() + '期'
                         : (item.period || '会员期');
                     const entry = orderNo + ' ' + periodLabel + ' 逾期' + od + '天';
-                    odHtml = '<span class="re-bill-overdue-click" data-entry="' + entry.replace(/"/g, '&quot;') + '" title="点击追加到其他备注">' + od + '天</span>';
+                    odHtml = '<span class="re-bill-warn re-bill-overdue-click" data-entry="' + entry.replace(/"/g, '&quot;') + '" title="点击追加到其他备注">' + od + '天</span>';
                 }
                 else odHtml = '0天';
                 inner += '<div class="re-bill-item">'
@@ -10600,7 +10600,7 @@
             if (isNoLockDragging) {
                 isNoLockDragging = false;
                 noLockPanel.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
-
+                
                 // 保存拖动后的位置
                 const currentLeft = noLockPanel.style.left;
                 const currentTop = noLockPanel.style.top;
@@ -10635,7 +10635,7 @@
     // 计算和更新无锁判断
     function calculateNoLock() {
         const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-
+        
         // 读取四项信用工具额度
         const huabei = parseCredit(flowInputs[3]?.value);
         const fenfu = parseCredit(flowInputs[4]?.value);
@@ -10672,7 +10672,7 @@
 
         // 计算结果
         const statusEl = document.getElementById('re-nl-status');
-
+        
         if (phoneCost === 0) {
             document.getElementById('re-nl-ratio').textContent = '—';
             document.getElementById('re-nl-min').textContent = '成本未知';
@@ -10704,19 +10704,19 @@
     function updatePreviews(satisfied, fenfu, huabei, douyin, meituan, v4Risk, phoneCost, totalCredit) {
         // 获取客户姓名
         const customerName = cachedName || document.getElementById('re-contact-name')?.textContent || '【无参数】';
-
+        
         // 获取客服姓名
         const staffNameEl = document.getElementById('re-staff-name');
         const staffName = staffNameEl?.textContent || '未知客服';
-
+        
         // 获取订单号
         const orderNoEl = document.getElementById('re-order-no');
         const orderNo = orderNoEl?.textContent || '【无参数】';
-
+        
         // 获取机型
         const productInfoEl = document.getElementById('re-product-info');
         const productInfo = productInfoEl?.textContent || 'iPhone 15 Pro Max 256GB';
-
+        
         // 获取套餐信息
         const packageInfoEl = document.getElementById('re-package-info');
         const packageInfo = packageInfoEl?.textContent || '12期免息套餐';
@@ -10848,7 +10848,7 @@
                 onload: function(response) {
                     submitRemarkBtn.disabled = false;
                     submitRemarkBtn.style.opacity = '1';
-
+                    
                     try {
                         const result = JSON.parse(response.responseText);
                         if (result.status) {
