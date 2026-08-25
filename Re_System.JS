@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.3.0
+// @version      3.4.0
 // @description  一个素雅的系统管理面板，包含左中右三个板块
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -129,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V3.2.0 Fix</span>
+                    <span class="re-panel-version">V3.4.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -7994,24 +7994,46 @@
                 return;
             }
 
-            // 用户机型 vs 下单机型：相同 → 弹窗警示 + 标红历史订单相同机型的序列号（比对逻辑同主面板"设备相同"胶囊）
+            // 场景①：用户机型 vs 下单机型（订单加载时已比对，主面板"设备相同"胶囊）
+            // 场景②：本单机型 vs 历史订单机型（点复购客户查询后比对）
+            // 任一命中 → 弹窗警示 + 匹配序列号标红；②命中 → 主面板补显"历史同机型"胶囊
             const orderToken = extractModelToken(cachedProductModel);
             const sameDeviceSuspect = isSameDeviceModel();
+            const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
+            const historyMatched = orders.filter(o =>
+                o.orderNo !== currentOrderNo
+                && orderToken && extractModelToken(o.model) === orderToken
+            );
+            // 主面板补显"历史同机型"胶囊（场景②命中时；动态追加到拓展业务胶囊区，订单切换时随胶囊区重建消失）
+            if (historyMatched.length) {
+                const expandBadgeEl = document.getElementById('re-expand-restrict-badge');
+                if (expandBadgeEl && !expandBadgeEl.querySelector('.re-history-same-model')) {
+                    const span = document.createElement('span');
+                    span.className = 're-same-model-badge re-history-same-model';
+                    span.title = '本单机型与历史订单机型相同：' + historyMatched.map(o => o.orderNo).join('、');
+                    span.textContent = '历史同机型';
+                    expandBadgeEl.appendChild(span);
+                    expandBadgeEl.style.display = 'inline-flex';
+                }
+            }
 
-            if (sameDeviceSuspect) {
+            if (sameDeviceSuspect || historyMatched.length) {
                 const badge = document.createElement('span');
                 badge.className = 're-same-model-badge';
-                badge.textContent = '客户疑似办理相同设备';
-                badge.title = '用户机型与本单机型相同：' + orderToken;
+                const parts = [];
+                if (sameDeviceSuspect) parts.push('用户机型与本单机型相同');
+                if (historyMatched.length) parts.push('历史订单存在相同机型：' + historyMatched.map(o => o.orderNo).join('、'));
+                badge.textContent = sameDeviceSuspect && historyMatched.length
+                    ? '客户疑似办理相同设备'
+                    : (sameDeviceSuspect ? '客户疑似办理相同设备' : '历史订单存在相同机型');
+                badge.title = parts.join('；');
                 titleEl.appendChild(badge);
             }
 
-            const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
-
             orders.forEach(order => {
                 const isCurrent = order.orderNo === currentOrderNo;
-                const highlightSerial = sameDeviceSuspect && !isCurrent
-                    && extractModelToken(order.model) === orderToken;
+                const highlightSerial = !isCurrent
+                    && orderToken && extractModelToken(order.model) === orderToken;
                 const item = document.createElement('div');
                 item.className = 're-model-order-item' + (isCurrent ? ' re-model-order-current' : '');
                 item.innerHTML = '<div class="re-model-order-info">'
