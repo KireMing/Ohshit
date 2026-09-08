@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.4.0
-// @description  一个素雅的系统管理面板，包含左中右三个板块
+// @version      3.7.0
+// @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
 // @match        https://backendproenv.aixzu.com/app-pre-auth-order/index*
@@ -108,8 +108,7 @@
             autoRefreshKey: 're-auto-refresh-enabled',
             lowPerfKey: 're-low-perf-enabled',
             restDaysKey: 're-rest-days',
-            editedDaysKey: 're-edited-days',
-            riskPanelEnabledKey: 're-risk-panel-enabled'
+            editedDaysKey: 're-edited-days'
         },
         DEFAULTS: {
             bgColor: '#e8eaed',
@@ -129,29 +128,11 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V3.4.0</span>
+                    <span class="re-panel-version">V3.7.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
             <div class="re-panel-resize-handle"></div>
-            <div class="re-risk-panel" id="re-risk-panel">
-                <div class="re-risk-panel-header">
-                    <div class="re-risk-panel-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        <span>风险异常</span>
-                        <span class="re-risk-count" id="re-risk-count">(0)</span>
-                    </div>
-                    <button class="re-risk-panel-close" id="re-risk-panel-close">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                </div>
-                <div class="re-risk-panel-content" id="re-risk-panel-content">
-                    <div class="re-risk-empty">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                        <span>所有检测项正常</span>
-                    </div>
-                </div>
-            </div>
             <div class="re-drag-ghost">
                 <span class="re-drag-ghost-text">移动中...</span>
                 <button class="re-drag-cancel" id="re-drag-cancel-btn">取消移动</button>
@@ -159,76 +140,68 @@
             <div class="re-no-lock-panel" id="re-no-lock-panel">
                 <div class="re-no-lock-header">
                     <span class="re-no-lock-title">无锁判断</span>
-                    <span class="re-no-lock-status" id="re-nl-status">待计算</span>
                     <button class="re-no-lock-close" id="re-no-lock-close">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </div>
                 <div class="re-no-lock-content">
-                    <div class="re-no-lock-grid">
-                        <div class="re-no-lock-item">
-                            <span class="re-no-lock-label">分付:</span>
-                            <span class="re-no-lock-value" id="re-nl-fenfu">未开通</span>
+                    <div class="re-nl-chips">
+                        <div class="re-nl-chip" id="re-nl-chip-fenfu">
+                            <span class="re-nl-chip-label">分付</span>
+                            <span class="re-nl-chip-val" id="re-nl-fenfu">未开通</span>
                         </div>
-                        <div class="re-no-lock-item">
-                            <span class="re-no-lock-label">花呗:</span>
-                            <span class="re-no-lock-value" id="re-nl-huabei">未开通</span>
+                        <div class="re-nl-chip" id="re-nl-chip-huabei">
+                            <span class="re-nl-chip-label">花呗</span>
+                            <span class="re-nl-chip-val" id="re-nl-huabei">未开通</span>
                         </div>
-                        <div class="re-no-lock-item">
-                            <span class="re-no-lock-label">抖音:</span>
-                            <span class="re-no-lock-value" id="re-nl-douyin">未开通</span>
+                        <div class="re-nl-chip re-nl-chip-dim" id="re-nl-chip-douyin">
+                            <span class="re-nl-chip-label">抖音 <em class="re-nl-tag">不计入</em></span>
+                            <span class="re-nl-chip-val" id="re-nl-douyin">未开通</span>
                         </div>
-                        <div class="re-no-lock-item">
-                            <span class="re-no-lock-label">美团:</span>
-                            <span class="re-no-lock-value" id="re-nl-meituan">未开通</span>
+                        <div class="re-nl-chip re-nl-chip-dim" id="re-nl-chip-meituan">
+                            <span class="re-nl-chip-label">美团 <em class="re-nl-tag">不计入</em></span>
+                            <span class="re-nl-chip-val" id="re-nl-meituan">未开通</span>
                         </div>
                     </div>
-                    <div class="re-no-lock-divider"></div>
-                    <div class="re-no-lock-row">
-                        <span class="re-no-lock-label">总计额度:</span>
-                        <span class="re-no-lock-value" id="re-nl-total">0.00</span>
+                    <div class="re-nl-params">
+                        <div class="re-nl-param">
+                            <span class="re-nl-param-label">总计额度</span>
+                            <span class="re-nl-param-val" id="re-nl-total">0.00</span>
+                        </div>
+                        <div class="re-nl-param">
+                            <span class="re-nl-param-label">V4 风控值</span>
+                            <span class="re-nl-param-val" id="re-nl-v4">0.00</span>
+                        </div>
+                        <div class="re-nl-param re-nl-param-cost">
+                            <span class="re-nl-param-label">手机成本</span>
+                            <div class="re-nl-cost-row">
+                                <input type="text" class="re-no-lock-input" id="re-nl-cost-input" placeholder="请输入成本">
+                                <button class="re-no-lock-recalc" id="re-nl-recalc">重算</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="re-no-lock-row">
-                        <span class="re-no-lock-label">有锁结果:</span>
-                        <span class="re-no-lock-value" id="re-nl-v4">0.00</span>
+                    <div class="re-no-lock-result">
+                        <div class="re-no-lock-status" id="re-nl-status">待计算</div>
+                        <div class="re-no-lock-result-sub">额度比例 <span id="re-nl-ratio">0.00%</span> ｜ 无锁最低 <span id="re-nl-min">0.00</span></div>
                     </div>
-                    <div class="re-no-lock-row re-no-lock-editable">
-                        <span class="re-no-lock-label">手机成本:</span>
-                        <input type="text" class="re-no-lock-input" id="re-nl-cost-input" placeholder="请输入成本">
-                        <button class="re-no-lock-recalc" id="re-nl-recalc">重算</button>
-                    </div>
-                    <div class="re-no-lock-divider"></div>
-                    <div class="re-no-lock-row">
-                        <span class="re-no-lock-label">额度比例:</span>
-                        <span class="re-no-lock-value" id="re-nl-ratio">0.00%</span>
-                    </div>
-                    <div class="re-no-lock-row">
-                        <span class="re-no-lock-label">无锁最低:</span>
-                        <span class="re-no-lock-value" id="re-nl-min">0.00</span>
-                    </div>
-                    <div class="re-no-lock-divider"></div>
                     <div class="re-no-lock-preview">
                         <div class="re-no-lock-preview-header">
-                            <div class="re-no-lock-preview-title">备注预览</div>
-                            <div class="re-no-lock-preview-actions">
-                                <button class="re-no-lock-action-btn" id="re-nl-submit-remark" title="提交客服备注">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                </button>
-                                <button class="re-no-lock-copy-btn" id="re-nl-copy-remark" title="复制">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                </button>
-                            </div>
+                            <span class="re-no-lock-preview-title">备注预览</span>
+                            <span class="re-no-lock-preview-actions">
+                                <button class="re-nl-pill re-nl-pill-primary" id="re-nl-submit-remark" title="提交客服备注">提交</button>
+                                <button class="re-nl-pill" id="re-nl-copy-remark" title="复制备注">复制</button>
+                            </span>
                         </div>
                         <textarea class="re-no-lock-preview-text" id="re-nl-preview-remark" readonly></textarea>
                     </div>
                     <div class="re-no-lock-preview">
                         <div class="re-no-lock-preview-header">
-                            <div class="re-no-lock-preview-title">登记Excel预览</div>
-                            <button class="re-no-lock-copy-btn" id="re-nl-copy-excel" title="复制">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                            </button>
+                            <span class="re-no-lock-preview-title">Excel 登记行</span>
+                            <span class="re-no-lock-preview-actions">
+                                <button class="re-nl-pill" id="re-nl-copy-excel" title="复制Excel行">复制</button>
+                            </span>
                         </div>
-                        <textarea class="re-no-lock-preview-text" id="re-nl-preview-excel" readonly></textarea>
+                        <textarea class="re-no-lock-preview-text re-no-lock-preview-excel" id="re-nl-preview-excel" readonly></textarea>
                     </div>
                 </div>
             </div>
@@ -302,16 +275,6 @@
                                                         <svg class="re-multi-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                             <polyline points="6 9 12 15 18 9"></polyline>
                                                         </svg>
-                                                    </div>
-                                                    <div class="re-multi-select-dropdown">
-                                                        <div class="re-multi-select-items"></div>
-                                                        <div class="re-multi-select-manage" id="re-work-proof-manage">
-                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                                <circle cx="12" cy="12" r="3"></circle>
-                                                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                                                            </svg>
-                                                            <span>管理选项</span>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </span>
@@ -613,19 +576,6 @@
                                                     <span class="re-switch-slider"></span>
                                                 </label>
                                             </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-red">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">风险评估</span>
-                                                    <span class="re-setting-desc">右侧显示风险异常汇总面板</span>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-risk-panel">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
-                                            </div>
                                             <div class="re-setting-card" id="re-setting-staff-name-card" style="cursor:pointer;">
                                                 <div class="re-setting-icon re-setting-icon-indigo">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -721,44 +671,51 @@
                         </div>
                         <div class="re-form-section" id="re-page-analysis" style="display: none;">
                             <div class="re-analysis-container">
+                                <div class="re-analysis-overview">
+                                    <div class="re-ov-card">
+                                        <div class="re-ov-value" id="re-stat-total">0</div>
+                                        <div class="re-ov-label" id="re-analysis-month-label">本月总量</div>
+                                        <div class="re-ov-delta" id="re-ov-total-delta" style="display:none;"></div>
+                                    </div>
+                                    <div class="re-ov-card">
+                                        <div class="re-ov-value" id="re-stat-daily-avg">0</div>
+                                        <div class="re-ov-label" id="re-avg-label">工作日日均</div>
+                                        <div class="re-ov-delta" id="re-ov-avg-delta" style="display:none;"></div>
+                                    </div>
+                                    <div class="re-ov-card re-stat-high">
+                                        <div class="re-ov-value" id="re-stat-max-orders">0</div>
+                                        <div class="re-ov-label" id="re-stat-max-date">最高</div>
+                                    </div>
+                                    <div class="re-ov-card re-stat-low">
+                                        <div class="re-ov-value" id="re-stat-min-orders">0</div>
+                                        <div class="re-ov-label" id="re-stat-min-date">最低</div>
+                                    </div>
+                                </div>
                                 <div class="re-analysis-section">
                                     <div class="re-analysis-header">
                                         <span class="re-analysis-title">订单趋势分析</span>
-                                        <span class="re-analysis-badge" id="re-analysis-month-label">当月</span>
+                                        <div class="re-range-tabs" id="re-analysis-range">
+                                            <button type="button" class="re-rtab" data-range="7d">近7天</button>
+                                            <button type="button" class="re-rtab" data-range="14d">近14天</button>
+                                            <button type="button" class="re-rtab on" data-range="month">本月</button>
+                                            <button type="button" class="re-rtab" data-range="lastmonth">上月</button>
+                                        </div>
                                     </div>
                                     <div class="re-chart-card">
                                         <canvas id="re-order-chart"></canvas>
                                         <div id="re-chart-tooltip" class="re-chart-tooltip" style="display: none;"></div>
-                                    </div>
-                                    <div class="re-analysis-stats">
-                                        <div class="re-stat-card">
-                                            <div class="re-stat-value" id="re-stat-total">0</div>
-                                            <div class="re-stat-label">总订单</div>
-                                        </div>
-                                        <div class="re-stat-card">
-                                            <div class="re-stat-value" id="re-stat-daily-avg">0</div>
-                                            <div class="re-stat-label">日均</div>
-                                        </div>
-                                        <div class="re-stat-card re-stat-high">
-                                            <div class="re-stat-value" id="re-stat-max-orders">0</div>
-                                            <div class="re-stat-label" id="re-stat-max-date">最高</div>
-                                        </div>
-                                        <div class="re-stat-card re-stat-low">
-                                            <div class="re-stat-value" id="re-stat-min-orders">0</div>
-                                            <div class="re-stat-label" id="re-stat-min-date">最低</div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="re-analysis-divider"></div>
                                 <div class="re-analysis-section">
                                     <div class="re-analysis-header">
                                         <span class="re-analysis-title">机型审核量分析</span>
-                                        <span class="re-analysis-badge">Top 5</span>
+                                        <div class="re-range-tabs" id="re-model-range">
+                                            <button type="button" class="re-rtab on" data-top="5">Top 5</button>
+                                            <button type="button" class="re-rtab" data-top="10">Top 10</button>
+                                        </div>
                                     </div>
-                                    <div class="re-chart-card">
-                                        <canvas id="re-model-chart"></canvas>
-                                        <div id="re-model-tooltip" class="re-chart-tooltip" style="display: none;"></div>
-                                    </div>
+                                    <div id="re-model-chart-wrap" class="re-model-chart-wrap"></div>
                                     <div class="re-model-legend" id="re-model-legend"></div>
                                 </div>
                             </div>
@@ -1568,19 +1525,17 @@
         }
 
         .re-history-day-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 12px;
-            flex-wrap: wrap;
         }
 
         .re-history-day-card {
-            flex: 1;
-            min-width: 200px;
-            max-width: calc(33.33% - 8px);
             background: rgba(255, 255, 255, 0.9);
             border-radius: 12px;
             border: 1px solid rgba(107, 114, 128, 0.15);
             overflow: hidden;
+            min-width: 0;
         }
 
         .re-history-day-header {
@@ -1660,49 +1615,51 @@
         }
 
         .re-history-day-more {
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: rgba(107, 114, 128, 0.1);
+            width: 100%;
+            margin-top: 2px;
+            padding: 5px 0;
+            border: 1px dashed rgba(107, 114, 128, 0.35);
+            background: transparent;
             color: #6b7280;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.12s ease;
         }
 
         .re-history-day-more:hover {
-            background: rgba(107, 114, 128, 0.2);
-            color: #374151;
-        }
-
-        .re-history-day-more svg {
-            width: 14px;
-            height: 14px;
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #3b82f6;
         }
 
         .re-history-day-collapse {
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: rgba(107, 114, 128, 0.1);
+            width: 100%;
+            margin-top: 2px;
+            padding: 5px 0;
+            border: 1px dashed rgba(107, 114, 128, 0.35);
+            background: transparent;
             color: #6b7280;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.12s ease;
         }
 
         .re-history-day-collapse:hover {
-            background: rgba(107, 114, 128, 0.2);
-            color: #374151;
-        }
-
-        .re-history-day-collapse svg {
-            width: 14px;
-            height: 14px;
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #3b82f6;
         }
 
         .re-history-day-content {
@@ -1725,11 +1682,16 @@
         }
 
         .re-history-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
             background: rgba(249, 250, 251, 0.8);
             border-radius: 8px;
-            padding: 10px 12px;
-            cursor: pointer;
+            padding: 5px 26px 5px 7px;
+            cursor: default;
             border: 1px solid transparent;
+            position: relative;
+            transition: background 0.12s ease, border-color 0.12s ease;
         }
 
         .re-history-item:hover {
@@ -1741,44 +1703,57 @@
             display: none;
         }
 
-        .re-history-item-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .re-history-item-index {
-            font-size: 11px;
-            font-weight: 600;
-            color: #9ca3af;
-            min-width: 18px;
-            text-align: center;
-        }
-
         .re-history-item-name {
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             color: #1f2937;
+            flex-shrink: 0;
+            max-width: 72px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .re-history-item-time {
+            font-size: 11px;
+            color: #6b7280;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+            flex-shrink: 0;
         }
 
         .re-history-item-model {
-            font-size: 12px;
+            font-size: 11px;
             color: #3b82f6;
             background: rgba(59, 130, 246, 0.1);
-            padding: 2px 8px;
+            padding: 1px 7px;
             border-radius: 4px;
+            max-width: 118px;
+            min-width: 0;
+            flex-shrink: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .re-history-item-shop {
-            font-size: 12px;
+            font-size: 11px;
             color: #6b7280;
             background: rgba(107, 114, 128, 0.1);
-            padding: 2px 8px;
+            padding: 1px 7px;
             border-radius: 4px;
-            margin-left: auto;
+            max-width: 104px;
+            min-width: 0;
+            flex-shrink: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .re-history-item-delete {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
             width: 20px;
             height: 20px;
             border: none;
@@ -1790,6 +1765,12 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+        }
+
+        .re-history-item:hover .re-history-item-delete {
+            opacity: 1;
         }
 
         .re-history-item-delete:hover {
@@ -1802,20 +1783,191 @@
             height: 12px;
         }
 
-        .re-history-item-preview {
+        /* Lightbox 模态遮罩：仅放大态点亮，盖住面板（后插入 DOM 同层级居上），点击即收起 */
+        .re-history-hover-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.28);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s linear;
+            z-index: 2147483647;
+        }
+
+        .re-history-hover-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .re-history-hover-card {
+            position: fixed;
+            width: 300px;
+            background: #ffffff;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+            padding: 10px 12px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(6px) scale(0.9);
+            transition: opacity 0.16s linear, transform 0.16s linear, left 0.16s linear, top 0.16s linear, width 0.16s linear, min-height 0.16s linear, padding 0.16s linear, box-shadow 0.16s linear;
+            z-index: 2147483647;
+        }
+
+        .re-history-hover-card.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transform-origin: left center;
+            pointer-events: auto;
+            user-select: text;
+            cursor: default;
+        }
+
+        .re-history-hover-card.flip-left {
+            transform-origin: right center;
+        }
+
+        /* 点击记录行/小卡片后放大到主面板 60% 大小（39vw × 42vh）居中屏幕，Lightbox 模态：
+           点击卡片外部任意处 / 点击卡片本体或 ✕ / 按 Esc 收起（不再依据鼠标移动轨迹判定） */
+        .re-history-hover-card.zoomed {
+            left: 50% !important;
+            top: 50% !important;
+            width: 39vw;
+            min-height: 42vh;
+            padding: 24px 28px;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center center;
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-name {
+            font-size: 22px;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-time {
+            font-size: 14px;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-tags {
+            margin-top: 10px;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-model,
+        .re-history-hover-card.zoomed .re-history-hover-card-shop {
+            font-size: 14px;
+            padding: 3px 10px;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-remark {
+            font-size: 15px;
+            max-height: 24vh;
+            margin-top: 14px;
+            padding: 12px 14px;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-remark-label {
+            font-size: 13px;
+        }
+
+        /* 放大态右上角 ✕ 收起按钮，小卡片态不显示 */
+        .re-history-hover-card-close {
             display: none;
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .re-history-hover-card-close:hover {
+            background: rgba(107, 114, 128, 0.2);
+            color: #374151;
+        }
+
+        .re-history-hover-card-close svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .re-history-hover-card.zoomed .re-history-hover-card-close {
+            display: flex;
+        }
+
+        .re-history-hover-card-head {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .re-history-hover-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .re-history-hover-card-time {
+            font-size: 11px;
+            color: #6b7280;
+            font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        }
+
+        .re-history-hover-card-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .re-history-hover-card-model {
+            font-size: 11px;
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 1px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .re-history-hover-card-shop {
+            font-size: 11px;
+            color: #6b7280;
+            background: rgba(107, 114, 128, 0.1);
+            padding: 1px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .re-history-hover-card-remark {
             margin-top: 8px;
-            padding: 8px 10px;
-            background: rgba(243, 244, 246, 0.8);
+            padding: 6px 8px;
+            background: rgba(243, 244, 246, 0.9);
+            border-left: 2px solid #3b82f6;
             border-radius: 6px;
             font-size: 11px;
             color: #4b5563;
-            line-height: 1.5;
+            line-height: 1.6;
             word-break: break-all;
+            max-height: 120px;
+            overflow-y: auto;
         }
 
-        .re-history-item-preview.show {
+        .re-history-hover-card-remark-label {
             display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 2px;
         }
 
         .re-form-section {
@@ -1867,15 +2019,6 @@
             color: #1f2937;
         }
 
-        .re-analysis-badge {
-            padding: 3px 10px;
-            border-radius: 10px;
-            background: rgba(59, 130, 246, 0.08);
-            color: #3b82f6;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
         .re-chart-card {
             background: #fff;
             border-radius: 10px;
@@ -1909,39 +2052,246 @@
             border-top: 5px solid rgba(31, 41, 55, 0.95);
         }
 
-        .re-analysis-stats {
+        /* 总览卡（分析页顶部独立行） */
+        .re-analysis-overview {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
+            margin-bottom: 16px;
         }
 
-        .re-stat-card {
+        .re-ov-card {
             background: #fff;
-            border-radius: 8px;
-            padding: 10px 12px;
+            border-radius: 10px;
+            padding: 12px 14px;
             border: 1px solid rgba(107, 114, 128, 0.1);
-            text-align: center;
         }
 
-        .re-stat-card.re-stat-high {
+        .re-ov-card.re-stat-high {
             border-left: 3px solid #10b981;
         }
 
-        .re-stat-card.re-stat-low {
+        .re-ov-card.re-stat-low {
             border-left: 3px solid #f59e0b;
         }
 
-        .re-stat-value {
-            font-size: 18px;
+        .re-ov-value {
+            font-size: 22px;
             font-weight: 600;
             color: #374151;
             line-height: 1.2;
         }
 
-        .re-stat-label {
+        .re-ov-value .re-ov-unit {
+            font-size: 13px;
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .re-ov-label {
             font-size: 11px;
             color: #9ca3af;
             margin-top: 2px;
+        }
+
+        .re-ov-delta {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .re-ov-delta.up { color: #10b981; }
+        .re-ov-delta.down { color: #ef4444; }
+        .re-ov-delta.flat { color: #9ca3af; font-weight: 400; }
+
+        /* 范围分段标签 */
+        .re-range-tabs {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .re-rtab {
+            height: 26px;
+            padding: 0 12px;
+            border: 1px solid rgba(107, 114, 128, 0.25);
+            border-radius: 6px;
+            background: #fff;
+            color: #6b7280;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .re-rtab:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .re-rtab.on {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* 机型横向条形图 */
+        .re-model-chart-wrap {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid rgba(107, 114, 128, 0.12);
+            display: grid;
+            gap: 6px;
+        }
+
+        .re-model-empty {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            padding: 30px 0;
+        }
+
+        .re-mbar-item {
+            display: grid;
+            gap: 4px;
+        }
+
+        .re-mbar-row {
+            display: grid;
+            grid-template-columns: 120px 1fr 84px;
+            align-items: center;
+            gap: 10px;
+            padding: 3px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.1s ease;
+        }
+
+        .re-mbar-row:hover {
+            background: rgba(59, 130, 246, 0.06);
+        }
+
+        .re-mbar-row.expanded {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .re-mbar-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .re-mbar-track {
+            height: 22px;
+            border-radius: 5px;
+            background: rgba(107, 114, 128, 0.08);
+            overflow: hidden;
+        }
+
+        .re-mbar-fill {
+            height: 100%;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: width 0.5s ease;
+        }
+
+        .re-mbar-meta {
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .re-mbar-meta b {
+            color: #4b5563;
+        }
+
+        /* 展开态：机型每日审核量柱状图 */
+        .re-mdaily-box {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 64px;
+            padding: 6px 6px 0;
+            margin-left: 130px;
+            margin-right: 94px;
+            border-left: 1px solid rgba(107, 114, 128, 0.15);
+            border-bottom: 1px solid rgba(107, 114, 128, 0.15);
+            border-radius: 0 0 4px 4px;
+            position: relative;
+        }
+
+        .re-mdaily-col {
+            flex: 1;
+            min-width: 0;
+            background: linear-gradient(180deg, #60a5fa, #3b82f6);
+            border-radius: 2px 2px 0 0;
+            position: relative;
+            transition: filter 0.1s ease;
+            animation: reMbarColIn 0.3s ease both;
+        }
+
+        @keyframes reMbarColIn {
+            from { transform: scaleY(0); transform-origin: bottom; }
+            to { transform: scaleY(1); transform-origin: bottom; }
+        }
+
+        .re-mdaily-col.zero {
+            background: rgba(107, 114, 128, 0.15);
+        }
+
+        .re-mdaily-col:hover {
+            filter: brightness(1.15);
+        }
+
+        /* 悬停提示 */
+        .re-mdaily-col::before {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(31, 41, 55, 0.95);
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease;
+            z-index: 5;
+        }
+
+        .re-mdaily-col:hover::before {
+            opacity: 1;
+        }
+
+        /* 日期标签（挂在柱子下方，稀疏显示） */
+        .re-mdaily-col::after {
+            content: attr(data-label);
+            position: absolute;
+            top: calc(100% + 3px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        .re-mbar-item:has(.re-mdaily-box) {
+            padding-bottom: 18px;
         }
 
         .re-analysis-divider {
@@ -2599,7 +2949,9 @@
         .re-multi-select {
             position: relative;
             display: inline-block;
-            min-width: 120px;
+            min-width: 200px;
+            max-width: 280px;
+            vertical-align: middle;
         }
 
         .re-multi-select-header {
@@ -2627,6 +2979,7 @@
 
         .re-multi-select-text {
             flex: 1;
+            min-width: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -2636,45 +2989,55 @@
             width: 14px;
             height: 14px;
             color: #9ca3af;
-
             flex-shrink: 0;
+            transition: transform 0.15s ease;
         }
 
         .re-multi-select.open .re-multi-select-arrow {
             transform: rotate(180deg);
         }
 
+        /* 宽下拉面板：挂 body、fixed 定位（JS 计算坐标），560px 两列网格 */
         .re-multi-select-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            min-width: 160px;
-            margin-top: 4px;
-            padding: 6px 0;
-            background: #fff;
+            position: fixed;
+            width: 560px;
+            max-width: calc(100vw - 16px);
+            background: #ffffff;
             border: 1px solid rgba(107, 114, 128, 0.2);
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 10000;
+            border-radius: 10px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            z-index: 2147483647;
             display: none;
         }
 
-        .re-multi-select.open .re-multi-select-dropdown {
-            display: block !important;
+        .re-multi-select-dropdown.open {
+            display: block;
+            animation: reMsDdIn 0.14s ease;
+        }
+
+        @keyframes reMsDdIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .re-multi-select-items {
-            max-height: 150px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            padding: 6px;
+            max-height: 320px;
             overflow-y: auto;
         }
 
         .re-multi-select-item {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 6px;
             cursor: pointer;
-
+            transition: background 0.1s ease;
+            min-width: 0;
         }
 
         .re-multi-select-item:hover {
@@ -2682,53 +3045,87 @@
         }
 
         .re-multi-select-item input {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #3b82f6;
+            display: none;
         }
 
-        .re-multi-select-item span {
+        .re-multi-select-box {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            border: 1.5px solid rgba(107, 114, 128, 0.35);
+            border-radius: 4.5px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+        }
+
+        .re-multi-select-box svg {
+            width: 11px;
+            height: 11px;
+            color: #ffffff;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.1s ease;
+        }
+
+        .re-multi-select-item.sel .re-multi-select-box {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .re-multi-select-item.sel .re-multi-select-box svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .re-multi-select-item-text {
             font-size: 13px;
             color: #374151;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
         }
 
-        .re-multi-select-manage {
+        .re-multi-select-foot {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 12px;
+            padding: 6px 8px 6px 14px;
             border-top: 1px solid rgba(107, 114, 128, 0.15);
-            margin-top: 4px;
-            cursor: pointer;
-            color: #6b7280;
-            font-size: 12px;
         }
 
-        .re-multi-select-manage:hover {
+        .re-multi-select-count {
+            font-size: 12px;
+            color: #6b7280;
+            margin-right: auto;
+        }
+
+        .re-multi-select-foot-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+            color: #6b7280;
+            padding: 6px 9px;
+            border-radius: 6px;
+            transition: all 0.1s ease;
+            font-family: inherit;
+        }
+
+        .re-multi-select-foot-btn:hover {
             background: rgba(59, 130, 246, 0.08);
             color: #3b82f6;
         }
 
-        .re-multi-select-manage svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        #re-work-proof {
-            min-width: 200px;
-        }
-
-        #re-work-proof .re-multi-select-dropdown {
-            min-width: 240px;
-        }
-
-        #re-work-proof .re-multi-select-items {
-            max-height: 250px;
-        }
-
-        #re-work-proof .re-multi-select-item {
-            padding: 10px 14px;
+        .re-multi-select-foot-btn svg {
+            width: 13px;
+            height: 13px;
         }
 
         .re-select-editable-wrapper {
@@ -2805,6 +3202,310 @@
         .re-select-dropdown-manage svg {
             width: 14px;
             height: 14px;
+        }
+
+        /* ===== 多选「管理选项」弹窗（独立前缀，不与可编辑下拉的管理弹窗共用） ===== */
+        .re-msmanage-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2147483650;
+            display: none;
+        }
+
+        .re-msmanage-modal.show {
+            display: block;
+        }
+
+        .re-msmanage-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            border-radius: 12px;
+            width: 460px;
+            max-width: calc(100vw - 32px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .re-msmanage-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.15);
+        }
+
+        .re-msmanage-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .re-msmanage-count {
+            font-size: 12px;
+            color: #6b7280;
+            background: rgba(107, 114, 128, 0.1);
+            padding: 2px 8px;
+            border-radius: 99px;
+        }
+
+        .re-msmanage-close {
+            margin-left: auto;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+        }
+
+        .re-msmanage-close:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .re-msmanage-close svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .re-msmanage-add {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px 4px;
+        }
+
+        .re-msmanage-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid rgba(107, 114, 128, 0.25);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .re-msmanage-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .re-msmanage-addbtn {
+            height: 36px;
+            padding: 0 14px;
+            border: none;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: filter 0.1s ease;
+        }
+
+        .re-msmanage-addbtn:hover {
+            filter: brightness(1.08);
+        }
+
+        .re-msmanage-addbtn svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .re-msmanage-hint {
+            padding: 6px 16px 0;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .re-msmanage-list {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            min-height: 80px;
+        }
+
+        .re-msmanage-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 10px 10px 8px;
+            background: rgba(249, 250, 251, 0.9);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.12s ease;
+            font-size: 13px;
+        }
+
+        .re-msmanage-item.custom {
+            background: rgba(59, 130, 246, 0.06);
+        }
+
+        .re-msmanage-item:hover {
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .re-msmanage-item.dragging {
+            opacity: 0.45;
+            border: 1px dashed #3b82f6;
+        }
+
+        .re-msmanage-item.drag-over {
+            border: 1px solid #3b82f6;
+            box-shadow: 0 -2px 0 0 #3b82f6;
+        }
+
+        .re-msmanage-grip {
+            color: #9ca3af;
+            display: flex;
+            cursor: grab;
+        }
+
+        .re-msmanage-grip:active {
+            cursor: grabbing;
+        }
+
+        .re-msmanage-grip svg {
+            width: 12px;
+            height: 14px;
+        }
+
+        .re-msmanage-num {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            background: #ffffff;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            font-size: 10px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .re-msmanage-text {
+            flex: 1;
+            color: #374151;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .re-msmanage-tag {
+            font-size: 10px;
+            padding: 1px 7px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .re-msmanage-tag.def {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #b45309;
+        }
+
+        .re-msmanage-tag.cus {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .re-msmanage-lock {
+            color: #9ca3af;
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        .re-msmanage-lock svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .re-msmanage-del {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            border: none;
+            border-radius: 5px;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.1s ease;
+        }
+
+        .re-msmanage-item:hover .re-msmanage-del {
+            opacity: 1;
+        }
+
+        .re-msmanage-del:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .re-msmanage-del svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .re-msmanage-foot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-top: 1px solid rgba(107, 114, 128, 0.15);
+            background: rgba(249, 250, 251, 0.6);
+        }
+
+        .re-msmanage-note {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-right: auto;
+        }
+
+        .re-msmanage-reset {
+            height: 30px;
+            padding: 0 12px;
+            border: 1px solid rgba(107, 114, 128, 0.25);
+            border-radius: 8px;
+            background: #ffffff;
+            color: #6b7280;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .re-msmanage-reset:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.06);
         }
 
         .re-select-manage-modal {
@@ -4408,213 +5109,16 @@
             background: rgba(248, 250, 252, 0.95);
         }
 
-        /* 风险面板样式 - 吸附在主面板右侧 */
-        .re-risk-panel {
-            position: absolute;
-            top: 0;
-            right: -290px;
-            width: 280px;
-            height: 100%;
-            background: linear-gradient(135deg, #e8eaed 0%, #d1d5db 50%, #e5e7eb 100%);
-            border-radius: 16px;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
-            z-index: 15;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(-10px);
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid rgba(107, 114, 128, 0.2);
-        }
-
-        .re-risk-panel.re-risk-visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(0);
-        }
-
-        .re-risk-panel-header {
-            padding: 10px 16px;
-            background: linear-gradient(135deg, rgba(107, 114, 128, 0.95) 0%, rgba(75, 85, 99, 0.95) 100%);
-            border-radius: 16px 16px 0 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .re-risk-panel-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .re-risk-panel-title svg {
-            width: 18px;
-            height: 18px;
-            color: #fca5a5;
-        }
-
-        .re-risk-count {
-            font-size: 12px;
-            color: #fca5a5;
-            font-weight: 600;
-        }
-
-        .re-risk-panel-close {
-            width: 28px;
-            height: 28px;
-            border: none;
-            background: transparent;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .re-risk-panel-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-        }
-
-        .re-risk-panel-close svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .re-risk-panel-content {
-            padding: 12px;
-            overflow-y: auto;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border-radius: 0 0 16px 16px;
-        }
-
-        .re-risk-panel-content::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .re-risk-panel-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .re-risk-panel-content::-webkit-scrollbar-thumb {
-            background: rgba(107, 114, 128, 0.2);
-            border-radius: 2px;
-        }
-
-        .re-risk-item {
-            padding: 10px 12px;
-            background: rgba(243, 244, 246, 0.5);
-            border-radius: 8px;
-        }
-
-        .re-risk-item:hover {
-            background: rgba(243, 244, 246, 0.8);
-        }
-
-        .re-risk-item-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .re-risk-item-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .re-risk-item.re-risk-high .re-risk-item-dot {
-            background: #ef4444;
-        }
-
-        .re-risk-item.re-risk-medium .re-risk-item-dot {
-            background: #f59e0b;
-        }
-
-        .re-risk-item.re-risk-normal .re-risk-item-dot {
-            background: #10b981;
-        }
-
-        .re-risk-item-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: #374151;
-            flex: 1;
-        }
-
-        .re-risk-item-badge {
-            font-size: 12px;
-            font-weight: 500;
-            padding: 1px 8px;
-            border-radius: 4px;
-        }
-
-        .re-risk-item.re-risk-high .re-risk-item-badge {
-            background: rgba(239, 68, 68, 0.12);
-            color: #ef4444;
-        }
-
-        .re-risk-item.re-risk-medium .re-risk-item-badge {
-            background: rgba(245, 158, 11, 0.12);
-            color: #f59e0b;
-        }
-
-        .re-risk-item.re-risk-normal .re-risk-item-badge {
-            background: rgba(16, 185, 129, 0.12);
-            color: #10b981;
-        }
-
-        .re-risk-item-detail {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 4px;
-            padding-left: 15px;
-            line-height: 1.4;
-        }
-
-        .re-risk-item-detail span {
-            font-weight: 500;
-        }
-
-        .re-risk-item.re-risk-high .re-risk-item-detail span {
-            color: #ef4444;
-        }
-
-        .re-risk-item.re-risk-medium .re-risk-item-detail span {
-            color: #f59e0b;
-        }
-
-        .re-risk-item.re-risk-normal .re-risk-item-detail span {
-            color: #10b981;
-        }
-
-        .re-risk-empty span {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 6px;
-        }
-
         /* 无锁判断面板样式 */
         .re-no-lock-panel {
             position: fixed;
             top: 80px;
             right: 20px;
             width: 360px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(17, 24, 39, 0.10);
             z-index: 2147483646;
             opacity: 0;
             visibility: hidden;
@@ -4623,6 +5127,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             backface-visibility: hidden;
+            overflow: hidden;
         }
 
         .re-no-lock-panel.re-no-lock-visible {
@@ -4632,10 +5137,9 @@
         }
 
         .re-no-lock-header {
-            padding: 14px 18px;
-            background: linear-gradient(135deg, rgba(107, 114, 128, 0.95) 0%, rgba(75, 85, 99, 0.95) 100%);
-            border-radius: 16px 16px 0 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid rgba(17, 24, 39, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -4647,60 +5151,7 @@
         .re-no-lock-title {
             font-size: 15px;
             font-weight: 600;
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .re-no-lock-status {
-            font-size: 13px;
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(8px);
-        }
-
-        .re-no-lock-status.satisfied {
-            color: #ffffff;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: pulse-green 2s ease-in-out infinite;
-        }
-
-        .re-no-lock-status.unsatisfied {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.15);
-            color: #ffffff;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: pulse-red 2s ease-in-out infinite;
-        }
-
-        .re-no-lock-status.pending {
-            color: rgba(255, 255, 255, 0.85);
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        @keyframes pulse-green {
-            0%, 100% {
-                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4), 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            50% {
-                box-shadow: 0 2px 12px rgba(16, 185, 129, 0.6), 0 0 0 4px rgba(16, 185, 129, 0);
-            }
-        }
-
-        @keyframes pulse-red {
-            0%, 100% {
-                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            50% {
-                box-shadow: 0 2px 12px rgba(239, 68, 68, 0.6), 0 0 0 4px rgba(239, 68, 68, 0);
-            }
+            color: #1f2937;
         }
 
         .re-no-lock-close {
@@ -4713,13 +5164,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.2s ease;
+            color: #6b7280;
+            transition: all 0.15s ease;
         }
 
         .re-no-lock-close:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
+            background: rgba(107, 114, 128, 0.12);
+            color: #1f2937;
         }
 
         .re-no-lock-close svg {
@@ -4728,101 +5179,206 @@
         }
 
         .re-no-lock-content {
-            padding: 16px 18px;
-            background: rgba(248, 250, 252, 0.5);
+            padding: 14px 16px 16px;
+            background: #ffffff;
+            display: grid;
+            gap: 12px;
         }
 
-        .re-no-lock-grid {
+        /* 渠道额度卡片 */
+        .re-nl-chips {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px 12px;
-            margin-bottom: 12px;
+            gap: 8px;
         }
 
-        .re-no-lock-item {
+        .re-nl-chip {
+            border: 1px solid rgba(17, 24, 39, 0.10);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: #ffffff;
+        }
+
+        .re-nl-chip-label {
+            font-size: 12px;
+            color: #6b7280;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .re-no-lock-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
+        .re-nl-tag {
+            font-style: normal;
+            font-size: 11px;
+            line-height: 14px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: rgba(107, 114, 128, 0.10);
+            color: #6b7280;
+            border: 1px solid rgba(17, 24, 39, 0.08);
         }
 
-        .re-no-lock-label {
-            font-size: 13px;
+        .re-nl-chip-val {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d4ed8;
+        }
+
+        .re-nl-chip-dim .re-nl-chip-val {
             color: #6b7280;
             font-weight: 500;
         }
 
-        .re-no-lock-value {
-            font-size: 13px;
-            color: #374151;
+        .re-nl-chip.off {
+            background: #f9fafb;
+        }
+
+        .re-nl-chip.off .re-nl-chip-val {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        /* 参数区 */
+        .re-nl-params {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .re-nl-param {
+            border: 1px solid rgba(17, 24, 39, 0.10);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .re-nl-param-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .re-nl-param-val {
+            font-size: 14px;
             font-weight: 600;
+            color: #1f2937;
         }
 
-        .re-no-lock-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(107, 114, 128, 0.2), transparent);
-            margin: 8px 0;
+        .re-nl-param-cost {
+            grid-column: span 2;
         }
 
-        .re-no-lock-editable {
+        .re-nl-cost-row {
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
         .re-no-lock-input {
             flex: 1;
-            height: 32px;
+            min-width: 0;
+            height: 30px;
             padding: 0 10px;
-            border: 1px solid rgba(107, 114, 128, 0.2);
+            border: 1px solid rgba(17, 24, 39, 0.15);
             border-radius: 6px;
             font-size: 13px;
-            color: #374151;
+            font-weight: 600;
+            color: #1f2937;
             background: #ffffff;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
 
         .re-no-lock-input:focus {
             outline: none;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
         }
 
         .re-no-lock-input::placeholder {
             color: #9ca3af;
+            font-weight: 400;
         }
 
         .re-no-lock-recalc {
-            height: 32px;
+            height: 30px;
             padding: 0 14px;
-            border: none;
+            border: 1px solid #3b82f6;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 500;
-            color: #ffffff;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #1d4ed8;
+            background: #ffffff;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+            transition: all 0.15s ease;
         }
 
         .re-no-lock-recalc:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-            transform: translateY(-1px);
+            background: rgba(59, 130, 246, 0.08);
         }
 
         .re-no-lock-recalc:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.15);
         }
 
+        /* 判定结果横幅 */
+        .re-no-lock-result {
+            border: 1px solid rgba(17, 24, 39, 0.10);
+            border-radius: 10px;
+            padding: 12px 14px;
+            text-align: center;
+            background: #f9fafb;
+        }
+
+        .re-no-lock-result:has(.re-no-lock-status.satisfied) {
+            border-color: #a7f3d0;
+            background: #ecfdf5;
+        }
+
+        .re-no-lock-result:has(.re-no-lock-status.unsatisfied) {
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .re-no-lock-status {
+            font-size: 17px;
+            font-weight: 700;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .re-no-lock-status.satisfied {
+            color: #059669;
+        }
+
+        .re-no-lock-status.unsatisfied {
+            color: #dc2626;
+        }
+
+        .re-no-lock-status.pending {
+            color: #6b7280;
+        }
+
+        .re-no-lock-result-sub {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 3px;
+        }
+
+        .re-no-lock-result-sub span {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* 预览区 */
         .re-no-lock-preview {
-            margin-top: 12px;
+            border: 1px dashed rgba(107, 114, 128, 0.35);
+            border-radius: 10px;
+            padding: 10px 12px;
         }
 
         .re-no-lock-preview-header {
@@ -4844,107 +5400,67 @@
             gap: 6px;
         }
 
-        .re-no-lock-action-btn {
-            width: 28px;
-            height: 28px;
-            padding: 5px;
-            border: none;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-        }
-
-        .re-no-lock-action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .re-no-lock-action-btn:active {
-            transform: translateY(0);
-        }
-
-        .re-no-lock-action-btn svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .re-no-lock-copy-btn {
-            width: 24px;
+        .re-nl-pill {
             height: 24px;
-            padding: 4px;
-            border: none;
-            background: transparent;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            transition: all 0.2s ease;
-        }
-
-        .re-no-lock-copy-btn:hover {
-            background: rgba(107, 114, 128, 0.1);
+            padding: 0 12px;
+            border: 1px solid rgba(17, 24, 39, 0.18);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
             color: #374151;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
 
-        .re-no-lock-copy-btn:active {
-            background: rgba(107, 114, 128, 0.2);
+        .re-nl-pill:hover {
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            background: rgba(59, 130, 246, 0.06);
         }
 
-        .re-no-lock-copy-btn svg {
-            width: 14px;
-            height: 14px;
+        .re-nl-pill:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .re-nl-pill-primary {
+            border-color: #3b82f6;
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+        .re-nl-pill-primary:hover {
+            border-color: #2563eb;
+            background: #2563eb;
+            color: #ffffff;
         }
 
         .re-no-lock-preview-text {
             width: 100%;
-            min-height: 60px;
-            padding: 8px 10px;
-            border: 1px solid rgba(107, 114, 128, 0.2);
+            min-height: 48px;
+            padding: 6px 8px;
+            border: none;
             border-radius: 6px;
             font-size: 12px;
             color: #374151;
-            background: #ffffff;
+            background: rgba(249, 250, 251, 0.8);
             resize: vertical;
             font-family: inherit;
             line-height: 1.5;
+            box-sizing: border-box;
         }
 
         .re-no-lock-preview-text:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: #ffffff;
+            box-shadow: inset 0 0 0 1px #3b82f6;
         }
 
-        .re-risk-empty {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            color: #6b7280;
-            gap: 10px;
-        }
-
-        .re-risk-empty svg {
-            width: 32px;
-            height: 32px;
-            color: #10b981;
-        }
-
-        .re-risk-empty span {
-            font-size: 13px;
-        }
-
-        #re-system-panel.re-low-perf .re-risk-panel {
-            background: rgba(255, 255, 255, 0.95);
+        .re-no-lock-preview-excel {
+            min-height: 34px;
+            white-space: pre;
+            overflow-x: auto;
         }
     `;
 
@@ -5232,28 +5748,49 @@
         URL.revokeObjectURL(link.href);
     }
 
-    const MODEL_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+    // 当前选中的分析范围（趋势图与总览条共用）
+    let analysisRange = 'month';
+
+    // 按范围生成日期窗口（闭区间日期字符串数组）
+    function getAnalysisDateWindow(range) {
+        const today = new Date();
+        const dates = [];
+        if (range === '7d' || range === '14d') {
+            const days = range === '7d' ? 7 : 14;
+            for (let i = days - 1; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                dates.push(formatDateForAnalysis(d));
+            }
+        } else if (range === 'lastmonth') {
+            const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const last = new Date(today.getFullYear(), today.getMonth(), 0);
+            for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
+                dates.push(formatDateForAnalysis(d));
+            }
+        } else { // month：本月1号到今天
+            const first = new Date(today.getFullYear(), today.getMonth(), 1);
+            for (let d = new Date(first); d <= today; d.setDate(d.getDate() + 1)) {
+                dates.push(formatDateForAnalysis(d));
+            }
+        }
+        return dates;
+    }
 
     function renderAnalysisData() {
         const monthLabel = document.getElementById('re-analysis-month-label');
-        const today = new Date();
-        if (monthLabel) {
-            monthLabel.textContent = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}`;
-        }
+        const rangeLabels = {
+            '7d': '近7天总量',
+            '14d': '近14天总量',
+            'month': '本月总量',
+            'lastmonth': '上月总量'
+        };
+        if (monthLabel) monthLabel.textContent = rangeLabels[analysisRange] || '本月总量';
 
         getAllHistoryRecords().then(records => {
+            const dateWindow = getAnalysisDateWindow(analysisRange);
             const dailyData = {};
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-            const startDate = new Date(currentYear, currentMonth, 1);
-            const currentDay = today.getDate();
-
-            for (let i = 0; i < currentDay; i++) {
-                const date = new Date(startDate);
-                date.setDate(date.getDate() + i);
-                const dateStr = formatDateForAnalysis(date);
-                dailyData[dateStr] = 0;
-            }
+            dateWindow.forEach(date => { dailyData[date] = 0; });
 
             records.forEach(record => {
                 if (record.date && dailyData.hasOwnProperty(record.date)) {
@@ -5261,8 +5798,9 @@
                 }
             });
 
-            const sortedDates = Object.keys(dailyData).sort();
+            const sortedDates = [...dateWindow].sort();
             const editedDays = getEditedDays();
+            const restDays = getRestDays();
             const chartData = sortedDates.map(date => {
                 const originalCount = dailyData[date];
                 const editedCount = editedDays[date];
@@ -5274,9 +5812,54 @@
                 };
             });
 
-            drawOrderChart(chartData);
-            updateAnalysisStats(chartData);
+            // 静默重绘：数据指纹没变时不播动画（drawOrderChart 读 canvas.dataset.fingerprint）
+            const fingerprint = JSON.stringify(chartData) + '|' + restDays.join(',');
+            drawOrderChart(chartData, fingerprint);
+            updateAnalysisStats(chartData, records, dateWindow);
         });
+    }
+
+    // 环比：与上一同长度周期比较（如本月1-8号 vs 上月1-8号；近7天 vs 再前7天）
+    function calcAnalysisDelta(records, dateWindow) {
+        const n = dateWindow.length;
+        if (n === 0) return null;
+        const winStart = new Date(dateWindow[0]);
+        const winEnd = new Date(dateWindow[n - 1]);
+        const spanDays = Math.round((winEnd - winStart) / 86400000) + 1;
+        const prevEnd = new Date(winStart);
+        prevEnd.setDate(prevEnd.getDate() - 1);
+        const prevStart = new Date(prevEnd);
+        prevStart.setDate(prevStart.getDate() - (spanDays - 1));
+
+        const editedDays = getEditedDays();
+        let prevTotal = 0, prevWorkDays = 0;
+        for (let d = new Date(prevStart); d <= prevEnd; d.setDate(d.getDate() + 1)) {
+            const ds = formatDateForAnalysis(d);
+            const edited = editedDays[ds];
+            const count = edited !== undefined ? edited : records.filter(r => r.date === ds).length;
+            prevTotal += count;
+            if (count > 0) prevWorkDays++;
+        }
+        return prevTotal;
+    }
+
+    function renderDeltaEl(el, current, prev) {
+        if (!el) return;
+        if (prev === null || prev === 0) {
+            if (current > 0 && prev === 0) {
+                el.textContent = '▲ 新增';
+                el.className = 're-ov-delta up';
+                el.style.display = '';
+            } else {
+                el.style.display = 'none';
+            }
+            return;
+        }
+        const pct = ((current - prev) / prev) * 100;
+        const sign = pct >= 0 ? '▲' : '▼';
+        el.textContent = `${sign} ${Math.abs(pct).toFixed(1)}% vs 上期`;
+        el.className = 're-ov-delta ' + (pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat');
+        el.style.display = '';
     }
 
     function formatDateForAnalysis(date) {
@@ -5338,10 +5921,14 @@
         saveEditedDays(editedDays);
     }
 
-    function drawOrderChart(data) {
+    function drawOrderChart(data, fingerprint) {
         const canvas = document.getElementById('re-order-chart');
         const tooltip = document.getElementById('re-chart-tooltip');
         if (!canvas) return;
+
+        // 静默重绘：指纹相同则直接画最终帧，不播动画
+        const skipAnim = fingerprint && canvas.dataset.fingerprint === fingerprint;
+        if (fingerprint) canvas.dataset.fingerprint = fingerprint;
 
         const ctx = canvas.getContext('2d');
         const rect = canvas.parentElement.getBoundingClientRect();
@@ -5376,8 +5963,8 @@
         const restDays = getRestDays();
         const chartPoints = [];
 
-        // 从左到右绘制动画
-        const animDuration = 800;
+        // 从左到右绘制动画（数据未变时跳过动画直接成帧）
+        const animDuration = skipAnim ? 0 : 800;
         const animStart = performance.now();
 
         function drawGrid() {
@@ -5648,13 +6235,16 @@
         modal.classList.add('re-modal-visible');
     }
 
-    function updateAnalysisStats(data) {
+    function updateAnalysisStats(data, records, dateWindow) {
         const totalEl = document.getElementById('re-stat-total');
         const avgEl = document.getElementById('re-stat-daily-avg');
+        const avgLabel = document.getElementById('re-avg-label');
         const maxOrdersEl = document.getElementById('re-stat-max-orders');
         const maxDateEl = document.getElementById('re-stat-max-date');
         const minOrdersEl = document.getElementById('re-stat-min-orders');
         const minDateEl = document.getElementById('re-stat-min-date');
+        const totalDeltaEl = document.getElementById('re-ov-total-delta');
+        const avgDeltaEl = document.getElementById('re-ov-avg-delta');
 
         if (data.length === 0) {
             if (totalEl) totalEl.textContent = '0';
@@ -5667,7 +6257,11 @@
         }
 
         const total = data.reduce((sum, d) => sum + d.count, 0);
-        const avg = (total / data.length).toFixed(1);
+        // 工作日日均：排除 0 单日（休息日、未开单日不计入分母）
+        const workDays = data.filter(d => d.count > 0);
+        const avg = workDays.length > 0 ? (total / workDays.length).toFixed(1) : '0';
+        if (avgLabel) avgLabel.textContent = `工作日日均（${workDays.length}天）`;
+
         let maxItem = data[0], minItem = data[0];
         data.forEach(d => {
             if (d.count > maxItem.count) maxItem = d;
@@ -5676,42 +6270,83 @@
 
         if (totalEl) totalEl.textContent = total;
         if (avgEl) avgEl.textContent = avg;
-        if (maxOrdersEl) maxOrdersEl.textContent = maxItem.count;
-        if (maxDateEl) maxDateEl.textContent = maxItem.date.slice(5);
-        if (minOrdersEl) minOrdersEl.textContent = minItem.count;
-        if (minDateEl) minDateEl.textContent = minItem.date.slice(5);
+        if (maxOrdersEl) maxOrdersEl.innerHTML = `${maxItem.count} <span class="re-ov-unit">台</span>`;
+        if (maxDateEl) maxDateEl.textContent = `最高 · ${maxItem.date.slice(5)}`;
+        if (minOrdersEl) minOrdersEl.innerHTML = `${minItem.count} <span class="re-ov-unit">台</span>`;
+        if (minDateEl) minDateEl.textContent = `最低 · ${minItem.date.slice(5)}`;
+
+        // 环比上一同长度周期
+        if (records && dateWindow) {
+            const prevTotal = calcAnalysisDelta(records, dateWindow);
+            renderDeltaEl(totalDeltaEl, total, prevTotal);
+            if (prevTotal !== null && prevTotal > 0) {
+                const prevWindow = getPrevWindowData(records, dateWindow);
+                const prevWorkDays = prevWindow.filter(c => c > 0).length;
+                const prevAvg = prevWorkDays > 0 ? prevTotal / prevWorkDays : 0;
+                const curAvg = workDays.length > 0 ? total / workDays.length : 0;
+                if (prevAvg > 0) {
+                    const pct = ((curAvg - prevAvg) / prevAvg) * 100;
+                    const sign = pct >= 0 ? '▲' : '▼';
+                    if (avgDeltaEl) {
+                        avgDeltaEl.textContent = `${sign} ${Math.abs(pct).toFixed(1)}% vs 上期`;
+                        avgDeltaEl.className = 're-ov-delta ' + (pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat');
+                        avgDeltaEl.style.display = '';
+                    }
+                } else if (avgDeltaEl) {
+                    avgDeltaEl.style.display = 'none';
+                }
+            } else if (avgDeltaEl) {
+                avgDeltaEl.style.display = 'none';
+            }
+        }
     }
+
+    // 上一周期的每日台数数组（与 calcAnalysisDelta 同窗口规则）
+    function getPrevWindowData(records, dateWindow) {
+        const n = dateWindow.length;
+        if (n === 0) return [];
+        const winStart = new Date(dateWindow[0]);
+        const winEnd = new Date(dateWindow[n - 1]);
+        const spanDays = Math.round((winEnd - winStart) / 86400000) + 1;
+        const prevEnd = new Date(winStart);
+        prevEnd.setDate(prevEnd.getDate() - 1);
+        const prevStart = new Date(prevEnd);
+        prevStart.setDate(prevStart.getDate() - (spanDays - 1));
+
+        const editedDays = getEditedDays();
+        const counts = [];
+        for (let d = new Date(prevStart); d <= prevEnd; d.setDate(d.getDate() + 1)) {
+            const ds = formatDateForAnalysis(d);
+            const edited = editedDays[ds];
+            counts.push(edited !== undefined ? edited : records.filter(r => r.date === ds).length);
+        }
+        return counts;
+    }
+
+    // 机型图当前展示数量（Top 5 / Top 10）
+    let modelTopN = 5;
 
     function renderModelAnalysis() {
         getAllHistoryRecords().then(records => {
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-            const startDate = new Date(currentYear, currentMonth, 1);
-            const currentDay = today.getDate();
-
-            const dateList = [];
-            for (let i = 0; i < currentDay; i++) {
-                const date = new Date(startDate);
-                date.setDate(date.getDate() + i);
-                dateList.push(formatDateForAnalysis(date));
-            }
+            // 机型图与趋势图共用时间范围
+            const dateWindow = getAnalysisDateWindow(analysisRange);
+            const dateSet = new Set(dateWindow);
 
             const modelMap = {};
             records.forEach(record => {
-                if (!record.model || !record.date || !dateList.includes(record.date)) return;
+                if (!record.model || !record.date || !dateSet.has(record.date)) return;
                 const name = simplifyModelName(record.model);
                 if (!modelMap[name]) modelMap[name] = { name, total: 0, dates: {} };
                 modelMap[name].total++;
                 modelMap[name].dates[record.date] = (modelMap[name].dates[record.date] || 0) + 1;
             });
 
-            const topModels = Object.values(modelMap)
-                .sort((a, b) => b.total - a.total)
-                .slice(0, 5);
+            const allModels = Object.values(modelMap).sort((a, b) => b.total - a.total);
+            const topModels = allModels.slice(0, modelTopN);
+            const grandTotal = allModels.reduce((s, m) => s + m.total, 0);
 
-            drawModelChart({ models: topModels, dates: dateList });
-            renderModelLegend(topModels);
+            drawModelChart({ models: topModels, grandTotal });
+            renderModelLegend(allModels, grandTotal);
         });
     }
 
@@ -5747,186 +6382,237 @@
         return model;
     }
 
+    // 机型横向条形图：DOM 实现（替代原 Canvas 五线折线，机型名+总量+占比+峰值一行可读）
+    // 点击横条行可展开该机型的每日审核量柱状图
     function drawModelChart(data) {
-        const canvas = document.getElementById('re-model-chart');
-        const tooltip = document.getElementById('re-model-tooltip');
-        if (!canvas) return;
+        const wrap = document.getElementById('re-model-chart-wrap');
+        if (!wrap) return;
+        // 记住当前展开的机型（重渲染时保持展开态）
+        const expandedName = wrap.dataset.expanded || null;
+        wrap.innerHTML = '';
 
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.parentElement.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        const canvasW = rect.width - 32;
-        const canvasH = 220;
-
-        canvas.width = canvasW * dpr;
-        canvas.height = canvasH * dpr;
-        canvas.style.width = canvasW + 'px';
-        canvas.style.height = canvasH + 'px';
-        ctx.scale(dpr, dpr);
-
-        const padding = { top: 20, right: 16, bottom: 36, left: 40 };
-        const chartW = canvasW - padding.left - padding.right;
-        const chartH = canvasH - padding.top - padding.bottom;
-
-        ctx.clearRect(0, 0, canvasW, canvasH);
-
-        if (data.models.length === 0 || data.dates.length === 0) {
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('暂无机型数据', canvasW / 2, canvasH / 2);
-            canvas.chartData = null;
+        if (!data.models || data.models.length === 0) {
+            wrap.innerHTML = '<div class="re-model-empty">暂无机型数据</div>';
             return;
         }
 
-        let maxCount = 1;
+        const maxTotal = Math.max(...data.models.map(m => m.total), 1);
+        const grandTotal = data.grandTotal || data.models.reduce((s, m) => s + m.total, 0);
+        const dateWindow = getAnalysisDateWindow(analysisRange);
+
         data.models.forEach(model => {
-            data.dates.forEach(date => {
-                const count = model.dates[date] || 0;
-                if (count > maxCount) maxCount = count;
+            const peak = Math.max(...Object.values(model.dates), 0);
+            const pct = grandTotal > 0 ? ((model.total / grandTotal) * 100).toFixed(1) : '0';
+            const widthPct = Math.max((model.total / maxTotal) * 100, 8);
+            const isExpanded = expandedName === model.name;
+
+            const item = document.createElement('div');
+            item.className = 're-mbar-item';
+
+            const row = document.createElement('div');
+            row.className = 're-mbar-row' + (isExpanded ? ' expanded' : '');
+            row.innerHTML = `
+                <span class="re-mbar-name" title="${model.name}">${model.name}</span>
+                <div class="re-mbar-track">
+                    <div class="re-mbar-fill" style="width: 0%; background: linear-gradient(90deg, #60a5fa, #2563eb);">${model.total} 台</div>
+                </div>
+                <span class="re-mbar-meta"><b>${pct}%</b> · 峰值 ${peak}/天</span>
+            `;
+            item.appendChild(row);
+
+            // 每日柱状图（展开态渲染）
+            if (isExpanded) {
+                item.appendChild(buildModelDailyBars(model, dateWindow));
+            }
+
+            // 点击行切换展开/收起（stopPropagation：重渲染会移除本行节点，
+            // 若让事件冒泡到 document，外点关闭判定 panel.contains(已脱离的target)=false 会误关主面板）
+            row.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const nowExpanded = wrap.dataset.expanded !== model.name;
+                wrap.dataset.expanded = nowExpanded ? model.name : '';
+                drawModelChart(data);
+            });
+
+            wrap.appendChild(item);
+            // 入场动画：下一帧展开到目标宽度
+            requestAnimationFrame(() => {
+                const fill = row.querySelector('.re-mbar-fill');
+                if (fill) fill.style.width = widthPct + '%';
             });
         });
-
-        const yScale = chartH / (maxCount + 1);
-        const xStep = chartW / (data.dates.length - 1 || 1);
-        const yGridCount = 4;
-        const allPoints = [];
-
-        // 从左到右绘制动画
-        const animDuration = 800;
-        const animStart = performance.now();
-
-        function drawGrid() {
-            ctx.strokeStyle = 'rgba(107, 114, 128, 0.08)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= yGridCount; i++) {
-                const y = padding.top + (chartH / yGridCount) * i;
-                ctx.beginPath();
-                ctx.moveTo(padding.left, y);
-                ctx.lineTo(canvasW - padding.right, y);
-                ctx.stroke();
-                const value = Math.round(maxCount - (maxCount / yGridCount) * i);
-                ctx.fillStyle = '#9ca3af';
-                ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(value.toString(), padding.left - 6, y);
-            }
-        }
-
-        function drawXLabels() {
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            const step = Math.max(1, Math.ceil(data.dates.length / 8));
-            data.dates.forEach((date, i) => {
-                if (i % step === 0 || i === data.dates.length - 1) {
-                    const x = padding.left + i * xStep;
-                    const parts = date.split('-');
-                    ctx.fillText(`${parts[1]}-${parts[2]}`, x, canvasH - padding.bottom + 8);
-                }
-            });
-        }
-
-        function animateModel(now) {
-            const elapsed = now - animStart;
-            const progress = Math.min(elapsed / animDuration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const drawCount = Math.ceil(data.dates.length * eased);
-
-            ctx.clearRect(0, 0, canvasW, canvasH);
-            drawGrid();
-
-            allPoints.length = 0;
-
-            data.models.forEach((model, modelIndex) => {
-                const color = MODEL_COLORS[modelIndex % MODEL_COLORS.length];
-                const points = [];
-
-                for (let i = 0; i < drawCount; i++) {
-                    const date = data.dates[i];
-                    const count = model.dates[date] || 0;
-                    const x = padding.left + i * xStep;
-                    const y = padding.top + chartH - count * yScale;
-                    points.push({ x, y, date, count, modelName: model.name, color });
-                }
-
-                // 折线
-                if (points.length > 0) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 1.5;
-                    ctx.lineJoin = 'round';
-                    ctx.lineCap = 'round';
-                    points.forEach((p, i) => {
-                        if (i === 0) ctx.moveTo(p.x, p.y);
-                        else ctx.lineTo(p.x, p.y);
-                    });
-                    ctx.stroke();
-
-                    // 数据点
-                    points.forEach(p => {
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
-                        ctx.fillStyle = '#fff';
-                        ctx.fill();
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1.5;
-                        ctx.stroke();
-                    });
-                }
-
-                allPoints.push(...points);
-            });
-
-            drawXLabels();
-
-            if (progress < 1) {
-                requestAnimationFrame(animateModel);
-            } else {
-                canvas.chartData = { points: allPoints, padding };
-                if (tooltip) {
-                    canvas.onmousemove = function(e) {
-                        const canvasRect = canvas.getBoundingClientRect();
-                        const mouseX = e.clientX - canvasRect.left;
-                        const mouseY = e.clientY - canvasRect.top;
-                        let found = null;
-                        for (const p of allPoints) {
-                            if (Math.sqrt(Math.pow(mouseX - p.x, 2) + Math.pow(mouseY - p.y, 2)) <= 10) {
-                                found = p;
-                                break;
-                            }
-                        }
-                        if (found) {
-                            tooltip.innerHTML = `<strong>${found.modelName}</strong><br/>${found.date}<br/>审核量：${found.count}`;
-                            tooltip.style.display = 'block';
-                            tooltip.style.left = found.x + 'px';
-                            tooltip.style.top = (found.y - 45) + 'px';
-                        } else {
-                            tooltip.style.display = 'none';
-                        }
-                    };
-                    canvas.onmouseleave = function() {
-                        tooltip.style.display = 'none';
-                    };
-                }
-            }
-        }
-        requestAnimationFrame(animateModel);
     }
 
-    function renderModelLegend(models) {
+    // 单个机型的每日审核量柱状图（DOM 实现：柱 + 悬停日期/台数）
+    function buildModelDailyBars(model, dateWindow) {
+        const box = document.createElement('div');
+        box.className = 're-mdaily-box';
+        const maxDay = Math.max(...dateWindow.map(d => model.dates[d] || 0), 1);
+        const showLabelStep = Math.max(1, Math.ceil(dateWindow.length / 10));
+
+        dateWindow.forEach((date, i) => {
+            const count = model.dates[date] || 0;
+            const hPct = Math.max((count / maxDay) * 100, count > 0 ? 6 : 2);
+            const col = document.createElement('div');
+            col.className = 're-mdaily-col' + (count > 0 ? '' : ' zero');
+            col.style.height = hPct + '%';
+            col.dataset.tip = `${date} · ${count} 台`;
+            // 日期标签（稀疏显示防拥挤）
+            if (i % showLabelStep === 0 || i === dateWindow.length - 1) {
+                col.dataset.label = date.slice(5);
+            }
+            box.appendChild(col);
+        });
+        return box;
+    }
+
+    function renderModelLegend(allModels, grandTotal) {
         const legendEl = document.getElementById('re-model-legend');
         if (!legendEl) return;
         legendEl.innerHTML = '';
-        models.forEach((model, index) => {
-            const color = MODEL_COLORS[index % MODEL_COLORS.length];
-            const item = document.createElement('div');
-            item.className = 're-legend-item';
-            item.innerHTML = `<span class="re-legend-color" style="background: ${color}"></span><span>${model.name} (${model.total})</span>`;
-            legendEl.appendChild(item);
+        if (allModels.length === 0) {
+            legendEl.style.display = 'none';
+            return;
+        }
+        legendEl.style.display = '';
+        const shown = allModels.slice(0, modelTopN);
+        const restCount = allModels.length - shown.length;
+        const restTotal = allModels.slice(modelTopN).reduce((s, m) => s + m.total, 0);
+        const summary = document.createElement('span');
+        summary.className = 're-legend-item';
+        summary.style.cursor = 'default';
+        summary.textContent = `共 ${allModels.length} 个机型 · ${grandTotal} 台` + (restCount > 0 ? ` · 其余 ${restCount} 个机型 ${restTotal} 台` : '');
+        legendEl.appendChild(summary);
+    }
+
+    // 历史记录浮卡（单例 DOM + 显示/隐藏定时器）
+    // 交互为 Lightbox 模式：悬停记录行 → 浮出小卡片预览；点击行/卡片 → 放大居中模态；
+    // 收起只走显式动作：点击卡片外部任意处 / 点击卡片本体或 ✕ / 按 Esc（不再依据鼠标移动轨迹判定）
+    let histHoverCardEl = null;
+    let histHoverBackdropEl = null;
+    let histHoverShowTimer = null;
+    let histHoverHideTimer = null;
+    let histHoverDocListenersBound = false;
+
+    function getHistoryHoverCard() {
+        if (histHoverCardEl && document.body.contains(histHoverCardEl)) return histHoverCardEl;
+        histHoverBackdropEl = document.createElement('div');
+        histHoverBackdropEl.className = 're-history-hover-backdrop';
+        document.body.appendChild(histHoverBackdropEl);
+
+        histHoverCardEl = document.createElement('div');
+        histHoverCardEl.className = 're-history-hover-card';
+        histHoverCardEl.innerHTML = `
+            <button class="re-history-hover-card-close" type="button" title="收起 (Esc)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="re-history-hover-card-head">
+                <span class="re-history-hover-card-name"></span>
+                <span class="re-history-hover-card-time"></span>
+            </div>
+            <div class="re-history-hover-card-tags">
+                <span class="re-history-hover-card-model"></span>
+                <span class="re-history-hover-card-shop"></span>
+            </div>
+            <div class="re-history-hover-card-remark">
+                <span class="re-history-hover-card-remark-label">备注快照</span>
+                <span class="re-history-hover-card-remark-text"></span>
+            </div>
+        `;
+        document.body.appendChild(histHoverCardEl);
+        // 鼠标移入小卡片：保持显示（放大改为点击触发，悬停不再自动 zoom）
+        histHoverCardEl.addEventListener('mouseenter', function() {
+            if (histHoverCardEl.classList.contains('zoomed')) return;
+            clearTimeout(histHoverHideTimer);
+            clearTimeout(histHoverShowTimer);
         });
+        // 移出未放大的小卡片：延迟隐藏；放大态为模态，不受鼠标移出影响
+        histHoverCardEl.addEventListener('mouseleave', function() {
+            if (histHoverCardEl.classList.contains('zoomed')) return;
+            clearTimeout(histHoverShowTimer);
+            histHoverHideTimer = setTimeout(hideHistoryHoverCard, 100);
+        });
+        // 点击卡片：✕ 或点击本体收起（框选文本准备复制时不收起）；小卡片点击 → 放大居中
+        histHoverCardEl.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (e.target.closest('.re-history-hover-card-close')) {
+                hideHistoryHoverCard();
+                return;
+            }
+            if (histHoverCardEl.classList.contains('zoomed')) {
+                const sel = window.getSelection();
+                if (sel && sel.toString()) return;
+                hideHistoryHoverCard();
+            } else {
+                zoomHistoryHoverCard();
+            }
+        });
+        // document 级监听只绑定一次（卡片重建不重复注册）
+        if (!histHoverDocListenersBound) {
+            histHoverDocListenersBound = true;
+            // 放大态按 Esc 收起
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && histHoverCardEl && histHoverCardEl.classList.contains('zoomed')) {
+                    hideHistoryHoverCard();
+                }
+            });
+            // 放大态点击卡片外部（含遮罩、面板）收起；该点击仅用于收起卡片，
+            // stopPropagation 阻止它继续触发「面板外点关闭」（卡片挂 body 上，不在 panel 内）
+            document.addEventListener('click', function(e) {
+                if (histHoverCardEl && histHoverCardEl.classList.contains('zoomed') && !histHoverCardEl.contains(e.target)) {
+                    hideHistoryHoverCard();
+                    e.stopPropagation();
+                }
+            }, true);
+        }
+        return histHoverCardEl;
+    }
+
+    // 放大为模态（Lightbox）：卡片居中至主面板 60% 大小，点亮背景遮罩
+    function zoomHistoryHoverCard() {
+        if (!histHoverCardEl) return;
+        clearTimeout(histHoverShowTimer);
+        clearTimeout(histHoverHideTimer);
+        histHoverCardEl.classList.add('zoomed');
+        if (histHoverBackdropEl) histHoverBackdropEl.classList.add('show');
+    }
+
+    function showHistoryHoverCard(itemEl) {
+        const card = getHistoryHoverCard();
+        card.querySelector('.re-history-hover-card-name').textContent = decodeURIComponent(itemEl.getAttribute('data-name') || '') || '未知';
+        card.querySelector('.re-history-hover-card-time').textContent = itemEl.getAttribute('data-time') || '';
+        card.querySelector('.re-history-hover-card-model').textContent = decodeURIComponent(itemEl.getAttribute('data-model') || '') || '未知机型';
+        card.querySelector('.re-history-hover-card-shop').textContent = decodeURIComponent(itemEl.getAttribute('data-shop') || '') || '未知店铺';
+        const previewText = decodeURIComponent(itemEl.getAttribute('data-preview') || '');
+        card.querySelector('.re-history-hover-card-remark-text').textContent = previewText || '（无备注）';
+
+        // fixed 定位：默认出现在行右侧，越界时向左翻转，底部钳制在视口内
+        card.classList.add('show');
+        const rect = itemEl.getBoundingClientRect();
+        const cardH = card.offsetHeight;
+        const cardW = 300;
+        let left = rect.right + 4;
+        if (left + cardW > window.innerWidth - 8) {
+            left = Math.max(8, rect.left - cardW - 4);
+            card.classList.add('flip-left');
+        } else {
+            card.classList.remove('flip-left');
+        }
+        let top = rect.top;
+        if (top + cardH > window.innerHeight - 8) {
+            top = Math.max(8, window.innerHeight - cardH - 8);
+        }
+        card.style.left = left + 'px';
+        card.style.top = top + 'px';
+    }
+
+    function hideHistoryHoverCard() {
+        if (histHoverCardEl) {
+            histHoverCardEl.classList.remove('show', 'zoomed');
+        }
+        if (histHoverBackdropEl) {
+            histHoverBackdropEl.classList.remove('show');
+        }
     }
 
     function renderHistoryRecords(searchTerm = '') {
@@ -6011,7 +6697,9 @@
 
                 sortedDates.forEach(date => {
                     const dateObj = new Date(date);
+                    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
                     const dateStr = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
+                    const weekStr = weekDays[dateObj.getDay()];
                     const items = monthData[date];
                 const totalCount = items.length;
                 const displayCount = 4;
@@ -6020,21 +6708,24 @@
                 let itemsHtml = '';
                 items.forEach((item, index) => {
                     const isHidden = index >= displayCount;
+                    const timeStr = (item.time || '').substring(0, 5);
                     itemsHtml += `
-                        <div class="re-history-item ${isHidden ? 're-history-item-hidden' : ''}" data-id="${item.id}">
-                            <div class="re-history-item-header">
-                                <span class="re-history-item-index">${index + 1}</span>
-                                <span class="re-history-item-name">${item.name || '未知'}</span>
-                                <span class="re-history-item-model">${item.model || '未知机型'}</span>
-                                <span class="re-history-item-shop">${item.shop || '未知店铺'}</span>
-                                <button class="re-history-item-delete" data-id="${item.id}" title="删除">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="re-history-item-preview" data-preview="${encodeURIComponent(item.preview || '')}"></div>
+                        <div class="re-history-item ${isHidden ? 're-history-item-hidden' : ''}" data-id="${item.id}"
+                             data-name="${encodeURIComponent(item.name || '')}"
+                             data-time="${timeStr}"
+                             data-model="${encodeURIComponent(item.model || '')}"
+                             data-shop="${encodeURIComponent(item.shop || '')}"
+                             data-preview="${encodeURIComponent(item.preview || '')}">
+                            <span class="re-history-item-name" title="${item.name || ''}">${item.name || '未知'}</span>
+                            <span class="re-history-item-time">${timeStr}</span>
+                            <span class="re-history-item-model" title="${item.model || ''}">${item.model || '未知机型'}</span>
+                            <span class="re-history-item-shop" title="${item.shop || ''}">${item.shop || '未知店铺'}</span>
+                            <button class="re-history-item-delete" data-id="${item.id}" title="删除">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
                         </div>
                     `;
                 });
@@ -6042,21 +6733,9 @@
                 dayCards.push(`
                     <div class="re-history-day-card" data-date="${date}">
                         <div class="re-history-day-header">
-                            <span class="re-history-day-title">${dateStr}</span>
+                            <span class="re-history-day-title">${dateStr} <span style="font-weight:400;color:#6b7280;">${weekStr}</span></span>
                             <span class="re-history-day-count">共 ${totalCount} 条</span>
                             <div class="re-history-day-actions">
-                                <button class="re-history-day-more" data-date="${date}" title="展开更多" style="${hasMore ? '' : 'display:none;'}">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="1"></circle>
-                                        <circle cx="19" cy="12" r="1"></circle>
-                                        <circle cx="5" cy="12" r="1"></circle>
-                                    </svg>
-                                </button>
-                                <button class="re-history-day-collapse" data-date="${date}" title="折叠" style="display:none;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="18 15 12 9 6 15"></polyline>
-                                    </svg>
-                                </button>
                                 <button class="re-history-day-export" data-date="${date}" title="导出Excel">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -6072,17 +6751,17 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="re-history-day-content collapsed">${itemsHtml}</div>
+                        <div class="re-history-day-content collapsed">
+                            ${itemsHtml}
+                            <button class="re-history-day-more" data-date="${date}" style="${hasMore ? '' : 'display:none;'}">展开剩余 ${totalCount - displayCount} 条</button>
+                            <button class="re-history-day-collapse" data-date="${date}" style="display:none;">收起</button>
+                        </div>
                     </div>
                 `);
                 });
 
-                // 将该月份的日期卡片按每行3个分组
-                let rowsHtml = '';
-                for (let i = 0; i < dayCards.length; i += 3) {
-                    const rowCards = dayCards.slice(i, i + 3);
-                    rowsHtml += `<div class="re-history-day-row">${rowCards.join('')}</div>`;
-                }
+                // 日期卡片放入自适应栅格容器（宽屏自动3列、常规2列，无需手动分组）
+                const rowsHtml = `<div class="re-history-day-row">${dayCards.join('')}</div>`;
 
                 // 生成月份折叠容器
                 monthSectionsHtml += `
@@ -6191,7 +6870,7 @@
 
                     content.classList.add('expanded');
                     content.classList.remove('collapsed');
-                    hiddenItems = card.querySelectorAll('.re-history-item-hidden');
+                    const hiddenItems = card.querySelectorAll('.re-history-item-hidden');
                     hiddenItems.forEach(item => {
                         item.classList.remove('re-history-item-hidden');
                     });
@@ -6225,21 +6904,34 @@
             });
 
             container.querySelectorAll('.re-history-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (e.target.closest('.re-history-item-delete')) return;
-
-                    const previewEl = this.querySelector('.re-history-item-preview');
-                    const previewText = decodeURIComponent(previewEl.getAttribute('data-preview') || '');
-
-                    if (previewText && !previewEl.classList.contains('show')) {
-                        previewEl.textContent = previewText;
-                        previewEl.classList.add('show');
-                    } else {
-                        previewEl.classList.remove('show');
-                        previewEl.textContent = '';
-                    }
+                // 悬停浮出完整信息卡（120ms 延迟防扫视闪烁），备注查看已由浮卡承担
+                item.addEventListener('mouseenter', function() {
+                    if (histHoverCardEl && histHoverCardEl.classList.contains('zoomed')) return; // 模态态不响应悬停
+                    clearTimeout(histHoverHideTimer);
+                    clearTimeout(histHoverShowTimer);
+                    const el = this;
+                    histHoverShowTimer = setTimeout(function() {
+                        showHistoryHoverCard(el);
+                    }, 120);
+                });
+                item.addEventListener('mouseleave', function() {
+                    if (histHoverCardEl && histHoverCardEl.classList.contains('zoomed')) return; // 模态态不受移出影响
+                    clearTimeout(histHoverShowTimer);
+                    histHoverHideTimer = setTimeout(hideHistoryHoverCard, 200);
+                });
+                // 点击记录行 → 浮卡放大为模态（Lightbox）；放大态下点击任意处的收起由全局捕获监听统一处理
+                item.addEventListener('click', function() {
+                    clearTimeout(histHoverShowTimer);
+                    clearTimeout(histHoverHideTimer);
+                    showHistoryHoverCard(this);
+                    void histHoverCardEl.offsetWidth; // 先在行旁定位，再放大，产生从行生长到屏幕中央的动画
+                    zoomHistoryHoverCard();
                 });
             });
+
+            // 滚动历史列表时收起浮卡（fixed 定位避免错位）
+            container.removeEventListener('scroll', hideHistoryHoverCard);
+            container.addEventListener('scroll', hideHistoryHoverCard);
 
             container.querySelectorAll('.re-history-item-delete').forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -6544,48 +7236,111 @@
         });
     }
 
+    // 多选下拉实例注册表：id → 挂在 body 上的宽下拉面板（fixed 定位，避开面板 transform 祖先）
+    const multiSelectDrops = {};
+
     function initMultiSelect() {
         const multiSelects = document.querySelectorAll('.re-multi-select');
+
+        function positionDropdown(multiSelect, dd) {
+            const header = multiSelect.querySelector('.re-multi-select-header');
+            if (!header) return;
+            const rect = header.getBoundingClientRect();
+            const w = dd.offsetWidth || 560;
+            const h = dd.offsetHeight || 200;
+            let left = rect.left;
+            let top = rect.bottom + 6;
+            if (left + w > window.innerWidth - 8) {
+                left = Math.max(8, window.innerWidth - 8 - w);
+            }
+            if (top + h > window.innerHeight - 8) {
+                top = Math.max(8, rect.top - 6 - h);
+            }
+            dd.style.left = left + 'px';
+            dd.style.top = top + 'px';
+        }
 
         multiSelects.forEach(multiSelect => {
             const header = multiSelect.querySelector('.re-multi-select-header');
             const textEl = multiSelect.querySelector('.re-multi-select-text');
-            const itemsContainer = multiSelect.querySelector('.re-multi-select-items');
-            const manageBtn = multiSelect.querySelector('.re-multi-select-manage');
             const multiSelectId = multiSelect.id;
 
             const defaultOptions = ['有近三个月证明', '无证明', '有社保', '有公积金'];
 
+            // 宽下拉面板：挂 body，fixed 定位由 JS 计算
+            const dd = document.createElement('div');
+            dd.className = 're-multi-select-dropdown';
+            dd.dataset.owner = multiSelectId;
+            dd.innerHTML = `
+                <div class="re-multi-select-items"></div>
+                <div class="re-multi-select-foot">
+                    <span class="re-multi-select-count">已选 0 项</span>
+                    <button type="button" class="re-multi-select-foot-btn clear" title="清空已选">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span>清空</span>
+                    </button>
+                    <button type="button" class="re-multi-select-foot-btn manage" title="管理选项">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span>管理选项</span>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(dd);
+            multiSelectDrops[multiSelectId] = dd;
+
+            const itemsContainer = dd.querySelector('.re-multi-select-items');
+            const countEl = dd.querySelector('.re-multi-select-count');
+            const clearBtn = dd.querySelector('.re-multi-select-foot-btn.clear');
+            const manageBtn = dd.querySelector('.re-multi-select-foot-btn.manage');
+
             function renderOptions(options) {
+                // 重渲染时保留已勾选状态（管理选项增删后不丢选择）
+                const prevChecked = new Set(
+                    Array.from(dd.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
+                );
                 itemsContainer.innerHTML = '';
                 options.forEach(opt => {
                     const label = document.createElement('label');
                     label.className = 're-multi-select-item';
                     label.innerHTML = `
                         <input type="checkbox" value="${opt}">
-                        <span>${opt}</span>
+                        <span class="re-multi-select-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </span>
+                        <span class="re-multi-select-item-text">${opt}</span>
                     `;
-                    itemsContainer.appendChild(label);
-
-                    label.querySelector('input').addEventListener('change', function() {
+                    const input = label.querySelector('input');
+                    input.checked = prevChecked.has(opt);
+                    if (input.checked) label.classList.add('sel');
+                    input.addEventListener('change', function() {
+                        label.classList.toggle('sel', this.checked);
                         updateText();
                         if (typeof updateRiskPreview === 'function') {
                             updateRiskPreview();
                         }
                     });
+                    itemsContainer.appendChild(label);
                 });
             }
 
             function updateText() {
-                const checkboxes = multiSelect.querySelectorAll('input[type="checkbox"]:checked');
+                const checkboxes = dd.querySelectorAll('input[type="checkbox"]:checked');
                 const selected = Array.from(checkboxes).map(cb => cb.value);
-
+                countEl.textContent = `已选 ${selected.length} 项`;
                 if (selected.length === 0) {
                     textEl.textContent = '选择证明';
-                } else if (selected.length > 2) {
-                    textEl.textContent = `已勾选${selected.length}条数据`;
+                    textEl.removeAttribute('title');
                 } else {
                     textEl.textContent = selected.join('、');
+                    textEl.title = selected.join('、');
                 }
             }
 
@@ -6598,27 +7353,72 @@
                 updateText();
             });
 
+            function closeDropdown() {
+                multiSelect.classList.remove('open');
+                dd.classList.remove('open');
+            }
+
             header.addEventListener('click', function(e) {
                 e.stopPropagation();
-                multiSelect.classList.toggle('open');
+                // 先关掉其他实例
+                Object.keys(multiSelectDrops).forEach(key => {
+                    if (key !== multiSelectId) {
+                        const other = document.getElementById(key);
+                        if (other) other.classList.remove('open');
+                        multiSelectDrops[key].classList.remove('open');
+                    }
+                });
+                const willOpen = !dd.classList.contains('open');
+                multiSelect.classList.toggle('open', willOpen);
+                dd.classList.toggle('open', willOpen);
+                if (willOpen) {
+                    positionDropdown(multiSelect, dd);
+                }
             });
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dd.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+                    dd.querySelectorAll('.re-multi-select-item.sel').forEach(item => item.classList.remove('sel'));
+                    updateText();
+                    if (typeof updateRiskPreview === 'function') {
+                        updateRiskPreview();
+                    }
+                });
+            }
 
             if (manageBtn) {
                 manageBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    multiSelect.classList.remove('open');
+                    closeDropdown();
                     showMultiSelectManageModal(multiSelectId, defaultOptions, renderOptions);
                 });
             }
         });
 
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.re-multi-select')) {
-                document.querySelectorAll('.re-multi-select.open').forEach(el => {
-                    el.classList.remove('open');
-                });
+            if (!e.target.closest('.re-multi-select') && !e.target.closest('.re-multi-select-dropdown')) {
+                document.querySelectorAll('.re-multi-select.open').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.re-multi-select-dropdown.open').forEach(el => el.classList.remove('open'));
             }
         });
+
+        // Esc 关闭所有下拉
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.re-multi-select.open').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.re-multi-select-dropdown.open').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        // 任意容器滚动时重新定位打开的下拉
+        document.addEventListener('scroll', function() {
+            document.querySelectorAll('.re-multi-select-dropdown.open').forEach(ddEl => {
+                const owner = document.getElementById(ddEl.dataset.owner);
+                if (owner) positionDropdown(owner, ddEl);
+            });
+        }, true);
     }
 
     function showMultiSelectManageModal(multiSelectId, defaultOptions, renderCallback) {
@@ -6626,30 +7426,40 @@
         if (!manageModal) {
             manageModal = document.createElement('div');
             manageModal.id = 're-multi-select-manage-modal';
-            manageModal.className = 're-select-manage-modal';
+            manageModal.className = 're-msmanage-modal';
             manageModal.innerHTML = `
-                <div class="re-select-manage-content">
-                    <div class="re-select-manage-header">
-                        <span class="re-select-manage-title">管理工作证明选项</span>
-                        <button class="re-select-manage-close">
+                <div class="re-msmanage-content">
+                    <div class="re-msmanage-head">
+                        <span class="re-msmanage-title">管理工作证明选项</span>
+                        <span class="re-msmanage-count">0 项</span>
+                        <button type="button" class="re-msmanage-close" title="关闭">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
                         </button>
                     </div>
-                    <div class="re-select-manage-body">
-                        <div class="re-select-manage-add">
-                            <input type="text" class="re-select-manage-input" placeholder="输入新选项">
-                            <button class="re-select-manage-add-btn">添加</button>
-                        </div>
-                        <div class="re-select-manage-list" id="re-multi-select-manage-list"></div>
+                    <div class="re-msmanage-add">
+                        <input type="text" class="re-msmanage-input" placeholder="输入新选项，多个用顿号分隔">
+                        <button type="button" class="re-msmanage-addbtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            添加
+                        </button>
+                    </div>
+                    <div class="re-msmanage-hint">支持批量添加：一次输入多个选项，用「、」或「,」分隔</div>
+                    <div class="re-msmanage-list" id="re-multi-select-manage-list"></div>
+                    <div class="re-msmanage-foot">
+                        <span class="re-msmanage-note">拖动 ⠿ 调整顺序（影响下拉展示顺序）</span>
+                        <button type="button" class="re-msmanage-reset">恢复默认选项</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(manageModal);
 
-            manageModal.querySelector('.re-select-manage-close').addEventListener('click', function() {
+            manageModal.querySelector('.re-msmanage-close').addEventListener('click', function() {
                 manageModal.classList.remove('show');
             });
 
@@ -6658,42 +7468,43 @@
                     manageModal.classList.remove('show');
                 }
             });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    manageModal.classList.remove('show');
+                }
+            });
         }
 
-        manageModal.querySelector('.re-select-manage-title').textContent = '管理工作证明选项';
+        const countEl = manageModal.querySelector('.re-msmanage-count');
 
         function renderManageList(options) {
             const listEl = manageModal.querySelector('#re-multi-select-manage-list');
+            const GRIP_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"></circle><circle cx="15" cy="6" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="9" cy="18" r="1.6"></circle><circle cx="15" cy="18" r="1.6"></circle></svg>`;
+            const TRASH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+            const LOCK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
             let html = '';
             options.forEach((opt, idx) => {
                 const isDefault = defaultOptions.includes(opt);
                 html += `
-                    <div class="re-select-manage-item ${isDefault ? '' : 'custom'}" data-idx="${idx}" draggable="true">
-                        <div class="re-select-manage-item-left">
-                            <span class="re-select-manage-drag-handle">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="9" cy="6" r="1"></circle>
-                                    <circle cx="15" cy="6" r="1"></circle>
-                                    <circle cx="9" cy="12" r="1"></circle>
-                                    <circle cx="15" cy="12" r="1"></circle>
-                                    <circle cx="9" cy="18" r="1"></circle>
-                                    <circle cx="15" cy="18" r="1"></circle>
-                                </svg>
-                            </span>
-                            <span class="re-select-manage-item-text">${opt}${isDefault ? '' : ' (自定义)'}</span>
-                        </div>
-                        ${!isDefault ? `<button class="re-select-manage-item-delete" data-value="${opt}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>` : ''}
+                    <div class="re-msmanage-item ${isDefault ? '' : 'custom'}" draggable="true">
+                        <span class="re-msmanage-grip">${GRIP_SVG}</span>
+                        <span class="re-msmanage-num">${idx + 1}</span>
+                        <span class="re-msmanage-text">${opt}</span>
+                        ${isDefault ? `
+                            <span class="re-msmanage-tag def">默认</span>
+                            <span class="re-msmanage-lock" title="默认选项不可删除">${LOCK_SVG}</span>
+                        ` : `
+                            <span class="re-msmanage-tag cus">自定义</span>
+                            <button type="button" class="re-msmanage-del" data-value="${opt}" title="删除">${TRASH_SVG}</button>
+                        `}
                     </div>
                 `;
             });
             listEl.innerHTML = html;
+            countEl.textContent = options.length + ' 项';
 
-            listEl.querySelectorAll('.re-select-manage-item-delete').forEach(btn => {
+            listEl.querySelectorAll('.re-msmanage-del').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const value = this.getAttribute('data-value');
                     getMultiSelectOptions(multiSelectId).then(savedOptions => {
@@ -6708,7 +7519,7 @@
             });
 
             let draggedItem = null;
-            listEl.querySelectorAll('.re-select-manage-item').forEach(item => {
+            listEl.querySelectorAll('.re-msmanage-item').forEach(item => {
                 item.addEventListener('dragstart', function(e) {
                     draggedItem = this;
                     this.classList.add('dragging');
@@ -6717,7 +7528,7 @@
 
                 item.addEventListener('dragend', function() {
                     this.classList.remove('dragging');
-                    listEl.querySelectorAll('.re-select-manage-item').forEach(i => {
+                    listEl.querySelectorAll('.re-msmanage-item').forEach(i => {
                         i.classList.remove('drag-over');
                     });
                 });
@@ -6739,7 +7550,7 @@
                     this.classList.remove('drag-over');
 
                     if (this !== draggedItem) {
-                        const allItems = Array.from(listEl.querySelectorAll('.re-select-manage-item'));
+                        const allItems = Array.from(listEl.querySelectorAll('.re-msmanage-item'));
                         const fromIdx = allItems.indexOf(draggedItem);
                         const toIdx = allItems.indexOf(this);
 
@@ -6757,32 +7568,51 @@
             });
         }
 
-        const addInput = manageModal.querySelector('.re-select-manage-input');
-        const addBtn = manageModal.querySelector('.re-select-manage-add-btn');
+        const addInput = manageModal.querySelector('.re-msmanage-input');
+        const addBtn = manageModal.querySelector('.re-msmanage-addbtn');
+        const resetBtn = manageModal.querySelector('.re-msmanage-reset');
 
         addInput.value = '';
 
+        // 批量添加：顿号/逗号分隔，重复项自动跳过
         addBtn.onclick = function() {
-            const newValue = addInput.value.trim();
-            if (newValue) {
-                getMultiSelectOptions(multiSelectId).then(savedOptions => {
-                    const options = savedOptions.length > 0 ? savedOptions : [...defaultOptions];
-                    if (!options.includes(newValue)) {
-                        options.push(newValue);
-                        saveMultiSelectOptions(multiSelectId, options).then(() => {
-                            renderManageList(options);
-                            renderCallback(options);
-                            addInput.value = '';
-                        });
+            const raw = addInput.value.trim();
+            if (!raw) return;
+            const newValues = raw.split(/[、,，]/).map(s => s.trim()).filter(Boolean);
+            if (newValues.length === 0) return;
+            getMultiSelectOptions(multiSelectId).then(savedOptions => {
+                const options = savedOptions.length > 0 ? savedOptions : [...defaultOptions];
+                let added = false;
+                newValues.forEach(v => {
+                    if (!options.includes(v)) {
+                        options.push(v);
+                        added = true;
                     }
                 });
-            }
+                if (added) {
+                    saveMultiSelectOptions(multiSelectId, options).then(() => {
+                        renderManageList(options);
+                        renderCallback(options);
+                    });
+                }
+                addInput.value = '';
+            });
         };
 
         addInput.onkeydown = function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 addBtn.click();
             }
+        };
+
+        // 恢复默认选项：一键还原四个预设项
+        resetBtn.onclick = function() {
+            const defaults = [...defaultOptions];
+            saveMultiSelectOptions(multiSelectId, defaults).then(() => {
+                renderManageList(defaults);
+                renderCallback(defaults);
+            });
         };
 
         getMultiSelectOptions(multiSelectId).then(savedOptions => {
@@ -6797,7 +7627,9 @@
         const multiSelect = document.getElementById(id);
         if (!multiSelect) return [];
 
-        const checkboxes = multiSelect.querySelectorAll('.re-multi-select-items input[type="checkbox"]:checked');
+        // 下拉面板挂载在 body 上（注册表索引），勾选状态从那里读取
+        const root = multiSelectDrops[id] || multiSelect;
+        const checkboxes = root.querySelectorAll('.re-multi-select-items input[type="checkbox"]:checked');
         return Array.from(checkboxes).map(cb => cb.value);
     }
 
@@ -7488,9 +8320,12 @@
         const isClickOnDayEditModal = dayEditModal && dayEditModal.contains(e.target);
         const repeatOrdersModal = document.getElementById('re-repeat-orders-modal');
         const isClickOnRepeatOrdersModal = repeatOrdersModal && repeatOrdersModal.contains(e.target);
+        // 宽下拉面板与历史悬停浮卡挂在 body 上（fixed 定位避开面板 transform 祖先），需排除
+        const isClickOnMultiSelectDrop = e.target.closest && e.target.closest('.re-multi-select-dropdown');
+        const isClickOnHistHoverCard = e.target.closest && e.target.closest('.re-history-hover-card');
         const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnLayuiLayer) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -7642,10 +8477,8 @@
                     lazyInit.analysis = true;
                     renderAnalysisData();
                     renderModelAnalysis();
-                } else {
-                    renderAnalysisData();
-                    renderModelAnalysis();
                 }
+                // 数据不变时静默重绘（drawOrderChart 内部指纹比对跳过动画）
             }
         });
     });
@@ -7726,8 +8559,8 @@
     }
 
     function isRestrictAppStoreModel() {
-        // 17 Pro / 17 Pro Max 全系（新机 + 二手）
-        return /17\s*pro/i.test(cachedProductModel);
+        // 16 Pro / 16 Pro Max / 17 Pro / 17 Pro Max 全系（新机 + 二手）
+        return /(1[67])\s*pro/i.test(cachedProductModel);
     }
 
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
@@ -7924,8 +8757,6 @@
                 if (ageNum >= CONFIG.THRESHOLD.overageAge) {
                     showTooltip('超龄顾客', window.innerWidth / 2, window.innerHeight / 2);
                 }
-                // 年龄数据填充完成后更新风险面板
-                updateRiskPanel();
             }
         } catch (e) {
         }
@@ -8351,7 +9182,9 @@
             // 标题右侧胶囊：禁止AppStore / 超龄客户 / 复购客户（复购可点击查询历史订单）
             if (expandBadgeEl) {
                 let badges = '';
-                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">对客户：您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？ 【对商家：您现在办理的是17pro、17promax新机，全新机拆封后退单是需要支付折损费的，您这边需要跟客户沟通好是否能接受限制，若接受限制再办理，若不接受请勿拆封！】</span></span>';
+                // 话术中的机型系列按本单实际机型生成（16系/17系）
+                const restrictModelLabel = /16\s*pro/i.test(cachedProductModel) ? '16pro、16promax' : '17pro、17promax';
+                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">对客户：您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？ 【对商家：您现在办理的是' + restrictModelLabel + '新机，全新机拆封后退单是需要支付折损费的，您这边需要跟客户沟通好是否能接受限制，若接受限制再办理，若不接受请勿拆封！】</span></span>';
                 if (isSameDeviceModel()) badges += '<span class="re-same-model-badge" title="用户机型与本单机型相同，客户疑似办理相同设备">设备相同</span>';
                 // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
                 const headerText = panel.querySelector('.re-header-data')?.textContent || '';
@@ -8506,8 +9339,6 @@
                 }
             }).catch(function() {
             });
-            // 店铺数据填充完成后更新风险面板
-            updateRiskPanel();
         } catch (e) {
         }
     }
@@ -8620,7 +9451,6 @@
             completedRequests++;
             if (completedRequests >= totalRequests) {
                 if (refreshIcon) refreshIcon.style.animation = '';
-                updateRiskPanel();
             }
         }
 
@@ -8953,9 +9783,6 @@
                                 memberAmountEl.style.display = 'none';
                             }
                         }
-
-                        // 价格数据填充完成后更新风险面板
-                        updateRiskPanel();
 
                     } catch (e) {
                     }
@@ -9343,7 +10170,7 @@
             if (this.checked) {
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
-                // 默认写入并选中拓展类型（17Pro/17ProMax 二手机型特殊处理）
+                // 默认写入并选中拓展类型（16Pro/16ProMax/17Pro/17ProMax 机型特殊处理）
                 const defaultExpandType = isRestrictAppStoreActive() ? '禁止AppStore+限制ID：' : '方案二：';
                 if (!Array.from(rentExpandSelect.options).some(o => o.value === defaultExpandType)) {
                     const opt = document.createElement('option');
@@ -10067,276 +10894,6 @@
         }, CONFIG.TIME.toastDuration);
     }
 
-    // 风险面板相关函数
-    function collectRiskItems() {
-        const riskItems = [];
-
-        // 1. 共租维度
-        const newRentEl = document.getElementById('re-new-rent');
-        if (newRentEl) {
-            const value = newRentEl.textContent.trim();
-            if (value && value !== '无共租风险') {
-                riskItems.push({
-                    type: 'high',
-                    title: '共租维度',
-                    badge: value,
-                    detail: '存在共租风险'
-                });
-            }
-        }
-
-        // 2. 风控等级
-        const riskLevelEl = document.getElementById('re-risk-level');
-        if (riskLevelEl) {
-            const value = riskLevelEl.textContent.trim();
-            if (value && value.includes('高')) {
-                riskItems.push({
-                    type: 'high',
-                    title: '风控等级',
-                    badge: value,
-                    detail: '高风险客户'
-                });
-            }
-        }
-
-        // 3. V4风控
-        const v4RiskEl = document.getElementById('re-v4-risk');
-        if (v4RiskEl) {
-            const value = v4RiskEl.textContent.trim();
-            if (value && value.includes('高')) {
-                riskItems.push({
-                    type: 'high',
-                    title: 'V4风控',
-                    badge: value,
-                    detail: 'V4风控高风险'
-                });
-            }
-            // V4风控百分比超过50%
-            const v4Percent = parseFloat(value);
-            if (!isNaN(v4Percent) && v4Percent > 50) {
-                riskItems.push({
-                    type: 'high',
-                    title: 'V4风控偏高',
-                    badge: v4Percent + '元',
-                    detail: `初审<span>${v4Percent}元</span>，<span>阈值偏高</span>`
-                });
-            }
-        }
-
-        // 4. 司法风险
-        const legalStatusEl = document.getElementById('re-legal-status');
-        if (legalStatusEl) {
-            const value = legalStatusEl.textContent.trim();
-            if (value && value !== '没有司法风险人员') {
-                riskItems.push({
-                    type: 'high',
-                    title: '司法风险人员',
-                    badge: value,
-                    detail: '存在司法风险'
-                });
-            }
-        }
-
-        // 5. 店铺逾期率
-        const shopOverdueEl = document.getElementById('re-shop-overdue');
-        if (shopOverdueEl) {
-            const text = shopOverdueEl.textContent.trim();
-            const value = parseFloat(text);
-            if (!isNaN(value) && value > 6) {
-                riskItems.push({
-                    type: 'high',
-                    title: '店铺逾期率',
-                    badge: value + '%',
-                    detail: `逾期率<span>${value}%</span>，<span>阈值高</span>`
-                });
-            } else if (!isNaN(value) && value > 3) {
-                riskItems.push({
-                    type: 'medium',
-                    title: '店铺逾期率',
-                    badge: value + '%',
-                    detail: `逾期率<span>${value}%</span>，<span>阈值偏高</span>`
-                });
-            }
-        }
-
-        // 6. 店铺离线比例
-        const shopOfflineEl = document.getElementById('re-shop-offline');
-        if (shopOfflineEl) {
-            const text = shopOfflineEl.textContent.trim();
-            const value = parseFloat(text);
-            if (!isNaN(value) && value > 7) {
-                riskItems.push({
-                    type: 'high',
-                    title: '店铺离线比例',
-                    badge: value + '%',
-                    detail: `离线比例<span>${value}%</span>，<span>红色阈值</span>`
-                });
-            } else if (!isNaN(value) && value > 4) {
-                riskItems.push({
-                    type: 'medium',
-                    title: '店铺离线比例',
-                    badge: value + '%',
-                    detail: `离线比例<span>${value}%</span>，<span>黄色阈值</span>`
-                });
-            }
-        }
-
-        // 7. 店铺类型
-        const shopCategoryEl = document.getElementById('re-shop-category');
-        if (shopCategoryEl) {
-            const value = shopCategoryEl.textContent.trim();
-            if (value === '出资商家') {
-                riskItems.push({
-                    type: 'high',
-                    title: '店铺类型',
-                    badge: value,
-                    detail: '出资商家类型'
-                });
-            }
-        }
-
-        // 8. 超指导价
-        const phoneCostDiffContainer = document.getElementById('re-phone-cost-diff');
-        if (phoneCostDiffContainer) {
-            const priceDiffEl = phoneCostDiffContainer.querySelector('.re-price-diff');
-            if (priceDiffEl) {
-                const value = priceDiffEl.textContent.trim();
-                if (value && value.startsWith('超')) {
-                    riskItems.push({
-                        type: 'high',
-                        title: '超指导价',
-                        badge: value,
-                        detail: `手机成本<span>${value}</span>`
-                    });
-                }
-            }
-        }
-
-        // 9. 超龄客户
-        const headerDataEl = document.querySelector('.re-header-data');
-        if (headerDataEl) {
-            const text = headerDataEl.textContent.trim();
-            const ageMatch = text.match(/(\d+)岁/);
-            if (ageMatch) {
-                const value = parseInt(ageMatch[1]);
-                if (!isNaN(value) && value > CONFIG.THRESHOLD.overageAge) {
-                    riskItems.push({
-                        type: 'medium',
-                        title: '超龄客户',
-                        badge: value + '岁',
-                        detail: `年龄<span>${value}岁</span>，高阈值<span>${CONFIG.THRESHOLD.overageAge}岁</span>`
-                    });
-                }
-            }
-        }
-
-        // 10. 高风险机型
-        const productInfoEl = document.getElementById('re-product-info');
-        if (productInfoEl) {
-            const fullText = productInfoEl.textContent.trim();
-            // 提取纯机型名，去掉内存等后缀，如 "iPhone 17 Pro Max 256GB" → "iPhone 17 Pro Max"
-            const modelMatch = fullText.match(/^(iPhone\s+\d+\s+Pro\s+Max|iPhone\s+\d+\s+Pro)/i);
-            if (modelMatch) {
-                const modelName = modelMatch[0];
-                riskItems.push({
-                    type: 'high',
-                    title: '高风险机型',
-                    badge: modelName,
-                    detail: `机型<span>${modelName}</span>，属于高风险机型`
-                });
-            }
-        }
-
-        return riskItems;
-    }
-
-    function updateRiskPanel() {
-        const riskPanel = document.getElementById('re-risk-panel');
-        const riskContent = document.getElementById('re-risk-panel-content');
-        const riskCount = document.getElementById('re-risk-count');
-
-        if (!riskPanel || !riskContent) return;
-
-        const items = collectRiskItems();
-        const count = items.length;
-
-        // 更新数量
-        if (riskCount) {
-            riskCount.textContent = '(' + count + ')';
-        }
-
-        // 清空内容
-        riskContent.innerHTML = '';
-
-        // 如果无内容，显示空状态
-        if (items.length === 0) {
-            riskContent.innerHTML = `
-                <div class="re-risk-empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                    <span>所有检测项正常</span>
-                </div>
-            `;
-            return;
-        }
-
-        // 渲染项目
-        items.forEach(item => {
-            const itemEl = document.createElement('div');
-            itemEl.className = 're-risk-item re-risk-' + item.type;
-            itemEl.innerHTML = `
-                <div class="re-risk-item-header">
-                    <div class="re-risk-item-dot"></div>
-                    <span class="re-risk-item-title">${item.title}</span>
-                    <span class="re-risk-item-badge">${item.badge}</span>
-                </div>
-                <div class="re-risk-item-detail">${item.detail}</div>
-            `;
-            riskContent.appendChild(itemEl);
-        });
-    }
-
-    function toggleRiskPanel(show) {
-        const riskPanel = document.getElementById('re-risk-panel');
-        if (!riskPanel) return;
-
-        if (show) {
-            riskPanel.classList.add('re-risk-visible');
-            updateRiskPanel();
-        } else {
-            riskPanel.classList.remove('re-risk-visible');
-        }
-    }
-
-    // 风险面板开关事件
-    const riskPanelSwitch = document.getElementById('re-setting-risk-panel');
-    if (riskPanelSwitch) {
-        // 初始化开关状态
-        const savedState = GM_getValue(CONFIG.STORAGE.riskPanelEnabledKey, true);
-        riskPanelSwitch.checked = savedState;
-        if (savedState) {
-            toggleRiskPanel(true);
-        }
-
-        riskPanelSwitch.addEventListener('change', function() {
-            const enabled = this.checked;
-            GM_setValue(CONFIG.STORAGE.riskPanelEnabledKey, enabled);
-            toggleRiskPanel(enabled);
-        });
-    }
-
-    // 风险面板关闭按钮
-    const riskPanelCloseBtn = document.getElementById('re-risk-panel-close');
-    if (riskPanelCloseBtn) {
-        riskPanelCloseBtn.addEventListener('click', function() {
-            toggleRiskPanel(false);
-            const riskPanelSwitch = document.getElementById('re-setting-risk-panel');
-            if (riskPanelSwitch) {
-                riskPanelSwitch.checked = false;
-                GM_setValue(CONFIG.STORAGE.riskPanelEnabledKey, false);
-            }
-        });
-    }
-
     const staffRemarkBtn = document.getElementById('re-btn-staff-remark');
     if (staffRemarkBtn) {
         staffRemarkBtn.addEventListener('click', function() {
@@ -10692,6 +11249,11 @@
         document.getElementById('re-nl-huabei').textContent = huabei > 0 ? formatDisplay(huabei) : '未开通';
         document.getElementById('re-nl-douyin').textContent = douyin > 0 ? formatDisplay(douyin) : '未开通';
         document.getElementById('re-nl-meituan').textContent = meituan > 0 ? formatDisplay(meituan) : '未开通';
+        // 渠道卡片置灰：未开通的整体降级显示
+        document.getElementById('re-nl-chip-fenfu')?.classList.toggle('off', !(fenfu > 0));
+        document.getElementById('re-nl-chip-huabei')?.classList.toggle('off', !(huabei > 0));
+        document.getElementById('re-nl-chip-douyin')?.classList.toggle('off', !(douyin > 0));
+        document.getElementById('re-nl-chip-meituan')?.classList.toggle('off', !(meituan > 0));
 
         // 总计额度只计入分付和花呗，抖音和美团仅展示
         const totalCredit = huabei + fenfu;
@@ -10778,6 +11340,12 @@
     if (noLockBtn) {
         noLockBtn.addEventListener('click', function() {
             if (noLockPanel) {
+                // V4风控未刷新时阻断
+                const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
+                if (!v4RiskText) {
+                    showErrorToast('请等待风控刷新');
+                    return;
+                }
                 // 恢复上次保存的位置
                 const savedPos = GM_getValue('noLockPanelPosition');
                 if (savedPos) {
@@ -11478,14 +12046,31 @@
     applyFontSettings();
 
     function initAnalysisEvents() {
-        const analysisRangeSelect = document.getElementById('re-analysis-range');
-        if (analysisRangeSelect) {
-            analysisRangeSelect.addEventListener('change', renderAnalysisData);
+        // 趋势图范围切换（近7天/近14天/本月/上月），机型图联动同一范围
+        const analysisRangeTabs = document.getElementById('re-analysis-range');
+        if (analysisRangeTabs) {
+            analysisRangeTabs.addEventListener('click', function(e) {
+                const btn = e.target.closest('.re-rtab');
+                if (!btn) return;
+                analysisRangeTabs.querySelectorAll('.re-rtab').forEach(t => t.classList.remove('on'));
+                btn.classList.add('on');
+                analysisRange = btn.dataset.range;
+                renderAnalysisData();
+                renderModelAnalysis();
+            });
         }
 
-        const modelRangeSelect = document.getElementById('re-model-range');
-        if (modelRangeSelect) {
-            modelRangeSelect.addEventListener('change', renderModelAnalysis);
+        // 机型图 Top N 切换
+        const modelRangeTabs = document.getElementById('re-model-range');
+        if (modelRangeTabs) {
+            modelRangeTabs.addEventListener('click', function(e) {
+                const btn = e.target.closest('.re-rtab');
+                if (!btn) return;
+                modelRangeTabs.querySelectorAll('.re-rtab').forEach(t => t.classList.remove('on'));
+                btn.classList.add('on');
+                modelTopN = parseInt(btn.dataset.top, 10) || 5;
+                renderModelAnalysis();
+            });
         }
     }
 
