@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.7.0
+// @version      3.9.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -128,7 +128,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V3.7.0</span>
+                    <span class="re-panel-version">V3.9.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -2752,6 +2752,27 @@
         .re-repeat-serial {
             color: #dc2626;
             font-weight: 600;
+        }
+
+        /* 非「已买断」状态：订单号标红 */
+        .re-repeat-order-no-red {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        /* 未完结胶囊（订单号右侧，非「已买断」状态显示） */
+        .re-repeat-unfinished-badge {
+            display: inline-block;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 0 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+            white-space: nowrap;
         }
 
         .re-current-order-badge {
@@ -8559,8 +8580,8 @@
     }
 
     function isRestrictAppStoreModel() {
-        // 16 Pro / 16 Pro Max / 17 Pro / 17 Pro Max 全系（新机 + 二手）
-        return /(1[67])\s*pro/i.test(cachedProductModel);
+        // 16 Pro / 16 Pro Max + iPhone 17 全系（17 / 17 Pro / 17 Pro Max，不含 17e；新机 + 二手）
+        return /(16\s*pro|17(?!e|\d))/i.test(cachedProductModel);
     }
 
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
@@ -8865,10 +8886,12 @@
                 const isCurrent = order.orderNo === currentOrderNo;
                 const highlightSerial = !isCurrent
                     && orderToken && extractModelToken(order.model) === orderToken;
+                // 状态非「已买断」→ 订单号标红 + 右侧红色「未完结」胶囊
+                const isUnfinished = (order.state || '').trim() !== '已买断';
                 const item = document.createElement('div');
                 item.className = 're-model-order-item' + (isCurrent ? ' re-model-order-current' : '');
                 item.innerHTML = '<div class="re-model-order-info">'
-                    + '<div class="re-model-order-name">订单号：' + order.orderNo + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
+                    + '<div class="re-model-order-name">订单号：<span class="' + (isUnfinished ? 're-repeat-order-no-red' : '') + '">' + order.orderNo + '</span>' + (isUnfinished ? '<span class="re-repeat-unfinished-badge">未完结</span>' : '') + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
                     + '<div class="re-repeat-order-fields">'
                     + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
                     + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
@@ -9183,7 +9206,7 @@
             if (expandBadgeEl) {
                 let badges = '';
                 // 话术中的机型系列按本单实际机型生成（16系/17系）
-                const restrictModelLabel = /16\s*pro/i.test(cachedProductModel) ? '16pro、16promax' : '17pro、17promax';
+                const restrictModelLabel = /16\s*pro/i.test(cachedProductModel) ? '16pro、16promax' : '17、17pro、17promax';
                 if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">对客户：您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？ 【对商家：您现在办理的是' + restrictModelLabel + '新机，全新机拆封后退单是需要支付折损费的，您这边需要跟客户沟通好是否能接受限制，若接受限制再办理，若不接受请勿拆封！】</span></span>';
                 if (isSameDeviceModel()) badges += '<span class="re-same-model-badge" title="用户机型与本单机型相同，客户疑似办理相同设备">设备相同</span>';
                 // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
