@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      3.9.0
+// @version      4.5.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -128,7 +128,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V3.9.0</span>
+                    <span class="re-panel-version">V4.5.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -136,74 +136,6 @@
             <div class="re-drag-ghost">
                 <span class="re-drag-ghost-text">移动中...</span>
                 <button class="re-drag-cancel" id="re-drag-cancel-btn">取消移动</button>
-            </div>
-            <div class="re-no-lock-panel" id="re-no-lock-panel">
-                <div class="re-no-lock-header">
-                    <span class="re-no-lock-title">无锁判断</span>
-                    <button class="re-no-lock-close" id="re-no-lock-close">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                </div>
-                <div class="re-no-lock-content">
-                    <div class="re-nl-chips">
-                        <div class="re-nl-chip" id="re-nl-chip-fenfu">
-                            <span class="re-nl-chip-label">分付</span>
-                            <span class="re-nl-chip-val" id="re-nl-fenfu">未开通</span>
-                        </div>
-                        <div class="re-nl-chip" id="re-nl-chip-huabei">
-                            <span class="re-nl-chip-label">花呗</span>
-                            <span class="re-nl-chip-val" id="re-nl-huabei">未开通</span>
-                        </div>
-                        <div class="re-nl-chip re-nl-chip-dim" id="re-nl-chip-douyin">
-                            <span class="re-nl-chip-label">抖音 <em class="re-nl-tag">不计入</em></span>
-                            <span class="re-nl-chip-val" id="re-nl-douyin">未开通</span>
-                        </div>
-                        <div class="re-nl-chip re-nl-chip-dim" id="re-nl-chip-meituan">
-                            <span class="re-nl-chip-label">美团 <em class="re-nl-tag">不计入</em></span>
-                            <span class="re-nl-chip-val" id="re-nl-meituan">未开通</span>
-                        </div>
-                    </div>
-                    <div class="re-nl-params">
-                        <div class="re-nl-param">
-                            <span class="re-nl-param-label">总计额度</span>
-                            <span class="re-nl-param-val" id="re-nl-total">0.00</span>
-                        </div>
-                        <div class="re-nl-param">
-                            <span class="re-nl-param-label">V4 风控值</span>
-                            <span class="re-nl-param-val" id="re-nl-v4">0.00</span>
-                        </div>
-                        <div class="re-nl-param re-nl-param-cost">
-                            <span class="re-nl-param-label">手机成本</span>
-                            <div class="re-nl-cost-row">
-                                <input type="text" class="re-no-lock-input" id="re-nl-cost-input" placeholder="请输入成本">
-                                <button class="re-no-lock-recalc" id="re-nl-recalc">重算</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="re-no-lock-result">
-                        <div class="re-no-lock-status" id="re-nl-status">待计算</div>
-                        <div class="re-no-lock-result-sub">额度比例 <span id="re-nl-ratio">0.00%</span> ｜ 无锁最低 <span id="re-nl-min">0.00</span></div>
-                    </div>
-                    <div class="re-no-lock-preview">
-                        <div class="re-no-lock-preview-header">
-                            <span class="re-no-lock-preview-title">备注预览</span>
-                            <span class="re-no-lock-preview-actions">
-                                <button class="re-nl-pill re-nl-pill-primary" id="re-nl-submit-remark" title="提交客服备注">提交</button>
-                                <button class="re-nl-pill" id="re-nl-copy-remark" title="复制备注">复制</button>
-                            </span>
-                        </div>
-                        <textarea class="re-no-lock-preview-text" id="re-nl-preview-remark" readonly></textarea>
-                    </div>
-                    <div class="re-no-lock-preview">
-                        <div class="re-no-lock-preview-header">
-                            <span class="re-no-lock-preview-title">Excel 登记行</span>
-                            <span class="re-no-lock-preview-actions">
-                                <button class="re-nl-pill" id="re-nl-copy-excel" title="复制Excel行">复制</button>
-                            </span>
-                        </div>
-                        <textarea class="re-no-lock-preview-text re-no-lock-preview-excel" id="re-nl-preview-excel" readonly></textarea>
-                    </div>
-                </div>
             </div>
             <div class="re-panel-content">
                 <div class="re-column re-column-left">
@@ -418,9 +350,9 @@
                                 <div class="re-data-col">
                                     <div class="re-card-title" id="re-expand-business-title"><span class="re-expand-title-text">拓展业务</span><span class="re-expand-badges" id="re-expand-restrict-badge" style="display:none;"></span></div>
                                     <div class="re-data-form">
-                                        <div class="re-data-form-row">
+                                        <div class="re-data-form-row" id="re-audit-row">
                                             <div class="re-data-form-inline">
-                                                <label class="re-form-label">审核价格</label>
+                                                <label class="re-form-label" id="re-audit-price-label">审核价格</label>
                                                 <input type="text" class="re-input re-price-input" id="re-audit-result" placeholder="请输入">
                                             </div>
                                             <div class="re-data-form-inline">
@@ -436,7 +368,7 @@
                                         </div>
                                         <div class="re-data-form-row">
                                             <div class="re-data-form-inline re-expand-result-row">
-                                                <label class="re-form-label">拓展价格</label>
+                                                <label class="re-form-label" id="re-expand-price-label">拓展价格</label>
                                                 <input type="text" class="re-input re-price-input" id="re-expand-result" placeholder="请输入">
                                                 <label class="re-form-label">拓展结果</label>
                                                 <select class="re-select" id="re-expand-order-result">
@@ -456,8 +388,8 @@
                                                     <option>腾讯会议</option>
                                                 </select>
                                             </div>
-                                            <div class="re-data-form-inline">
-                                                <label class="re-form-label">拓展</label>
+                                            <div class="re-data-form-inline" id="re-expand-switch-inline">
+                                                <label class="re-form-label" id="re-expand-switch-label">拓展</label>
                                                 <label class="re-switch">
                                                     <input type="checkbox" id="re-rent-expand">
                                                     <span class="re-switch-slider"></span>
@@ -761,7 +693,7 @@
                             </button>
                             <button class="re-action-btn" id="re-btn-no-lock">
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                                无锁操作
+                                无锁模式
                             </button>
                         </div>
                         <div class="re-contact-info" id="re-contact-section">
@@ -1226,6 +1158,37 @@
         .re-expand-badges .re-restrict-appstore {
             margin-right: 0;
             margin-left: 0;
+        }
+
+        /* 无锁模式胶囊：达标绿 / 未达标灰 */
+        .re-nolock-badge {
+            display: inline-block;
+            font-size: 13px;
+            padding: 1px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 600;
+            vertical-align: middle;
+            cursor: default;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .re-expand-badges .re-nolock-badge {
+            margin-right: 0;
+            margin-left: 0;
+        }
+
+        .re-nolock-badge.re-nolock-badge-ok {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .re-nolock-badge.re-nolock-badge-no {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
         }
 
         .re-expand-badges .re-repeat-customer {
@@ -2773,6 +2736,13 @@
             margin-left: 6px;
             vertical-align: middle;
             white-space: nowrap;
+            cursor: pointer;
+            transition: background .15s, border-color .15s;
+        }
+
+        .re-repeat-unfinished-badge:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
         }
 
         .re-current-order-badge {
@@ -5130,358 +5100,31 @@
             background: rgba(248, 250, 252, 0.95);
         }
 
-        /* 无锁判断面板样式 */
-        .re-no-lock-panel {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            width: 360px;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(17, 24, 39, 0.10);
-            z-index: 2147483646;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(100%);
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            backface-visibility: hidden;
-            overflow: hidden;
+        /* 无锁模式：主面板边缘蓝光呼吸 */
+        #re-system-panel.re-no-lock-mode {
+            animation: re-no-lock-glow 2s ease-in-out infinite;
         }
 
-        .re-no-lock-panel.re-no-lock-visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(0) translateZ(0);
+        @keyframes re-no-lock-glow {
+            0%, 100% {
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.35), 0 0 18px 2px rgba(59, 130, 246, 0.25);
+            }
+            50% {
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.65), 0 0 32px 6px rgba(59, 130, 246, 0.45);
+            }
         }
 
-        .re-no-lock-header {
-            padding: 12px 16px;
-            background: #ffffff;
-            border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            cursor: move;
-            user-select: none;
+        /* 低性能模式：关闭蓝光动画 */
+        #re-system-panel.re-low-perf.re-no-lock-mode {
+            animation: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(59, 130, 246, 0.55);
         }
 
-        .re-no-lock-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .re-no-lock-close {
-            width: 28px;
-            height: 28px;
-            border: none;
-            background: transparent;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            transition: all 0.15s ease;
-        }
-
-        .re-no-lock-close:hover {
-            background: rgba(107, 114, 128, 0.12);
-            color: #1f2937;
-        }
-
-        .re-no-lock-close svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .re-no-lock-content {
-            padding: 14px 16px 16px;
-            background: #ffffff;
-            display: grid;
-            gap: 12px;
-        }
-
-        /* 渠道额度卡片 */
-        .re-nl-chips {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .re-nl-chip {
-            border: 1px solid rgba(17, 24, 39, 0.10);
-            border-radius: 8px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            background: #ffffff;
-        }
-
-        .re-nl-chip-label {
-            font-size: 12px;
-            color: #6b7280;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .re-nl-tag {
-            font-style: normal;
-            font-size: 11px;
-            line-height: 14px;
-            padding: 0 5px;
-            border-radius: 999px;
-            background: rgba(107, 114, 128, 0.10);
-            color: #6b7280;
-            border: 1px solid rgba(17, 24, 39, 0.08);
-        }
-
-        .re-nl-chip-val {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1d4ed8;
-        }
-
-        .re-nl-chip-dim .re-nl-chip-val {
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .re-nl-chip.off {
-            background: #f9fafb;
-        }
-
-        .re-nl-chip.off .re-nl-chip-val {
-            color: #9ca3af;
-            font-weight: 400;
-        }
-
-        /* 参数区 */
-        .re-nl-params {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .re-nl-param {
-            border: 1px solid rgba(17, 24, 39, 0.10);
-            border-radius: 8px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .re-nl-param-label {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .re-nl-param-val {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .re-nl-param-cost {
-            grid-column: span 2;
-        }
-
-        .re-nl-cost-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .re-no-lock-input {
-            flex: 1;
-            min-width: 0;
-            height: 30px;
-            padding: 0 10px;
-            border: 1px solid rgba(17, 24, 39, 0.15);
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #1f2937;
-            background: #ffffff;
-            transition: all 0.15s ease;
-        }
-
-        .re-no-lock-input:focus {
-            outline: none;
+        /* 无锁模式按钮激活态 */
+        .re-action-btn.re-no-lock-btn-active {
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-        }
-
-        .re-no-lock-input::placeholder {
-            color: #9ca3af;
-            font-weight: 400;
-        }
-
-        .re-no-lock-recalc {
-            height: 30px;
-            padding: 0 14px;
-            border: 1px solid #3b82f6;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
+            background: rgba(59, 130, 246, 0.10);
             color: #1d4ed8;
-            background: #ffffff;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .re-no-lock-recalc:hover {
-            background: rgba(59, 130, 246, 0.08);
-        }
-
-        .re-no-lock-recalc:active {
-            background: rgba(59, 130, 246, 0.15);
-        }
-
-        /* 判定结果横幅 */
-        .re-no-lock-result {
-            border: 1px solid rgba(17, 24, 39, 0.10);
-            border-radius: 10px;
-            padding: 12px 14px;
-            text-align: center;
-            background: #f9fafb;
-        }
-
-        .re-no-lock-result:has(.re-no-lock-status.satisfied) {
-            border-color: #a7f3d0;
-            background: #ecfdf5;
-        }
-
-        .re-no-lock-result:has(.re-no-lock-status.unsatisfied) {
-            border-color: #fecaca;
-            background: #fef2f2;
-        }
-
-        .re-no-lock-status {
-            font-size: 17px;
-            font-weight: 700;
-            color: #6b7280;
-            letter-spacing: 0.5px;
-            line-height: 1.3;
-        }
-
-        .re-no-lock-status.satisfied {
-            color: #059669;
-        }
-
-        .re-no-lock-status.unsatisfied {
-            color: #dc2626;
-        }
-
-        .re-no-lock-status.pending {
-            color: #6b7280;
-        }
-
-        .re-no-lock-result-sub {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 3px;
-        }
-
-        .re-no-lock-result-sub span {
-            font-weight: 600;
-            color: #374151;
-        }
-
-        /* 预览区 */
-        .re-no-lock-preview {
-            border: 1px dashed rgba(107, 114, 128, 0.35);
-            border-radius: 10px;
-            padding: 10px 12px;
-        }
-
-        .re-no-lock-preview-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .re-no-lock-preview-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .re-no-lock-preview-actions {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .re-nl-pill {
-            height: 24px;
-            padding: 0 12px;
-            border: 1px solid rgba(17, 24, 39, 0.18);
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #374151;
-            background: #ffffff;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .re-nl-pill:hover {
-            border-color: #3b82f6;
-            color: #1d4ed8;
-            background: rgba(59, 130, 246, 0.06);
-        }
-
-        .re-nl-pill:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .re-nl-pill-primary {
-            border-color: #3b82f6;
-            background: #3b82f6;
-            color: #ffffff;
-        }
-
-        .re-nl-pill-primary:hover {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
-        }
-
-        .re-no-lock-preview-text {
-            width: 100%;
-            min-height: 48px;
-            padding: 6px 8px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #374151;
-            background: rgba(249, 250, 251, 0.8);
-            resize: vertical;
-            font-family: inherit;
-            line-height: 1.5;
-            box-sizing: border-box;
-        }
-
-        .re-no-lock-preview-text:focus {
-            outline: none;
-            background: #ffffff;
-            box-shadow: inset 0 0 0 1px #3b82f6;
-        }
-
-        .re-no-lock-preview-excel {
-            min-height: 34px;
-            white-space: pre;
-            overflow-x: auto;
         }
     `;
 
@@ -8580,8 +8223,8 @@
     }
 
     function isRestrictAppStoreModel() {
-        // 16 Pro / 16 Pro Max + iPhone 17 全系（17 / 17 Pro / 17 Pro Max，不含 17e；新机 + 二手）
-        return /(16\s*pro|17(?!e|\d))/i.test(cachedProductModel);
+        // 16 Pro / 16 Pro Max + iPhone 17 全系（17 / 17 Pro / 17 Pro Max，不含 17e / 17 Air；新机 + 二手）
+        return /(16\s*pro|17(?!\s*(e|air)|\d))/i.test(cachedProductModel);
     }
 
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
@@ -8613,6 +8256,11 @@
         restrictAppStoreEnabled = enabled;
         GM_setValue('re-restrict-appstore-enabled', enabled);
 
+        // 与无锁模式互斥：开启禁止AppStore时自动退出无锁模式
+        if (enabled && typeof noLockModeActive !== 'undefined' && noLockModeActive) {
+            exitNoLockMode();
+        }
+
         // 刷新胶囊开关状态
         const badge = document.querySelector('#re-expand-restrict-badge .re-restrict-appstore');
         if (badge) badge.classList.toggle('active', enabled);
@@ -8638,6 +8286,162 @@
             }
         }
     }
+
+    // ==================== 无锁模式（每单重置，不持久化；与禁止AppStore互斥） ====================
+    let noLockModeActive = false;
+    let noLockOrderSnapshot = '';      // 进入无锁模式时的订单号，用于切单重置
+    let noLockExpandSnapshot = null;   // 进入无锁模式时拓展开关的状态快照，退出时恢复
+
+    // 无锁条件：(花呗 + 分付 + V4风控) / 手机成本 >= 0.9
+    // V4 风控值：只取显示文本中的第一个数字（如 "2000元 (30.77%)" → 2000，避免把百分比数字拼进来）
+    function getV4RiskValue() {
+        const text = String(document.getElementById('re-v4-risk')?.textContent || '');
+        const m = text.match(/-?\d+(?:\.\d+)?/);
+        return m ? parseFloat(m[0]) : 0;
+    }
+
+    function isNoLockSatisfied() {
+        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
+        const huabei = parseFloat(String(flowInputs[3]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const fenfu = parseFloat(String(flowInputs[4]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const v4Risk = getV4RiskValue();
+        const phoneCost = parseFloat(String(document.getElementById('re-phone-cost')?.value || '').replace(/[^\d.]/g, '')) || 0;
+        if (phoneCost <= 0) return false;
+        return (huabei + fenfu + v4Risk) / phoneCost >= 0.9;
+    }
+
+    // 无锁最低（沿用旧面板口径：0.9×成本 − 花呗 − 分付；成本未知返回 null）
+    function getNoLockNeededAmount() {
+        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
+        const huabei = parseFloat(String(flowInputs[3]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const fenfu = parseFloat(String(flowInputs[4]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const phoneCost = parseFloat(String(document.getElementById('re-phone-cost')?.value || '').replace(/[^\d.]/g, '')) || 0;
+        if (phoneCost <= 0) return null;
+        return Math.max(0, Math.round((0.9 * phoneCost - huabei - fenfu) * 100) / 100);
+    }
+
+    function getNoLockPlaceholderText() {
+        const need = getNoLockNeededAmount();
+        return need === null ? '无锁最低：成本未知' : '无锁最低：¥' + need;
+    }
+
+    // 无锁模式内且条件达标（达标态：只保留无锁结果行，正常上锁行隐藏）
+    function isNoLockQualified() {
+        return noLockModeActive && isNoLockSatisfied();
+    }
+
+    // 无锁比例：(花呗 + 分付 + V4) / 手机成本，向下取整；成本未知返回 null
+    function getNoLockRatioPercent() {
+        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
+        const huabei = parseFloat(String(flowInputs[3]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const fenfu = parseFloat(String(flowInputs[4]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const v4Risk = getV4RiskValue();
+        const phoneCost = parseFloat(String(document.getElementById('re-phone-cost')?.value || '').replace(/[^\d.]/g, '')) || 0;
+        if (phoneCost <= 0) return null;
+        return Math.floor((huabei + fenfu + v4Risk) / phoneCost * 100);
+    }
+
+    // 无锁胶囊（仅无锁模式内显示）：达标绿 √可无锁(xx%) / 未达标灰 不满足(xx%)
+    function refreshNoLockCapsule(qualified) {
+        const badgeWrap = document.getElementById('re-expand-restrict-badge');
+        if (!badgeWrap) return;
+        let cap = badgeWrap.querySelector('.re-nolock-badge');
+        if (!noLockModeActive) {
+            if (cap) cap.remove();
+            // 无其他胶囊时收起胶囊区
+            if (!badgeWrap.children.length) badgeWrap.style.display = 'none';
+            return;
+        }
+        const pct = getNoLockRatioPercent();
+        const pctText = pct === null ? '--' : String(pct);
+        if (!cap) {
+            cap = document.createElement('span');
+            badgeWrap.appendChild(cap);
+        }
+        cap.className = 're-nolock-badge ' + (qualified ? 're-nolock-badge-ok' : 're-nolock-badge-no');
+        cap.textContent = qualified ? '√可无锁(' + pctText + '%)' : '不满足(' + pctText + '%)';
+        badgeWrap.style.display = 'inline-flex';
+    }
+
+    // 刷新无锁模式相关 UI（按钮高亮/面板蓝光/标签切换/行显隐/胶囊）
+    function refreshNoLockUI() {
+        const btn = document.getElementById('re-btn-no-lock');
+        const auditLabel = document.getElementById('re-audit-price-label');
+        const auditRow = document.getElementById('re-audit-row');
+        const expandLabel = document.getElementById('re-expand-switch-label');
+        const expandPriceLabel = document.getElementById('re-expand-price-label');
+        const expandInline = document.getElementById('re-expand-switch-inline');
+        const expandSelect = document.getElementById('re-expand-type');
+        const expandResultRow = document.querySelector('.re-expand-result-row');
+
+        const qualified = isNoLockQualified();
+
+        if (btn) btn.classList.toggle('re-no-lock-btn-active', noLockModeActive);
+        panel.classList.toggle('re-no-lock-mode', noLockModeActive);
+
+        // 审核价格 → 正常上锁（仅改名）
+        if (auditLabel) auditLabel.textContent = noLockModeActive ? '正常上锁' : '审核价格';
+
+        // 达标时隐藏正常上锁行（正常上锁输入框 + 审核结果下拉整行消失，只留无锁结果）
+        if (auditRow) auditRow.style.display = qualified ? 'none' : '';
+
+        // 无锁模式内开关行始终隐藏（达标后无锁结果行直接展示，无需手动开启）
+        if (expandInline) expandInline.style.display = noLockModeActive ? 'none' : '';
+        if (expandLabel) expandLabel.textContent = noLockModeActive ? '无锁' : '拓展';
+
+        // 拓展类型下拉隐藏（无锁与拓展两套系统互斥）
+        if (expandSelect) expandSelect.style.display = noLockModeActive ? 'none' : '';
+
+        // 拓展价格 → 无锁结果；无锁模式内该行始终显示（不达标时与正常上锁行并存，可手动填无锁报价）
+        if (expandPriceLabel) expandPriceLabel.textContent = noLockModeActive ? '无锁结果' : '拓展价格';
+        if (noLockModeActive) {
+            if (expandResultRow) expandResultRow.classList.add('re-visible');
+        }
+
+        // 无锁结果占位符：自动计算无锁最低（0.9×成本 − 花呗 − 分付）；退出时恢复常规占位
+        const expandResultInputEl = document.getElementById('re-expand-result');
+        if (expandResultInputEl) {
+            if (noLockModeActive) {
+                expandResultInputEl.placeholder = getNoLockPlaceholderText();
+            } else if (typeof updatePricePlaceholder === 'function') {
+                updatePricePlaceholder();
+            }
+        }
+
+        // 无锁胶囊（仅模式内显示）
+        refreshNoLockCapsule(qualified);
+
+        if (typeof updatePreview === 'function') updatePreview();
+        if (typeof updateRiskPreview === 'function') updateRiskPreview();
+    }
+
+    // 退出无锁模式（手动关闭 / 切换订单时调用），恢复拓展开关进入前状态
+    function exitNoLockMode() {
+        if (!noLockModeActive) return;
+        noLockModeActive = false;
+        const expandSwitch = document.getElementById('re-rent-expand');
+        const expandResultRow = document.querySelector('.re-expand-result-row');
+        if (expandSwitch) {
+            const restore = noLockExpandSnapshot === true;
+            if (expandSwitch.checked !== restore) {
+                expandSwitch.checked = restore;
+                expandSwitch.dispatchEvent(new Event('change'));
+            } else if (expandResultRow) {
+                // 开关状态未变时，无锁结果行显隐直接对齐开关（模式内曾按达标态直接改过）
+                expandResultRow.classList.toggle('re-visible', restore);
+            }
+        }
+        noLockOrderSnapshot = '';
+        noLockExpandSnapshot = null;
+        refreshNoLockUI();
+    }
+
+    // 激活期间数据变化（流水/成本/V4刷新）时重判：达标态切换（正常上锁行/无锁结果行/胶囊联动）
+    function revalidateNoLock() {
+        if (!noLockModeActive) return;
+        refreshNoLockUI();
+    }
+    // ==================== 无锁模式 END ====================
 
     function fetchPageData() {
         try {
@@ -8891,7 +8695,7 @@
                 const item = document.createElement('div');
                 item.className = 're-model-order-item' + (isCurrent ? ' re-model-order-current' : '');
                 item.innerHTML = '<div class="re-model-order-info">'
-                    + '<div class="re-model-order-name">订单号：<span class="' + (isUnfinished ? 're-repeat-order-no-red' : '') + '">' + order.orderNo + '</span>' + (isUnfinished ? '<span class="re-repeat-unfinished-badge">未完结</span>' : '') + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
+                    + '<div class="re-model-order-name">订单号：<span class="' + (isUnfinished ? 're-repeat-order-no-red' : '') + '">' + order.orderNo + '</span>' + (isUnfinished ? '<span class="re-repeat-unfinished-badge" data-order="' + order.orderNo + '" title="点击追加到其他备注">未完结</span>' : '') + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
                     + '<div class="re-repeat-order-fields">'
                     + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
                     + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
@@ -8919,6 +8723,23 @@
                         // 账单：抓取扣款信息展示在弹窗右侧账单详情面板
                         await showBillPanel(orderNo, this);
                     }
+                });
+            });
+
+            // 未完结胶囊点击 → 追加其他备注：{订单号} 未完结，需要完结此订单
+            listEl.querySelectorAll('.re-repeat-unfinished-badge').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const orderNo = this.getAttribute('data-order');
+                    const input = document.getElementById('re-other-remark');
+                    if (!input || !orderNo) return;
+                    const entry = orderNo + ' 未完结，需要完结此订单';
+                    if (input.value.includes(entry)) {
+                        showSuccessToast('该订单已在其他备注中');
+                        return;
+                    }
+                    input.value = input.value ? input.value.replace(/;\s*$/, '') + ';' + entry : entry;
+                    showSuccessToast('已追加到其他备注：' + entry);
                 });
             });
 
@@ -9230,6 +9051,9 @@
                     }
                 };
 
+                // 胶囊区 innerHTML 重建会清掉无锁胶囊；模式仍激活时补回并同步行显隐
+                if (noLockModeActive) refreshNoLockUI();
+
                 // 检测到禁止AppStore机型且开关为关闭态时提醒（同一客户同机型只提醒一次）
                 if (isRestrictAppStoreModel() && !restrictAppStoreEnabled) {
                     const toastKey = (cachedName || '') + '|' + (cachedProductModel || '');
@@ -9424,6 +9248,10 @@
             const orderNoEl = document.getElementById('re-order-no');
             if (orderNoEl && orderNo) {
                 orderNoEl.textContent = orderNo;
+                // 无锁模式每单重置：订单号变化时自动退出
+                if (noLockModeActive && orderNo && noLockOrderSnapshot && orderNo !== noLockOrderSnapshot) {
+                    exitNoLockMode();
+                }
             }
         } catch (e) {
         }
@@ -9563,6 +9391,8 @@
                         } else if (v4Risk.includes('高')) {
                             v4RiskDisplay.classList.add('re-value-danger');
                         }
+                        // V4风控值刷新后重判无锁条件
+                        if (typeof revalidateNoLock === 'function') revalidateNoLock();
                     }
 
                 } catch (e) {
@@ -9752,6 +9582,8 @@
                         if (phoneCostInput && phoneCost) {
                             phoneCostInput.value = phoneCost;
                             updatePricePlaceholder();
+                            // 手机成本填充后重判无锁条件
+                            if (typeof revalidateNoLock === 'function') revalidateNoLock();
                         }
 
                         if (phoneCostDiffContainer) {
@@ -9963,7 +9795,7 @@
 
         if (!phoneCostEl || cachedDiscount === null) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
-            if (expandResultInput) expandResultInput.placeholder = '请输入';
+            if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : '请输入';
             return;
         }
 
@@ -9971,7 +9803,7 @@
         const cost = parseFloat(costText);
         if (isNaN(cost)) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
-            if (expandResultInput) expandResultInput.placeholder = '请输入';
+            if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : '请输入';
             return;
         }
 
@@ -10001,7 +9833,7 @@
         const placeholderText = '最低结果：¥' + finalMinPrice;
 
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
-        if (expandResultInput) expandResultInput.placeholder = placeholderText;
+        if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : placeholderText;
     }
 
     function getMinPrice() {
@@ -10246,7 +10078,7 @@
         const previewBox = document.querySelector('.re-preview-box');
 
         if (staffRemarkBtn) {
-            if (!previewContent || previewContent === '请先填 审核价格' || previewContent === '订单取消') {
+            if (!previewContent || previewContent === '请先填 审核价格' || previewContent === '请先填 正常上锁' || previewContent === '请先填 无锁结果' || previewContent === '订单取消') {
                 staffRemarkBtn.classList.add('disabled');
                 staffRemarkBtn.setAttribute('disabled', 'true');
             } else {
@@ -10255,6 +10087,8 @@
             }
         }
 
+        const noLockQualified = isNoLockQualified();
+
         if (previewMain) {
             if (orderResult === '取消') {
                 if (cachedName) {
@@ -10262,8 +10096,19 @@
                 } else {
                     previewMain.textContent = '订单取消';
                 }
+            } else if (noLockQualified) {
+                // 达标态：正常上锁行已隐藏，只剩无锁结果段（客户姓名 | 无锁结果：价格，结果）
+                if (!expandResult) {
+                    previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 无锁结果</span>';
+                } else {
+                    previewMain.textContent = cachedName || '';
+                }
             } else if (auditText.trim() === '') {
-                previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 审核价格</span>';
+                previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 ' + (noLockModeActive ? '正常上锁' : '审核价格') + '</span>';
+            } else if (noLockModeActive) {
+                // 无锁模式话术：客户姓名 | 正常上锁：价格，审核结果
+                let previewText = (cachedName ? cachedName : '') + ' | 正常上锁：' + auditText + '，' + orderResult;
+                previewMain.textContent = previewText;
             } else {
                 let previewText = '';
                 const mainLabel = isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：';
@@ -10277,7 +10122,16 @@
         }
 
         if (previewExpand) {
-            if (expandChecked && expandResult) {
+            if (noLockModeActive) {
+                // 无锁模式：无锁结果段始终可输出（不达标时与正常上锁段并存）
+                if (expandResult) {
+                    previewExpand.textContent = ' | 无锁结果：' + expandResult + '，' + expandOrderResult;
+                    previewExpand.style.display = 'inline';
+                } else {
+                    previewExpand.textContent = '';
+                    previewExpand.style.display = 'none';
+                }
+            } else if (expandChecked && expandResult) {
                 const typeText = expandType ? expandType.replace(/：$/, '') + '：' : '';
                 previewExpand.textContent = ' | ' + typeText + expandResult + ' ' + expandOrderResult;
                 previewExpand.style.display = 'inline';
@@ -10299,7 +10153,7 @@
 
         const finalContent = previewContentEl ? previewContentEl.textContent.trim() : '';
         if (previewBox) {
-            if (!finalContent || finalContent === '请先填 审核价格') {
+            if (!finalContent || finalContent === '请先填 审核价格' || finalContent === '请先填 正常上锁' || finalContent === '请先填 无锁结果') {
                 previewBox.classList.add('empty');
             } else {
                 previewBox.classList.remove('empty');
@@ -10427,15 +10281,28 @@
 
         const auditPrice = getCachedElement('auditResult', '#re-audit-result')?.value || '';
         const auditResult = getCachedElement('orderResult', '#re-order-result')?.value || '';
-        if (auditPrice) parts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+        const noLockQualified = isNoLockQualified();
+        if (auditPrice && !noLockQualified) {
+            if (noLockModeActive) {
+                parts.push('正常上锁：' + auditPrice + '，' + auditResult);
+            } else {
+                parts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+            }
+        }
 
-        const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
-        if (expandChecked) {
-            const expandType = getCachedElement('expandType', '#re-expand-type')?.value || '';
-            const expandPrice = getCachedElement('expandResult', '#re-expand-result')?.value || '';
+        const expandPriceVal = getCachedElement('expandResult', '#re-expand-result')?.value || '';
+        if (noLockModeActive) {
+            // 无锁模式：无锁结果段不依赖拓展开关（不达标时与正常上锁段并存）
             const expandResult = getCachedElement('expandOrderResult', '#re-expand-order-result')?.value || '';
-            if (expandType && expandPrice) {
-                parts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
+            if (expandPriceVal) parts.push('无锁结果：' + expandPriceVal + '，' + expandResult);
+        } else {
+            const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
+            if (expandChecked) {
+                const expandType = getCachedElement('expandType', '#re-expand-type')?.value || '';
+                const expandResult = getCachedElement('expandOrderResult', '#re-expand-order-result')?.value || '';
+                if (expandType && expandPriceVal) {
+                    parts.push(expandType.replace(/：$/, '') + '：' + expandPriceVal + ' ' + expandResult);
+                }
             }
         }
 
@@ -10447,7 +10314,8 @@
         if (reductionEl) {
             const phoneCostText = getCachedElement('phoneCost', '#re-phone-cost')?.value || '';
             const phoneCost = parseFloat(phoneCostText.replace(/[¥,]/g, '')) || 0;
-            const auditPrice = parseFloat(getCachedElement('auditResult', '#re-audit-result')?.value) || 0;
+            // 达标态下价格取无锁结果
+            const auditPrice = parseFloat(noLockQualified ? expandPriceVal : getCachedElement('auditResult', '#re-audit-result')?.value) || 0;
             const v4RiskText = getCachedElement('v4Risk', '#re-v4-risk')?.textContent || '';
             const v4Risk = parseFloat(v4RiskText) || 0;
 
@@ -11079,25 +10947,38 @@
                     // 添加审核结果
                     const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
                     const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
-                    if (auditPrice && auditResult) {
-                        remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
-                    }
-
-                    // 添加拓展业务
-                    const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
-                    if (expandChecked) {
-                        const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
-                        const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
-                        const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
-                        if (expandType && expandPrice) {
-                            remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
+                    const noLockQualified = isNoLockQualified();
+                    if (auditPrice && auditResult && !noLockQualified) {
+                        if (noLockModeActive) {
+                            remarkParts.push('正常上锁：' + auditPrice + '，' + auditResult);
+                        } else {
+                            remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
                         }
                     }
 
-                    // 添加降低幅度
+                    // 添加拓展业务 / 无锁结果
+                    const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
+                    if (noLockModeActive) {
+                        // 无锁模式：无锁结果段不依赖拓展开关（不达标时与正常上锁段并存）
+                        const expandResultQ = (document.getElementById('re-expand-order-result')?.value || '').trim();
+                        if (expandPrice) {
+                            remarkParts.push('无锁结果：' + expandPrice + '，' + expandResultQ);
+                        }
+                    } else {
+                        const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
+                        if (expandChecked) {
+                            const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
+                            const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
+                            if (expandType && expandPrice) {
+                                remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
+                            }
+                        }
+                    }
+
+                    // 添加降低幅度（达标态下价格取无锁结果）
                     const phoneCostText = (document.getElementById('re-phone-cost')?.value || '').trim();
                     const phoneCost = parseFloat(phoneCostText.replace(/[¥,]/g, '')) || 0;
-                    const auditPriceNum = parseFloat(auditPrice) || 0;
+                    const auditPriceNum = parseFloat(noLockQualified ? expandPrice : auditPrice) || 0;
                     const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
                     const v4Risk = parseFloat(v4RiskText) || 0;
 
@@ -11172,321 +11053,46 @@
         });
     }
 
-    // 无锁操作按钮功能
-    const noLockBtn = document.getElementById('re-btn-no-lock');
-    const noLockPanel = document.getElementById('re-no-lock-panel');
-    const noLockClose = document.getElementById('re-no-lock-close');
-    const noLockHeader = noLockPanel?.querySelector('.re-no-lock-header');
-
-    // 无锁面板拖动功能
-    let isNoLockDragging = false;
-    let noLockCurrentX, noLockCurrentY, noLockInitialX, noLockInitialY;
-
-    if (noLockHeader && noLockPanel) {
-        noLockHeader.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.re-no-lock-close') || e.target.closest('.re-no-lock-status')) {
-                return;
-            }
-            isNoLockDragging = true;
-            noLockInitialX = e.clientX - (parseInt(noLockPanel.style.left) || 0);
-            noLockInitialY = e.clientY - (parseInt(noLockPanel.style.top) || 0);
-            noLockPanel.style.transition = 'none';
-        });
-
-        document.addEventListener('mousemove', function(e) {
-            if (isNoLockDragging) {
-                e.preventDefault();
-                noLockCurrentX = e.clientX - noLockInitialX;
-                noLockCurrentY = e.clientY - noLockInitialY;
-                noLockPanel.style.left = noLockCurrentX + 'px';
-                noLockPanel.style.top = noLockCurrentY + 'px';
-                noLockPanel.style.right = 'auto';
-            }
-        });
-
-        document.addEventListener('mouseup', function() {
-            if (isNoLockDragging) {
-                isNoLockDragging = false;
-                noLockPanel.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
-                
-                // 保存拖动后的位置
-                const currentLeft = noLockPanel.style.left;
-                const currentTop = noLockPanel.style.top;
-                GM_setValue('noLockPanelPosition', {
-                    left: currentLeft,
-                    top: currentTop
-                });
-            }
-        });
-    }
-
-    // 数据解析函数
-    function parseCredit(val) {
-        if (!val || val.trim() === '') return 0;
-        const num = parseFloat(val.replace(/[^\d.]/g, ''));
-        return isNaN(num) ? 0 : num;
-    }
-
-    function parseAmount(val) {
-        if (!val) return 0;
-        const num = parseFloat(val.replace(/[^\d.]/g, ''));
-        return isNaN(num) ? 0 : num;
-    }
-
-    // 格式化展示：整数显示整数，小数最多2位
-    function formatDisplay(num) {
-        if (!num || num === 0) return num === 0 ? '0' : '';
-        const rounded = Math.round(num * 100) / 100;
-        return String(rounded);
-    }
-
-    // 计算和更新无锁判断
-    function calculateNoLock() {
-        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        
-        // 读取四项信用工具额度
-        const huabei = parseCredit(flowInputs[3]?.value);
-        const fenfu = parseCredit(flowInputs[4]?.value);
-        const douyin = parseCredit(flowInputs[5]?.value);
-        const meituan = parseCredit(flowInputs[6]?.value);
-
-        // 读取V4风控结果
-        const v4RiskEl = document.getElementById('re-v4-risk');
-        const v4Risk = parseFloat(v4RiskEl?.textContent) || 0;
-
-        // 读取手机成本
-        const costInput = document.getElementById('re-nl-cost-input');
-        let phoneCost = parseAmount(costInput?.value);
-
-        // 如果成本为0，从面板读取
-        if (phoneCost === 0) {
-            const phoneCostEl = document.getElementById('re-phone-cost');
-            phoneCost = parseAmount(phoneCostEl?.value);
-            if (costInput) {
-                costInput.value = phoneCost > 0 ? phoneCost : '';
-            }
-        }
-
-        // 更新显示值
-        document.getElementById('re-nl-fenfu').textContent = fenfu > 0 ? formatDisplay(fenfu) : '未开通';
-        document.getElementById('re-nl-huabei').textContent = huabei > 0 ? formatDisplay(huabei) : '未开通';
-        document.getElementById('re-nl-douyin').textContent = douyin > 0 ? formatDisplay(douyin) : '未开通';
-        document.getElementById('re-nl-meituan').textContent = meituan > 0 ? formatDisplay(meituan) : '未开通';
-        // 渠道卡片置灰：未开通的整体降级显示
-        document.getElementById('re-nl-chip-fenfu')?.classList.toggle('off', !(fenfu > 0));
-        document.getElementById('re-nl-chip-huabei')?.classList.toggle('off', !(huabei > 0));
-        document.getElementById('re-nl-chip-douyin')?.classList.toggle('off', !(douyin > 0));
-        document.getElementById('re-nl-chip-meituan')?.classList.toggle('off', !(meituan > 0));
-
-        // 总计额度只计入分付和花呗，抖音和美团仅展示
-        const totalCredit = huabei + fenfu;
-        document.getElementById('re-nl-total').textContent = formatDisplay(totalCredit);
-        document.getElementById('re-nl-v4').textContent = formatDisplay(v4Risk);
-
-        // 计算结果
-        const statusEl = document.getElementById('re-nl-status');
-        
-        if (phoneCost === 0) {
-            document.getElementById('re-nl-ratio').textContent = '—';
-            document.getElementById('re-nl-min').textContent = '成本未知';
-            statusEl.textContent = '请输入成本';
-            statusEl.className = 're-no-lock-status pending';
-            return;
-        }
-
-        const creditRatio = (totalCredit / phoneCost * 100).toFixed(2);
-        const noLockMin = ((0.9 - totalCredit / phoneCost) * phoneCost).toFixed(2);
-        const satisfied = (totalCredit + v4Risk) / phoneCost >= 0.9;
-
-        document.getElementById('re-nl-ratio').textContent = creditRatio + '%';
-        document.getElementById('re-nl-min').textContent = noLockMin;
-
-        if (satisfied) {
-            statusEl.textContent = '✓ 满足无锁';
-            statusEl.className = 're-no-lock-status satisfied';
-        } else {
-            statusEl.textContent = '✗ 不满足无锁';
-            statusEl.className = 're-no-lock-status unsatisfied';
-        }
-
-        // 更新预览框
-        updatePreviews(satisfied, fenfu, huabei, douyin, meituan, v4Risk, phoneCost, totalCredit);
-    }
-
-    // 更新预览框内容
-    function updatePreviews(satisfied, fenfu, huabei, douyin, meituan, v4Risk, phoneCost, totalCredit) {
-        // 获取客户姓名
-        const customerName = cachedName || document.getElementById('re-contact-name')?.textContent || '【无参数】';
-        
-        // 获取客服姓名
-        const staffNameEl = document.getElementById('re-staff-name');
-        const staffName = staffNameEl?.textContent || '未知客服';
-        
-        // 获取订单号
-        const orderNoEl = document.getElementById('re-order-no');
-        const orderNo = orderNoEl?.textContent || '【无参数】';
-        
-        // 获取机型
-        const productInfoEl = document.getElementById('re-product-info');
-        const productInfo = productInfoEl?.textContent || 'iPhone 15 Pro Max 256GB';
-        
-        // 获取套餐信息
-        const packageInfoEl = document.getElementById('re-package-info');
-        const packageInfo = packageInfoEl?.textContent || '12期免息套餐';
-
-        // 备注预览框1 - 仅显示已开通项，未开通不显示
-        const creditParts = [];
-        if (fenfu > 0) creditParts.push(`分付额度：${formatDisplay(fenfu)}`);
-        if (huabei > 0) creditParts.push(`花呗额度：${formatDisplay(huabei)}`);
-        if (douyin > 0) creditParts.push(`抖音月付：${formatDisplay(douyin)}`);
-        if (meituan > 0) creditParts.push(`美团月付：${formatDisplay(meituan)}`);
-        const creditSegment = creditParts.length > 0 ? creditParts.join('、') + ' ' : '没有相关额度 ';
-
-        const lockStatus = satisfied ? '无锁通过' : '正常办理上锁通过';
-        const remarkPreview = `${customerName} ${creditSegment}手机妈妈 ${formatDisplay(v4Risk)} [${lockStatus}]`;
-        document.getElementById('re-nl-preview-remark').value = remarkPreview;
-
-        // 登记Excel预览框2 - 0显示为"未开通"
-        const fenfuDisplay = fenfu > 0 ? formatDisplay(fenfu) : '未开通';
-        const huabeiDisplay = huabei > 0 ? formatDisplay(huabei) : '未开通';
-        const douyinDisplay = douyin > 0 ? formatDisplay(douyin) : '未开通';
-        const meituanDisplay = meituan > 0 ? formatDisplay(meituan) : '未开通';
-
-        // 合计：如果全部为0则显示0，否则显示实际相加值
-        const totalDisplay = totalCredit > 0 ? formatDisplay(totalCredit) : '0';
-
-        const excelPreview = `${staffName}\t${customerName}\t${orderNo}\t${productInfo}\t${packageInfo}\t${formatDisplay(phoneCost)}\t${fenfuDisplay}\t${huabeiDisplay}\t${douyinDisplay}\t${meituanDisplay}\t${totalDisplay}`;
-        document.getElementById('re-nl-preview-excel').value = excelPreview;
-    }
-
-    // 打开弹窗
-    if (noLockBtn) {
-        noLockBtn.addEventListener('click', function() {
-            if (noLockPanel) {
-                // V4风控未刷新时阻断
+    // 无锁模式按钮：点击进入/退出；进入前校验综合风险T1/T2、V4刷新与禁止AppStore互斥
+    const noLockModeBtn = document.getElementById('re-btn-no-lock');
+    if (noLockModeBtn) {
+        noLockModeBtn.addEventListener('click', function() {
+            if (!noLockModeActive) {
+                const riskLevelText = (document.getElementById('re-risk-level')?.textContent || '').trim();
+                if (!riskLevelText) {
+                    showErrorToast('请等待风控刷新');
+                    return;
+                }
+                if (!/T[12](?!\d)/i.test(riskLevelText)) {
+                    showErrorToast('综合风险非T1/T2，不可办理无锁');
+                    return;
+                }
                 const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
                 if (!v4RiskText) {
                     showErrorToast('请等待风控刷新');
                     return;
                 }
-                // 恢复上次保存的位置
-                const savedPos = GM_getValue('noLockPanelPosition');
-                if (savedPos) {
-                    noLockPanel.style.left = savedPos.left;
-                    noLockPanel.style.top = savedPos.top;
-                    noLockPanel.style.right = 'auto';
+                if (isRestrictAppStoreActive()) {
+                    showErrorToast('与禁止AppStore互斥，请先关闭禁止AppStore');
+                    return;
                 }
-                calculateNoLock();
-                noLockPanel.classList.add('re-no-lock-visible');
+                noLockModeActive = true;
+                noLockOrderSnapshot = (document.getElementById('re-order-no')?.textContent || '').trim();
+                noLockExpandSnapshot = document.getElementById('re-rent-expand')?.checked || false;
+                refreshNoLockUI();
+                showSuccessToast('无锁模式已开启');
+            } else {
+                exitNoLockMode();
+                showSuccessToast('无锁模式已关闭');
             }
         });
     }
 
-    // 关闭弹窗
-    if (noLockClose) {
-        noLockClose.addEventListener('click', function() {
-            if (noLockPanel) {
-                // 保存当前位置
-                const currentLeft = noLockPanel.style.left || 'auto';
-                const currentTop = noLockPanel.style.top || '80px';
-                if (currentLeft !== 'auto') {
-                    GM_setValue('noLockPanelPosition', {
-                        left: currentLeft,
-                        top: currentTop
-                    });
-                }
-                noLockPanel.classList.remove('re-no-lock-visible');
-            }
-        });
-    }
-
-    // 重新计算按钮
-    const recalcBtn = document.getElementById('re-nl-recalc');
-    if (recalcBtn) {
-        recalcBtn.addEventListener('click', function() {
-            calculateNoLock();
-        });
-    }
-
-    // 复制按钮功能
-    const copyRemarkBtn = document.getElementById('re-nl-copy-remark');
-    const copyExcelBtn = document.getElementById('re-nl-copy-excel');
-    const submitRemarkBtn = document.getElementById('re-nl-submit-remark');
-
-    if (copyRemarkBtn) {
-        copyRemarkBtn.addEventListener('click', function() {
-            const textArea = document.getElementById('re-nl-preview-remark');
-            if (textArea) {
-                textArea.select();
-                document.execCommand('copy');
-                showSuccessToast('备注预览已复制');
-            }
-        });
-    }
-
-    if (copyExcelBtn) {
-        copyExcelBtn.addEventListener('click', function() {
-            const textArea = document.getElementById('re-nl-preview-excel');
-            if (textArea) {
-                textArea.select();
-                document.execCommand('copy');
-                showSuccessToast('Excel预览已复制');
-            }
-        });
-    }
-
-    // 提交客服备注按钮
-    if (submitRemarkBtn) {
-        submitRemarkBtn.addEventListener('click', function() {
-            const remarkContent = document.getElementById('re-nl-preview-remark')?.value;
-            const orderNoEl = document.getElementById('re-order-no');
-            const outOrderNo = orderNoEl?.textContent?.trim();
-
-            if (!remarkContent || remarkContent.trim() === '') {
-                showErrorToast('备注内容为空');
-                return;
-            }
-
-            if (!outOrderNo) {
-                showErrorToast('订单号获取失败');
-                return;
-            }
-
-            // 禁用按钮防止重复点击
-            submitRemarkBtn.disabled = true;
-            submitRemarkBtn.style.opacity = '0.6';
-
-            // 提交备注
-            GM_xmlhttpRequest({
-                method: 'POST',
-                url: CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.staffRemark,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                data: `classify=0&content=${encodeURIComponent(remarkContent)}&out_order_no=${outOrderNo}`,
-                onload: function(response) {
-                    submitRemarkBtn.disabled = false;
-                    submitRemarkBtn.style.opacity = '1';
-                    
-                    try {
-                        const result = JSON.parse(response.responseText);
-                        if (result.status) {
-                            showSuccessToast('客服备注提交成功');
-                        } else {
-                            showErrorToast(result.msg || '备注提交失败');
-                        }
-                    } catch (e) {
-                        showErrorToast('响应解析失败');
-                    }
-                },
-                onerror: function() {
-                    submitRemarkBtn.disabled = false;
-                    submitRemarkBtn.style.opacity = '1';
-                    showErrorToast('网络请求失败');
-                }
-            });
-        });
-    }
+    // 流水输入/手机成本变化时重判无锁条件（花呗情况=flowInputs[3]，微信分付=flowInputs[4]）
+    ['re-huabei-status', 're-wechat-fenfu', 're-phone-cost'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', revalidateNoLock);
+    });
 
     const autoProcessBtn = document.getElementById('re-btn-auto-process');
     if (autoProcessBtn) {
@@ -11699,25 +11305,38 @@
         // 添加审核结果
         const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
         const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
-        if (auditPrice && auditResult) {
-            remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
-        }
-
-        // 添加拓展业务
-        const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
-        if (expandChecked) {
-            const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
-            const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
-            const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
-            if (expandType && expandPrice) {
-                remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
+        const noLockQualified = isNoLockQualified();
+        if (auditPrice && auditResult && !noLockQualified) {
+            if (noLockModeActive) {
+                remarkParts.push('正常上锁：' + auditPrice + '，' + auditResult);
+            } else {
+                remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
             }
         }
 
-        // 添加降低幅度
+        // 添加拓展业务 / 无锁结果
+        const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
+        if (noLockModeActive) {
+            // 无锁模式：无锁结果段不依赖拓展开关（不达标时与正常上锁段并存）
+            const expandResultQ = (document.getElementById('re-expand-order-result')?.value || '').trim();
+            if (expandPrice) {
+                remarkParts.push('无锁结果：' + expandPrice + '，' + expandResultQ);
+            }
+        } else {
+            const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
+            if (expandChecked) {
+                const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
+                const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
+                if (expandType && expandPrice) {
+                    remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
+                }
+            }
+        }
+
+        // 添加降低幅度（达标态下价格取无锁结果）
         const phoneCostText = (document.getElementById('re-phone-cost')?.value || '').trim();
         const phoneCost = parseFloat(phoneCostText.replace(/[¥,]/g, '')) || 0;
-        const auditPriceNum = parseFloat(auditPrice) || 0;
+        const auditPriceNum = parseFloat(noLockQualified ? expandPrice : auditPrice) || 0;
         const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
         const v4Risk = parseFloat(v4RiskText) || 0;
 
