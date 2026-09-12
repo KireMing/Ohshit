@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      4.5.1
+// @version      4.8.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -105,6 +105,7 @@
             autoFetchKey: 're-auto-fetch-enabled',
             autoContactQueryKey: 're-auto-contact-query-enabled',
             preventRefreshKey: 're-prevent-refresh-enabled',
+            zhimaAutoSubmitKey: 're-zhima-auto-submit-enabled',
             autoRefreshKey: 're-auto-refresh-enabled',
             lowPerfKey: 're-low-perf-enabled',
             restDaysKey: 're-rest-days',
@@ -128,7 +129,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V4.5.1</span>
+                    <span class="re-panel-version">V4.8.0</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -167,6 +168,15 @@
                             <div class="re-form-group">
                                 <div class="re-form-title">基础选项</div>
                                 <div class="re-form-row">
+                                    <div class="re-form-item-inline">
+                                        <label class="re-form-label">流水宝</label>
+                                        <div class="re-form-inline">
+                                            <label class="re-switch">
+                                                <input type="checkbox" id="re-liushui-bao">
+                                                <span class="re-switch-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
                                     <div class="re-form-item-inline">
                                         <label class="re-form-label">旧机选项</label>
                                         <div class="re-form-inline">
@@ -483,6 +493,20 @@
                                                 </label>
                                             </div>
                                             <div class="re-setting-card">
+                                                <div class="re-setting-icon re-setting-icon-green">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                </div>
+                                                <div class="re-setting-info">
+                                                    <span class="re-setting-name">主动提交芝麻分</span>
+                                                    <span class="re-setting-desc">点自动处理时，将芝麻信用提交到风控报告</span>
+                                                </div>
+                                                <label class="re-switch re-switch-small">
+                                                    <input type="checkbox" id="re-setting-zhima-submit">
+                                                    <span class="re-switch-slider"></span>
+                                                </label>
+                                                <button class="re-zhima-test-btn" id="re-zhima-test-btn" title="手动测试一次芝麻分提交链路">测试提交</button>
+                                            </div>
+                                            <div class="re-setting-card">
                                                 <div class="re-setting-icon re-setting-icon-cyan">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                                                 </div>
@@ -683,9 +707,9 @@
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                                 风控备注
                             </button>
-                            <button class="re-action-btn">
-                                <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                                记录备注
+                            <button class="re-action-btn" id="re-btn-view-report">
+                                <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                查看报告
                             </button>
                             <button class="re-action-btn" id="re-btn-auto-process">
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"/><circle cx="12" cy="12" r="10"/></svg>
@@ -2434,6 +2458,32 @@
             border-color: rgba(107, 114, 128, 0.15);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 芝麻分测试提交按钮（设置卡片内，开关右侧） */
+        .re-zhima-test-btn {
+            flex-shrink: 0;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .15s, color .15s, border-color .15s;
+        }
+
+        .re-zhima-test-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+            border-color: #9ca3af;
+        }
+
+        .re-zhima-test-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .re-setting-icon {
@@ -7626,6 +7676,141 @@
         autoRefreshEnabled = enabled;
     }
 
+    // ===== 芝麻分自动提交（风控报告系统 riskanalysis.aixzu.com）=====
+    let zhimaAutoSubmitEnabled = false;
+    let zhimaSubmitting = false;
+
+    // 流水宝开关：客户是否已发送流水宝（每单重置，未开启时拦截外联功能）
+    function isLiushuiBaoEnabled() {
+        const checkbox = document.getElementById('re-liushui-bao');
+        return !!(checkbox && checkbox.checked);
+    }
+
+    function resetLiushuiBaoSwitch() {
+        const checkbox = document.getElementById('re-liushui-bao');
+        if (checkbox && checkbox.checked) {
+            checkbox.checked = false;
+        }
+    }
+
+    function loadZhimaAutoSubmitSetting() {
+        const saved = localStorage.getItem(CONFIG.STORAGE.zhimaAutoSubmitKey);
+        zhimaAutoSubmitEnabled = saved === 'true';
+        const zhimaCheckbox = document.getElementById('re-setting-zhima-submit');
+        if (zhimaCheckbox) {
+            zhimaCheckbox.checked = zhimaAutoSubmitEnabled;
+        }
+    }
+
+    function saveZhimaAutoSubmitSetting(enabled) {
+        localStorage.setItem(CONFIG.STORAGE.zhimaAutoSubmitKey, enabled.toString());
+        zhimaAutoSubmitEnabled = enabled;
+    }
+
+    // 解析主面板「芝麻信用」输入值，取文本中第一个数字
+    function getZhimaScoreValue() {
+        const text = String(document.getElementById('re-zhima-credit')?.value || '');
+        const m = text.match(/\d+(?:\.\d+)?/);
+        return m ? parseFloat(m[0]) : null;
+    }
+
+    // 搜索客户风控报告：GET /api/v1/admin/reports?q={姓名}&group=finished → 取 created_at 最新一条
+    function searchZhimaReport(name, callback) {
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: 'https://riskanalysis.aixzu.com/api/v1/admin/reports?page=1&page_size=20&q=' + encodeURIComponent(name) + '&group=finished',
+            headers: { 'accept': 'application/json, text/plain, */*' },
+            onload: function(response) {
+                try {
+                    const data = JSON.parse(response.responseText);
+                    const items = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
+                    if (!items.length) { callback(null, null); return; }
+                    // 同一客户可能有多份报告，取 created_at 最新
+                    items.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+                    callback(null, items[0]);
+                } catch (e) {
+                    callback(e, null);
+                }
+            },
+            onerror: function() { callback(new Error('network'), null); },
+            ontimeout: function() { callback(new Error('timeout'), null); }
+        });
+    }
+
+    // 提交芝麻分：PATCH /api/v1/admin/reports/{report_id}（declared_income 原值带回，不覆盖运营手填值）
+    function submitZhimaScore(report, score, callback) {
+        const declaredIncome = parseFloat(String(report.declared_income ?? '0')) || 0;
+        GM_xmlhttpRequest({
+            method: 'PATCH',
+            url: 'https://riskanalysis.aixzu.com/api/v1/admin/reports/' + encodeURIComponent(report.report_id),
+            headers: {
+                'accept': 'application/json, text/plain, */*',
+                'content-type': 'application/json'
+            },
+            data: JSON.stringify({ declared_income: declaredIncome, zhima_score: score }),
+            onload: function(response) {
+                try {
+                    const ok = response.status >= 200 && response.status < 300;
+                    callback(ok ? null : new Error('http ' + response.status), ok);
+                } catch (e) {
+                    callback(e, false);
+                }
+            },
+            onerror: function() { callback(new Error('network'), false); },
+            ontimeout: function() { callback(new Error('timeout'), false); }
+        });
+    }
+
+    // 芝麻分提交流程入口（自动处理时 / 测试按钮共用）
+    // isTest: true = 测试提交（Toast 带「测试」字样，按钮禁用防连点）
+    function runZhimaSubmit(isTest) {
+        if (zhimaSubmitting) { if (isTest) showErrorToast('芝麻分正在提交中…'); return; }
+        // 流水宝未开启：拦截外联提交
+        if (!isLiushuiBaoEnabled()) {
+            showErrorToast('此客户未开启流水宝');
+            return;
+        }
+        const name = (cachedName || '').trim();
+        if (!name) {
+            showErrorToast('客户姓名为空，' + (isTest ? '请先获取订单数据' : '跳过芝麻分提交'));
+            return;
+        }
+        const score = getZhimaScoreValue();
+        if (score === null) {
+            showErrorToast('芝麻信用未填写，' + (isTest ? '请先填写芝麻信用' : '跳过提交'));
+            return;
+        }
+
+        zhimaSubmitting = true;
+        const testBtn = document.getElementById('re-zhima-test-btn');
+        const btnLabel = testBtn ? testBtn.textContent : '';
+        if (isTest && testBtn) { testBtn.disabled = true; testBtn.textContent = '提交中…'; }
+
+        searchZhimaReport(name, function(searchErr, report) {
+            if (searchErr) {
+                zhimaSubmitting = false;
+                if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
+                showErrorToast('芝麻分提交失败：搜索报告请求异常');
+                return;
+            }
+            if (!report) {
+                zhimaSubmitting = false;
+                if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
+                showErrorToast('未找到该客户的风控报告');
+                return;
+            }
+            submitZhimaScore(report, score, function(submitErr, ok) {
+                zhimaSubmitting = false;
+                if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
+                if (ok) {
+                    showSuccessToast((isTest ? '测试成功！' : '') + '芝麻分已提交：' + score);
+                } else {
+                    showErrorToast('芝麻分提交失败' + (submitErr && submitErr.message ? '（' + submitErr.message + '）' : ''));
+                }
+            });
+        });
+    }
+
     function loadLowPerfSetting() {
         const saved = localStorage.getItem(CONFIG.STORAGE.lowPerfKey);
         lowPerfEnabled = saved === 'true';
@@ -7652,6 +7837,7 @@
     loadAutoFetchSetting();
     loadAutoContactQuerySetting();
     loadPreventRefreshSetting();
+    loadZhimaAutoSubmitSetting();
     loadAutoRefreshSetting();
     loadLowPerfSetting();
 
@@ -7702,6 +7888,50 @@
     if (preventRefreshCheckbox) {
         preventRefreshCheckbox.addEventListener('change', function() {
             savePreventRefreshSetting(this.checked);
+        });
+    }
+
+    const zhimaSubmitCheckbox = document.getElementById('re-setting-zhima-submit');
+    if (zhimaSubmitCheckbox) {
+        zhimaSubmitCheckbox.addEventListener('change', function() {
+            saveZhimaAutoSubmitSetting(this.checked);
+            showSuccessToast(this.checked ? '主动提交芝麻分：已开启' : '主动提交芝麻分：已关闭');
+        });
+    }
+
+    const zhimaTestBtn = document.getElementById('re-zhima-test-btn');
+    if (zhimaTestBtn) {
+        zhimaTestBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            runZhimaSubmit(true);
+        });
+    }
+
+    // 查看报告：搜索客户最新风控报告，新标签页打开详情页
+    const viewReportBtn = document.getElementById('re-btn-view-report');
+    if (viewReportBtn) {
+        viewReportBtn.addEventListener('click', function() {
+            // 流水宝未开启：拦截外联查询
+            if (!isLiushuiBaoEnabled()) {
+                showErrorToast('此客户未开启流水宝');
+                return;
+            }
+            const name = (cachedName || '').trim();
+            if (!name) {
+                showErrorToast('请先获取订单数据');
+                return;
+            }
+            searchZhimaReport(name, function(err, report) {
+                if (err) {
+                    showErrorToast('查询报告失败：网络异常');
+                    return;
+                }
+                if (!report) {
+                    showErrorToast('没有相关报告');
+                    return;
+                }
+                window.open('https://riskanalysis.aixzu.com/report/' + encodeURIComponent(report.report_id), '_blank');
+            });
         });
     }
 
@@ -9247,10 +9477,15 @@
 
             const orderNoEl = document.getElementById('re-order-no');
             if (orderNoEl && orderNo) {
+                const prevOrderNo = orderNoEl.textContent.trim();
                 orderNoEl.textContent = orderNo;
                 // 无锁模式每单重置：订单号变化时自动退出
                 if (noLockModeActive && orderNo && noLockOrderSnapshot && orderNo !== noLockOrderSnapshot) {
                     exitNoLockMode();
+                }
+                // 流水宝开关每单重置：切单后新客户默认未开启
+                if (prevOrderNo && orderNo && prevOrderNo !== orderNo) {
+                    resetLiushuiBaoSwitch();
                 }
             }
         } catch (e) {
@@ -11117,6 +11352,11 @@
                 showTooltip(noLockQualified ? '请填写无锁结果' : '请填写审核价格', window.innerWidth / 2, window.innerHeight / 2);
                 if (requiredPriceInput) requiredPriceInput.focus();
                 return;
+            }
+
+            // 芝麻分自动提交（异步并行，不阻塞自动处理主流程）
+            if (zhimaAutoSubmitEnabled) {
+                runZhimaSubmit(false);
             }
 
             const originalContent = this.innerHTML;
