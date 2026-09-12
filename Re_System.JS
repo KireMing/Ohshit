@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      4.5.0
+// @version      4.5.1
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -128,7 +128,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V4.5.0</span>
+                    <span class="re-panel-version">V4.5.1</span>
                 </div>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
@@ -11105,14 +11105,17 @@
                 return;
             }
 
-            const auditPriceInput = document.getElementById('re-audit-result');
-            const auditPrice = auditPriceInput ? auditPriceInput.value.trim() : '';
             const orderResultSelect = document.getElementById('re-order-result');
             const orderResult = orderResultSelect ? orderResultSelect.value : '';
 
-            if (orderResult !== '取消' && !auditPrice) {
-                showTooltip('请填写审核价格', window.innerWidth / 2, window.innerHeight / 2);
-                if (auditPriceInput) auditPriceInput.focus();
+            // 无锁达标态：正常上锁行已隐藏，必填项切换为无锁结果
+            const noLockQualified = isNoLockQualified();
+            const requiredPriceInput = noLockQualified ? document.getElementById('re-expand-result') : document.getElementById('re-audit-result');
+            const requiredPrice = requiredPriceInput ? requiredPriceInput.value.trim() : '';
+
+            if (orderResult !== '取消' && !requiredPrice) {
+                showTooltip(noLockQualified ? '请填写无锁结果' : '请填写审核价格', window.innerWidth / 2, window.innerHeight / 2);
+                if (requiredPriceInput) requiredPriceInput.focus();
                 return;
             }
 
