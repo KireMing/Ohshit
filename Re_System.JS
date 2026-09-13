@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      4.8.0
+// @version      5.7
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -106,6 +106,8 @@
             autoContactQueryKey: 're-auto-contact-query-enabled',
             preventRefreshKey: 're-prevent-refresh-enabled',
             zhimaAutoSubmitKey: 're-zhima-auto-submit-enabled',
+            liushuiBaoMemoryKey: 're-liushui-bao-memory-enabled',
+            liushuiBaoStateKey: 're-liushui-bao-state',
             autoRefreshKey: 're-auto-refresh-enabled',
             lowPerfKey: 're-low-perf-enabled',
             restDaysKey: 're-rest-days',
@@ -115,7 +117,9 @@
             bgColor: '#e8eaed',
             bgOpacity: 80,
             fontSize: 14,
-            fontBold: false
+            fontBold: false,
+            headerBg: '#6b7280',   // 标题栏背景色（默认深灰渐变主色）
+            headerTextColor: '#ffffff' // 标题栏文字颜色
         },
         CHART: {
             hitRadius: 15,
@@ -129,8 +133,9 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V4.8.0</span>
+                    <span class="re-panel-version">V5.7</span>
                 </div>
+                <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <span class="re-panel-staff" id="re-staff-name"></span>
             </div>
             <div class="re-panel-resize-handle"></div>
@@ -140,7 +145,6 @@
             </div>
             <div class="re-panel-content">
                 <div class="re-column re-column-left">
-                    <div class="re-column-header">导航</div>
                     <div class="re-column-content">
                         <ul class="re-nav-list">
                             <li class="re-nav-item active" data-page="data" title="数据">
@@ -159,10 +163,6 @@
                     </div>
                 </div>
                 <div class="re-column re-column-center">
-                    <div class="re-column-header">
-                        <span class="re-header-title">主内容区</span>
-                        <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
-                    </div>
                     <div class="re-column-content" id="re-main-content">
                         <div class="re-form-section" id="re-page-data">
                             <div class="re-form-group">
@@ -494,17 +494,30 @@
                                             </div>
                                             <div class="re-setting-card">
                                                 <div class="re-setting-icon re-setting-icon-green">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                                </div>
+                                                <div class="re-setting-info">
+                                                    <span class="re-setting-name">主面板流水宝记忆</span>
+                                                    <span class="re-setting-desc">开启后流水宝开关跨订单保持，关闭则每单重置</span>
+                                                </div>
+                                                <label class="re-switch re-switch-small">
+                                                    <input type="checkbox" id="re-setting-liushui-bao-memory">
+                                                    <span class="re-switch-slider"></span>
+                                                </label>
+                                            </div>
+                                            <div class="re-setting-card">
+                                                <div class="re-setting-icon re-setting-icon-green">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                                                 </div>
                                                 <div class="re-setting-info">
                                                     <span class="re-setting-name">主动提交芝麻分</span>
                                                     <span class="re-setting-desc">点自动处理时，将芝麻信用提交到风控报告</span>
+                                                    <button class="re-zhima-test-btn" id="re-zhima-test-btn" title="手动测试一次芝麻分提交链路">测试提交</button>
                                                 </div>
                                                 <label class="re-switch re-switch-small">
                                                     <input type="checkbox" id="re-setting-zhima-submit">
                                                     <span class="re-switch-slider"></span>
                                                 </label>
-                                                <button class="re-zhima-test-btn" id="re-zhima-test-btn" title="手动测试一次芝麻分提交链路">测试提交</button>
                                             </div>
                                             <div class="re-setting-card">
                                                 <div class="re-setting-icon re-setting-icon-cyan">
@@ -546,27 +559,52 @@
                                     </div>
                                     <div class="re-settings-panel" id="re-settings-appearance">
                                         <div class="re-appearance-section">
-                                            <div class="re-appearance-item">
-                                                <div class="re-appearance-header">
-                                                    <span class="re-appearance-title">背板颜色</span>
-                                                    <span class="re-appearance-desc">自定义面板背景颜色</span>
+                                            <div class="re-appearance-group">配色</div>
+                                            <div class="re-appearance-colors">
+                                                <div class="re-appearance-item">
+                                                    <div class="re-appearance-header">
+                                                        <span class="re-appearance-title">背板颜色</span>
+                                                        <span class="re-appearance-desc">自定义面板背景颜色</span>
+                                                    </div>
+                                                    <div class="re-appearance-control">
+                                                        <input type="color" id="re-setting-bg-color" value="#e8eaed" class="re-color-picker">
+                                                        <button class="re-reset-icon-btn" id="re-reset-bg-color" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+                                                    </div>
                                                 </div>
-                                                <div class="re-appearance-control">
-                                                    <input type="color" id="re-setting-bg-color" value="#e8eaed" class="re-color-picker">
-                                                    <button class="re-btn-sm" id="re-reset-bg-color">重置</button>
+                                                <div class="re-appearance-item">
+                                                    <div class="re-appearance-header">
+                                                        <span class="re-appearance-title">标题栏背景色</span>
+                                                        <span class="re-appearance-desc">自定义顶部标题栏背景</span>
+                                                    </div>
+                                                    <div class="re-appearance-control">
+                                                        <input type="color" id="re-setting-header-bg" value="#6b7280" class="re-color-picker">
+                                                        <button class="re-reset-icon-btn" id="re-reset-header-bg" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+                                                    </div>
+                                                </div>
+                                                <div class="re-appearance-item">
+                                                    <div class="re-appearance-header">
+                                                        <span class="re-appearance-title">标题栏文字颜色</span>
+                                                        <span class="re-appearance-desc">标题、客户数据、客服名字色</span>
+                                                    </div>
+                                                    <div class="re-appearance-control">
+                                                        <input type="color" id="re-setting-header-text" value="#ffffff" class="re-color-picker">
+                                                        <button class="re-reset-icon-btn" id="re-reset-header-text" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div class="re-appearance-group">背景</div>
+                                            <div class="re-appearance-bg">
                                             <div class="re-appearance-item">
                                                 <div class="re-appearance-header">
                                                     <span class="re-appearance-title">背景图片</span>
                                                     <span class="re-appearance-desc">上传自定义背景图片</span>
                                                 </div>
                                                 <div class="re-appearance-control">
+                                                    <span id="re-bg-image-name" class="re-filename-text"></span>
                                                     <label class="re-file-upload-btn" id="re-bg-image-upload-label">
                                                         选择图片
                                                         <input type="file" id="re-setting-bg-image" accept="image/jpeg,image/png,image/webp" style="display:none">
                                                     </label>
-                                                    <span id="re-bg-image-name" class="re-filename-text"></span>
                                                     <button class="re-btn-sm re-btn-danger" id="re-clear-bg-image" style="display:none;">清除</button>
                                                 </div>
                                             </div>
@@ -580,6 +618,8 @@
                                                     <span id="re-opacity-value" class="re-opacity-text">80%</span>
                                                 </div>
                                             </div>
+                                            </div>
+                                            <div class="re-appearance-group">字体</div>
                                             <div class="re-appearance-item">
                                                 <div class="re-appearance-header">
                                                     <span class="re-appearance-title">字体大小</span>
@@ -679,7 +719,6 @@
                     </div>
                 </div>
                 <div class="re-column re-column-right" id="re-right-column">
-                    <div class="re-column-header">信息栏</div>
                     <div class="re-column-content">
                         <div class="re-info-card">
                             <div class="re-info-title">监管机信息</div>
@@ -746,6 +785,11 @@
                             </div>
                             <div class="re-risk-preview-content" id="re-risk-preview-text">暂无数据</div>
                             <div class="re-risk-reduction" id="re-risk-reduction"></div>
+                        </div>
+                        <!-- 工作流预览：常驻展示自动处理将执行的节点链 -->
+                        <div class="re-workflow-bar re-workflow-hidden" id="re-workflow-bar">
+                            <div class="re-workflow-title">工作流<span class="re-workflow-hint" id="re-workflow-hint"> · 点自动处理时执行</span></div>
+                            <div class="re-workflow-nodes" id="re-workflow-nodes"></div>
                         </div>
                     </div>
                 </div>
@@ -945,7 +989,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 16px;
-            background: linear-gradient(135deg, rgba(107, 114, 128, 0.95) 0%, rgba(75, 85, 99, 0.95) 100%);
+            /* 标题栏背景/文字颜色：外观设置可覆盖（变量在 #re-system-panel 上定义） */
+            background: linear-gradient(135deg, var(--re-header-bg-1, rgba(107, 114, 128, 0.95)) 0%, var(--re-header-bg-2, rgba(75, 85, 99, 0.95)) 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px 16px 0 0;
             cursor: move;
@@ -961,7 +1006,7 @@
         .re-panel-title {
             font-size: 14px;
             font-weight: 500;
-            color: #ffffff;
+            color: var(--re-header-text, #ffffff);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
@@ -970,16 +1015,16 @@
             font-weight: 600;
             padding: 3px 10px;
             border-radius: 20px;
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
             color: #ffffff;
             letter-spacing: 0.3px;
-            box-shadow: 0 2px 6px rgba(251, 191, 36, 0.3);
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
             white-space: nowrap;
         }
 
         .re-panel-staff {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.85);
+            color: var(--re-header-text, rgba(255, 255, 255, 0.85));
             margin-left: auto;
             padding-right: 16px;
         }
@@ -1033,29 +1078,29 @@
             min-width: 300px;
         }
 
-        .re-column-center .re-column-header {
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        .re-header-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            flex-shrink: 0;
-        }
-
+        /* 客户数据：并入深色顶栏，居中自适应省略 */
         .re-header-data {
-            font-size: 14px;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+            font-size: 13px;
             font-weight: 600;
-            color: #374151;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            color: var(--re-header-text, rgba(255, 255, 255, 0.92));
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0 12px;
         }
 
+        /* 复购客户：金色高亮 + 闪烁提示 */
         .re-header-data.highlight-gold {
+            color: #fbbf24;
+            animation: re-header-gold-flash 0.7s ease-in-out 3;
+        }
+
+        @keyframes re-header-gold-flash {
+            0%, 100% { opacity: 1; text-shadow: none; }
+            50% { opacity: 0.55; text-shadow: 0 0 10px rgba(251, 191, 36, 0.8); }
         }
 
         .re-new-chain-link {
@@ -1229,22 +1274,6 @@
             width: 240px;
             min-width: 200px;
             border-left: 1px solid rgba(107, 114, 128, 0.2);
-        }
-
-        .re-column-header {
-            padding: 14px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.1) 100%);
-            border-bottom: 1px solid rgba(107, 114, 128, 0.15);
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .re-column-left .re-column-header {
-            text-align: center;
-            padding: 14px 8px;
         }
 
         .re-column-content {
@@ -1734,6 +1763,82 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        /* 历史记录标签胶囊（下单时的胶囊快照） */
+        .re-history-item-tags {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: auto;
+            min-width: 0;
+            overflow: hidden;
+            flex-shrink: 1;
+            padding-right: 18px;
+        }
+
+        .re-history-tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1.5;
+        }
+
+        .re-history-tag-nolock {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .re-history-tag-appstore {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .re-history-tag-repeat {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .re-history-tag-risk {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* 浮卡内的标签胶囊（稍大） */
+        .re-history-hover-card-tags .re-history-tag {
+            font-size: 12px;
+            padding: 2px 8px;
+        }
+
+        /* 月份标题右侧：按标签筛选下拉 */
+        .re-history-tag-filter {
+            font-size: 11px;
+            color: #374151;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 2px 4px;
+            height: 24px;
+            cursor: pointer;
+            outline: none;
+            max-width: 108px;
+            flex-shrink: 0;
+        }
+
+        .re-history-tag-filter:focus {
+            border-color: #93c5fd;
+        }
+
+        /* 筛选无结果的空态：保留下拉操作栏，可切换/清除筛选 */
+        .re-history-empty-filter {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
         }
 
         .re-history-item-delete {
@@ -2460,30 +2565,30 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
 
-        /* 芝麻分测试提交按钮（设置卡片内，开关右侧） */
+        /* 芝麻分测试提交：描述下方的文字链接式按钮，保持卡片右侧只有开关 */
         .re-zhima-test-btn {
-            flex-shrink: 0;
-            font-size: 12px;
+            display: inline-block;
+            margin-top: 3px;
+            padding: 0;
+            border: none;
+            background: none;
+            font-size: 11px;
             font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            color: #6b7280;
+            color: #3b82f6;
             cursor: pointer;
-            white-space: nowrap;
-            transition: background .15s, color .15s, border-color .15s;
+            transition: color .15s;
         }
 
         .re-zhima-test-btn:hover {
-            background: #f3f4f6;
-            color: #374151;
-            border-color: #9ca3af;
+            color: #2563eb;
+            text-decoration: underline;
         }
 
         .re-zhima-test-btn:disabled {
             cursor: not-allowed;
             opacity: 0.6;
+            color: #6b7280;
+            text-decoration: none;
         }
 
         .re-setting-icon {
@@ -2587,7 +2692,38 @@
         .re-appearance-section {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
+        }
+
+        /* 外观设置分组标题：配色 / 背景 / 字体 */
+        .re-appearance-group {
+            font-size: 11px;
+            font-weight: 600;
+            color: #9ca3af;
+            letter-spacing: 3px;
+            padding-left: 2px;
+            margin-top: 4px;
+        }
+
+        .re-appearance-group:first-child {
+            margin-top: 0;
+        }
+
+        /* 配色组：两列网格，压缩纵向高度 */
+        .re-appearance-colors {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .re-appearance-colors .re-appearance-item {
+            padding: 10px 12px;
+            gap: 8px;
+        }
+
+        /* 背景组保持整行 */
+        .re-appearance-bg .re-appearance-item {
+            padding: 14px 16px;
         }
 
         .re-appearance-item {
@@ -2621,6 +2757,36 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* 紧凑圆形重置按钮：替代占宽的「重置」文字按钮 */
+        .re-reset-icon-btn {
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border: 1px solid #d1d5db;
+            border-radius: 50%;
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background .15s, color .15s, border-color .15s, transform .25s;
+        }
+
+        .re-reset-icon-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+            border-color: #9ca3af;
+            transform: rotate(-60deg);
+        }
+
+        .re-reset-icon-btn svg {
+            width: 13px;
+            height: 13px;
+            stroke-width: 2;
         }
 
         .re-appearance-preview {
@@ -2657,21 +2823,24 @@
             border-radius: 4px;
         }
 
+        /* 上传按钮：中性灰描边，与设置区其他按钮统一 */
         .re-file-upload-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 6px 14px;
+            padding: 5px 12px;
             font-size: 12px;
-            color: #fff;
-            background: #3b82f6;
-            border: none;
+            color: #374151;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
             border-radius: 6px;
             cursor: pointer;
+            transition: background .15s, border-color .15s;
         }
 
         .re-file-upload-btn:hover {
-            background: #2563eb;
+            background: #e5e7eb;
+            border-color: #9ca3af;
         }
 
         .re-filename-text {
@@ -4173,6 +4342,153 @@
             padding-top: 0;
             padding-bottom: 0;
             border: none;
+        }
+
+        /* ===== 工作流预览（蛇形节点链）===== */
+        .re-workflow-bar {
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(107, 114, 128, 0.15);
+            overflow: hidden;
+            max-height: 200px;
+            transition: opacity 0.25s ease, max-height 0.25s ease, margin 0.25s ease, padding 0.25s ease;
+        }
+
+        .re-workflow-bar.re-workflow-hidden {
+            opacity: 0;
+            max-height: 0;
+            margin-top: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border: none;
+        }
+
+        .re-workflow-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.12);
+        }
+
+        /* 预览态提示：处理进行中自动隐藏 */
+        .re-workflow-hint {
+            font-size: 10px;
+            font-weight: 400;
+            color: #9ca3af;
+            margin-left: 4px;
+        }
+
+        /* 蛇形容器：各行纵向排列 */
+        .re-workflow-nodes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .re-wf-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        /* 奇数行反向：蛇从右往左爬 */
+        .re-wf-row-reverse {
+            flex-direction: row-reverse;
+        }
+
+        /* 行间转折竖线 */
+        .re-wf-corner {
+            position: relative;
+            width: 100%;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .re-wf-corner::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            height: 22px;
+            width: 2px;
+            border-radius: 2px;
+            background: #d1d5db;
+        }
+
+        .re-wf-corner-right::before { right: 32px; }
+        .re-wf-corner-left::before { left: 32px; }
+
+        .re-wf-corner.lit::before { background: #3b82f6; }
+
+        .re-workflow-node {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 999px;
+            white-space: nowrap;
+            line-height: 1.4;
+            flex-shrink: 0;
+        }
+
+        /* 未执行：浅灰空心 */
+        .re-workflow-node.pending {
+            background: #f3f4f6;
+            color: #9ca3af;
+            border: 1px dashed #d1d5db;
+        }
+
+        /* 进行中：天蓝呼吸 */
+        .re-workflow-node.running {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+            animation: re-workflow-breath 1.2s ease-in-out infinite;
+        }
+
+        /* 成功：天蓝实底 */
+        .re-workflow-node.done {
+            background: #3b82f6;
+            color: #fff;
+            border: 1px solid #3b82f6;
+        }
+
+        /* 失败：灰黑实底 */
+        .re-workflow-node.failed {
+            background: #1f2937;
+            color: #f9fafb;
+            border: 1px solid #111827;
+        }
+
+        /* 跳过：浅灰实底 */
+        .re-workflow-node.skipped {
+            background: #e5e7eb;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+
+        /* 行内连线：自适应填满两侧节点之间的整个间隙 */
+        .re-workflow-link {
+            flex: 1;
+            min-width: 10px;
+            height: 2px;
+            background: #d1d5db;
+            border-radius: 2px;
+        }
+
+        .re-workflow-link.lit {
+            background: #3b82f6;
+        }
+
+        @keyframes re-workflow-breath {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
         }
 
         .re-risk-preview-header {
@@ -6291,6 +6607,55 @@
         if (histHoverBackdropEl) histHoverBackdropEl.classList.add('show');
     }
 
+    // 收集当前订单的胶囊标签快照（自动处理成功存历史时调用）
+    function collectOrderTags() {
+        const tags = [];
+        if (typeof noLockModeActive !== 'undefined' && noLockModeActive) tags.push('无锁模式');
+        if (typeof restrictAppStoreEnabled !== 'undefined' && restrictAppStoreEnabled) tags.push('禁止AppStore');
+        if (document.querySelector('#re-expand-restrict-badge .re-history-same-model')) tags.push('历史同机型');
+        if (typeof isSameDeviceModel === 'function' && isSameDeviceModel()) tags.push('设备相同');
+        try {
+            const headerText = panel.querySelector('.re-header-data')?.textContent || '';
+            const orderCountMatch = headerText.match(/客户办单[：:](\d+)次/);
+            if (orderCountMatch && parseInt(orderCountMatch[1], 10) >= CONFIG.THRESHOLD.repeatCustomer) tags.push('复购客户');
+            const ageMatch = headerText.match(/(\d+)岁/);
+            if (ageMatch && parseInt(ageMatch[1], 10) > CONFIG.THRESHOLD.overageAge) tags.push('超龄客户');
+        } catch (e) {}
+        return tags;
+    }
+
+    // 历史标签 → 样式类映射
+    function getHistoryTagClass(tag) {
+        if (tag === '无锁模式') return 're-history-tag-nolock';
+        if (tag === '禁止AppStore') return 're-history-tag-appstore';
+        if (tag === '复购客户') return 're-history-tag-repeat';
+        return 're-history-tag-risk';
+    }
+
+    // 历史标签筛选状态（月份标题右侧下拉，全局生效）
+    let historyTagFilter = '';
+
+    const HISTORY_TAG_OPTIONS = ['无锁模式', '禁止AppStore', '复购客户', '超龄客户', '设备相同', '历史同机型'];
+
+    // 筛选下拉的选项 HTML（月份标题与空态操作栏共用）
+    function buildTagFilterOptionsHtml() {
+        return '<option value="">按标签筛选</option>' +
+            HISTORY_TAG_OPTIONS.map(t => `<option value="${t}" ${historyTagFilter === t ? 'selected' : ''}>${t}</option>`).join('');
+    }
+
+    // 筛选下拉事件绑定（change 重渲染 / click 阻止冒泡）
+    function bindTagFilterSelect(sel) {
+        sel.addEventListener('change', function(e) {
+            e.stopPropagation();
+            historyTagFilter = this.value;
+            const searchInput = document.getElementById('re-history-search');
+            renderHistoryRecords(searchInput ? searchInput.value : '');
+        });
+        sel.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
     function showHistoryHoverCard(itemEl) {
         const card = getHistoryHoverCard();
         card.querySelector('.re-history-hover-card-name').textContent = decodeURIComponent(itemEl.getAttribute('data-name') || '') || '未知';
@@ -6299,6 +6664,20 @@
         card.querySelector('.re-history-hover-card-shop').textContent = decodeURIComponent(itemEl.getAttribute('data-shop') || '') || '未知店铺';
         const previewText = decodeURIComponent(itemEl.getAttribute('data-preview') || '');
         card.querySelector('.re-history-hover-card-remark-text').textContent = previewText || '（无备注）';
+
+        // 标签胶囊快照（下单时的胶囊状态）
+        const tagsWrap = card.querySelector('.re-history-hover-card-tags');
+        tagsWrap.querySelectorAll('.re-history-tag').forEach(el => el.remove());
+        let tagsArr = [];
+        try {
+            tagsArr = JSON.parse(decodeURIComponent(itemEl.getAttribute('data-tags') || '') || '[]');
+        } catch (e) { tagsArr = []; }
+        (Array.isArray(tagsArr) ? tagsArr : []).forEach(t => {
+            const span = document.createElement('span');
+            span.className = 're-history-tag ' + getHistoryTagClass(t);
+            span.textContent = t;
+            tagsWrap.appendChild(span);
+        });
 
         // fixed 定位：默认出现在行右侧，越界时向左翻转，底部钳制在视口内
         card.classList.add('show');
@@ -6340,22 +6719,38 @@
             const term = searchTerm.trim().toLowerCase();
 
             if (term) {
-                filteredRecords = records.filter(record =>
+                filteredRecords = filteredRecords.filter(record =>
                     record.name && record.name.toLowerCase().includes(term)
+                );
+            }
+
+            // 按标签筛选（月份标题右侧下拉，全局生效，与搜索词叠加）
+            if (historyTagFilter) {
+                filteredRecords = filteredRecords.filter(record =>
+                    Array.isArray(record.tags) && record.tags.includes(historyTagFilter)
                 );
             }
 
             if (filteredRecords.length === 0) {
                 if (emptyEl) emptyEl.style.display = 'flex';
                 container.innerHTML = '';
-                if (term) {
+                if (term || historyTagFilter) {
                     const noResult = document.createElement('div');
                     noResult.className = 're-history-no-result';
+                    const filterDesc = historyTagFilter ? (term ? `"${searchTerm.trim()}" + 标签「${historyTagFilter}」` : `标签「${historyTagFilter}」`) : `"${searchTerm.trim()}"`;
                     noResult.innerHTML = `
                         <svg class="re-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        <div class="re-empty-text">未找到 "${searchTerm.trim()}" 相关记录</div>
+                        <div class="re-empty-text">未找到 ${filterDesc} 相关记录</div>
                     `;
                     container.appendChild(noResult);
+                    // 保留筛选操作栏：无结果时月份标题（含下拉）已被清空，这里补一个下拉可切换/清除筛选
+                    if (historyTagFilter) {
+                        const filterBar = document.createElement('div');
+                        filterBar.className = 're-history-empty-filter';
+                        filterBar.innerHTML = `<select class="re-history-tag-filter" title="按标签筛选历史记录">${buildTagFilterOptionsHtml()}</select>`;
+                        container.appendChild(filterBar);
+                        bindTagFilterSelect(filterBar.querySelector('select'));
+                    }
                 } else {
                     container.appendChild(emptyEl);
                 }
@@ -6423,17 +6818,23 @@
                 items.forEach((item, index) => {
                     const isHidden = index >= displayCount;
                     const timeStr = (item.time || '').substring(0, 5);
+                    const itemTags = Array.isArray(item.tags) ? item.tags : [];
+                    const tagsHtml = itemTags.map(t =>
+                        `<span class="re-history-tag ${getHistoryTagClass(t)}">${t}</span>`
+                    ).join('');
                     itemsHtml += `
                         <div class="re-history-item ${isHidden ? 're-history-item-hidden' : ''}" data-id="${item.id}"
                              data-name="${encodeURIComponent(item.name || '')}"
                              data-time="${timeStr}"
                              data-model="${encodeURIComponent(item.model || '')}"
                              data-shop="${encodeURIComponent(item.shop || '')}"
-                             data-preview="${encodeURIComponent(item.preview || '')}">
+                             data-preview="${encodeURIComponent(item.preview || '')}"
+                             data-tags="${encodeURIComponent(JSON.stringify(itemTags))}">
                             <span class="re-history-item-name" title="${item.name || ''}">${item.name || '未知'}</span>
                             <span class="re-history-item-time">${timeStr}</span>
                             <span class="re-history-item-model" title="${item.model || ''}">${item.model || '未知机型'}</span>
                             <span class="re-history-item-shop" title="${item.shop || ''}">${item.shop || '未知店铺'}</span>
+                            <span class="re-history-item-tags">${tagsHtml}</span>
                             <button class="re-history-item-delete" data-id="${item.id}" title="删除">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -6488,6 +6889,9 @@
                             </button>
                             <span class="re-history-month-title">${monthStr}</span>
                             <span class="re-history-month-count">共 ${monthTotalCount} 条</span>
+                            <select class="re-history-tag-filter" data-month="${month}" title="按标签筛选历史记录">
+                                ${buildTagFilterOptionsHtml()}
+                            </select>
                             <button class="re-history-month-export" data-month="${month}" title="导出整月数据">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -6510,6 +6914,11 @@
             });
 
             container.innerHTML = monthSectionsHtml;
+
+            // 按标签筛选（月份标题右侧下拉，全局生效；与搜索词叠加）
+            container.querySelectorAll('.re-history-tag-filter').forEach(sel => {
+                bindTagFilterSelect(sel);
+            });
 
             // 月份折叠交互
             container.querySelectorAll('.re-history-month-toggle').forEach(btn => {
@@ -7681,15 +8090,55 @@
     let zhimaSubmitting = false;
 
     // 流水宝开关：客户是否已发送流水宝（每单重置，未开启时拦截外联功能）
+    // 设置里「主面板流水宝记忆」开启时：开关状态跨订单保持（localStorage 记忆）
+    let liushuiBaoMemoryEnabled = false;
+
     function isLiushuiBaoEnabled() {
         const checkbox = document.getElementById('re-liushui-bao');
         return !!(checkbox && checkbox.checked);
     }
 
     function resetLiushuiBaoSwitch() {
+        // 记忆模式下不重置，状态跨订单保持
+        if (liushuiBaoMemoryEnabled) return;
         const checkbox = document.getElementById('re-liushui-bao');
         if (checkbox && checkbox.checked) {
             checkbox.checked = false;
+        }
+    }
+
+    function loadLiushuiBaoMemorySetting() {
+        liushuiBaoMemoryEnabled = localStorage.getItem(CONFIG.STORAGE.liushuiBaoMemoryKey) === 'true';
+
+        const memoryCheckbox = document.getElementById('re-setting-liushui-bao-memory');
+        if (memoryCheckbox) {
+            memoryCheckbox.checked = liushuiBaoMemoryEnabled;
+            memoryCheckbox.addEventListener('change', function() {
+                liushuiBaoMemoryEnabled = memoryCheckbox.checked;
+                localStorage.setItem(CONFIG.STORAGE.liushuiBaoMemoryKey, liushuiBaoMemoryEnabled.toString());
+                if (liushuiBaoMemoryEnabled) {
+                    // 开启记忆：立即持久化当前开关状态
+                    localStorage.setItem(CONFIG.STORAGE.liushuiBaoStateKey, isLiushuiBaoEnabled().toString());
+                } else {
+                    // 关闭记忆：清除持久化状态，开关回到每单重置
+                    localStorage.removeItem(CONFIG.STORAGE.liushuiBaoStateKey);
+                }
+            });
+        }
+
+        // 记忆模式下恢复上次状态，否则默认关闭
+        const liushuiBaoCheckbox = document.getElementById('re-liushui-bao');
+        if (liushuiBaoCheckbox && liushuiBaoMemoryEnabled) {
+            liushuiBaoCheckbox.checked = localStorage.getItem(CONFIG.STORAGE.liushuiBaoStateKey) === 'true';
+        }
+
+        // 开关变化时持久化（仅记忆模式）
+        if (liushuiBaoCheckbox) {
+            liushuiBaoCheckbox.addEventListener('change', function() {
+                if (liushuiBaoMemoryEnabled) {
+                    localStorage.setItem(CONFIG.STORAGE.liushuiBaoStateKey, liushuiBaoCheckbox.checked.toString());
+                }
+            });
         }
     }
 
@@ -7768,16 +8217,19 @@
         // 流水宝未开启：拦截外联提交
         if (!isLiushuiBaoEnabled()) {
             showErrorToast('此客户未开启流水宝');
+            if (!isTest) setWorkflowNode('zhima', 'skipped', '跳过芝麻分');
             return;
         }
         const name = (cachedName || '').trim();
         if (!name) {
             showErrorToast('客户姓名为空，' + (isTest ? '请先获取订单数据' : '跳过芝麻分提交'));
+            if (!isTest) setWorkflowNode('zhima', 'skipped', '跳过芝麻分');
             return;
         }
         const score = getZhimaScoreValue();
         if (score === null) {
             showErrorToast('芝麻信用未填写，' + (isTest ? '请先填写芝麻信用' : '跳过提交'));
+            if (!isTest) setWorkflowNode('zhima', 'skipped', '跳过芝麻分');
             return;
         }
 
@@ -7790,12 +8242,14 @@
             if (searchErr) {
                 zhimaSubmitting = false;
                 if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
+                if (!isTest) setWorkflowNode('zhima', 'failed', '芝麻分失败');
                 showErrorToast('芝麻分提交失败：搜索报告请求异常');
                 return;
             }
             if (!report) {
                 zhimaSubmitting = false;
                 if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
+                if (!isTest) setWorkflowNode('zhima', 'failed', '无报告');
                 showErrorToast('未找到该客户的风控报告');
                 return;
             }
@@ -7803,8 +8257,10 @@
                 zhimaSubmitting = false;
                 if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
                 if (ok) {
+                    if (!isTest) setWorkflowNode('zhima', 'done', '已芝麻分');
                     showSuccessToast((isTest ? '测试成功！' : '') + '芝麻分已提交：' + score);
                 } else {
+                    if (!isTest) setWorkflowNode('zhima', 'failed', '芝麻分失败');
                     showErrorToast('芝麻分提交失败' + (submitErr && submitErr.message ? '（' + submitErr.message + '）' : ''));
                 }
             });
@@ -7837,6 +8293,7 @@
     loadAutoFetchSetting();
     loadAutoContactQuerySetting();
     loadPreventRefreshSetting();
+    loadLiushuiBaoMemorySetting();
     loadZhimaAutoSubmitSetting();
     loadAutoRefreshSetting();
     loadLowPerfSetting();
@@ -7895,6 +8352,7 @@
     if (zhimaSubmitCheckbox) {
         zhimaSubmitCheckbox.addEventListener('change', function() {
             saveZhimaAutoSubmitSetting(this.checked);
+            renderWorkflowPreview(); // 芝麻分节点是否上链实时联动
             showSuccessToast(this.checked ? '主动提交芝麻分：已开启' : '主动提交芝麻分：已关闭');
         });
     }
@@ -8643,6 +9101,8 @@
 
         if (typeof updatePreview === 'function') updatePreview();
         if (typeof updateRiskPreview === 'function') updateRiskPreview();
+        // 工作流预览联动：无锁状态/达标态变化会影响「跳过分配」预展示
+        renderWorkflowPreview();
     }
 
     // 退出无锁模式（手动关闭 / 切换订单时调用），恢复拓展开关进入前状态
@@ -8672,6 +9132,140 @@
         refreshNoLockUI();
     }
     // ==================== 无锁模式 END ====================
+
+    // ==================== 工作流预览（蛇形节点链） ====================
+    let workflowNodesConfig = [];
+    let workflowHideTimer = null;
+    let wfMarchTimer = null;
+    let wfCursor = -1;   // 蛇头游标：当前展示到第几个节点
+    let wfState = [];    // 各节点真实结果 { key, doneText, real }
+    let wfProcessing = false; // 自动处理进行中（预览重绘避让）
+
+    const WF_ROW_SIZE = 2;      // 蛇形每行节点数（两列三行，避免超出格子宽度）
+    const WF_STEP_FAST = 220;   // 已有结果时节点的滑过间隔(ms)
+
+    // 初始化/重置工作流条：showZhima = 芝麻分节点是否参与本次流程；preview = 预览态（不启动蛇头爬行）
+    function initWorkflowBar(showZhima, skipAssign, preview) {
+        const bar = document.getElementById('re-workflow-bar');
+        const wrap = document.getElementById('re-workflow-nodes');
+        if (!bar || !wrap) return;
+
+        clearTimeout(workflowHideTimer);
+        clearTimeout(wfMarchTimer);
+
+        // 预览态显示提示文字，处理进行中隐藏
+        const hint = document.getElementById('re-workflow-hint');
+        if (hint) hint.style.display = preview ? '' : 'none';
+
+        const defs = [
+            { key: 'assign', label: '客服分配', doneText: '已分配' },
+            { key: 'remark', label: '客服备注', doneText: '已备注' },
+            { key: 'risk', label: '风控备注', doneText: '已风控' },
+            { key: 'zhima', label: '芝麻分', doneText: '已芝麻分' },
+            { key: 'copy', label: '复制预览', doneText: '已复制' },
+            { key: 'history', label: '记录历史', doneText: '已记录' }
+        ];
+        workflowNodesConfig = defs.filter(d => d.key !== 'zhima' || showZhima);
+        wfState = workflowNodesConfig.map(d => ({
+            key: d.key,
+            doneText: d.doneText,
+            real: (d.key === 'assign' && skipAssign) ? { status: 'skipped', text: '跳过分配' } : null
+        }));
+        wfCursor = -1;
+
+        // 蛇形分行：偶数行左→右，奇数行右→左
+        const rows = [];
+        for (let i = 0; i < workflowNodesConfig.length; i += WF_ROW_SIZE) {
+            rows.push(workflowNodesConfig.slice(i, i + WF_ROW_SIZE));
+        }
+
+        let html = '';
+        rows.forEach((row, ri) => {
+            const reverse = ri % 2 === 1;
+            html += `<div class="re-wf-row${reverse ? ' re-wf-row-reverse' : ''}">`;
+            row.forEach((d, i) => {
+                const st = wfState.find(s => s.key === d.key);
+                let cls = 'pending';
+                let text = d.label;
+                if (st.real) { cls = st.real.status; text = st.real.text; }
+                html += `<span class="re-workflow-node ${cls}" data-wf-key="${d.key}">${text}</span>`;
+                if (i < row.length - 1) {
+                    html += `<span class="re-workflow-link" data-wf-after="${d.key}"></span>`;
+                }
+            });
+            html += `</div>`;
+            // 行间转折竖线：接在上一行结束侧
+            if (ri < rows.length - 1) {
+                const side = ri % 2 === 0 ? 'right' : 'left';
+                html += `<div class="re-wf-corner re-wf-corner-${side}" data-wf-corner-after="${row[row.length - 1].key}"></div>`;
+            }
+        });
+        wrap.innerHTML = html;
+        bar.classList.remove('re-workflow-hidden');
+
+        wfProcessing = !preview;
+        // 启动蛇头爬行（仅处理态）
+        if (!preview) {
+            wfMarchTimer = setTimeout(wfMarch, 250);
+        }
+    }
+
+    // 预览态：按当前设置渲染点自动处理时将执行的工作流链（处理进行中不重绘）
+    function renderWorkflowPreview() {
+        if (wfProcessing) return;
+        const skipAssign = noLockModeActive && !isNoLockQualified();
+        initWorkflowBar(zhimaAutoSubmitEnabled, skipAssign, true);
+    }
+
+    // 蛇头推进：按顺序逐节点点亮；有结果的快速定格滑过，无结果的保持 running 等真实回调
+    function wfMarch() {
+        wfMarchTimer = null;
+        wfCursor++;
+        if (wfCursor >= wfState.length) return;
+        const st = wfState[wfCursor];
+        const node = document.querySelector(`.re-workflow-node[data-wf-key="${st.key}"]`);
+        if (st.real) {
+            if (node) wfApplyFinal(st, node);
+            wfMarchTimer = setTimeout(wfMarch, WF_STEP_FAST);
+        } else if (node) {
+            node.className = 're-workflow-node running';
+        }
+    }
+
+    // 定格节点最终状态并点亮其后的连线/转折线
+    function wfApplyFinal(st, node) {
+        node.className = `re-workflow-node ${st.real.status}`;
+        node.textContent = st.real.text;
+        const link = document.querySelector(`.re-workflow-link[data-wf-after="${st.key}"]`);
+        if (link) link.classList.add('lit');
+        const corner = document.querySelector(`.re-wf-corner[data-wf-corner-after="${st.key}"]`);
+        if (corner) corner.classList.add('lit');
+    }
+
+    // 更新节点真实结果：status = done | failed | skipped（running 由蛇头自动展示，忽略）
+    function setWorkflowNode(key, status, text) {
+        if (status === 'running') return;
+        const st = wfState.find(s => s.key === key);
+        if (!st || st.real) return;
+        st.real = { status, text: text || st.doneText };
+        // 蛇头正停在该节点：立即定格并继续爬
+        if (wfCursor >= 0 && wfCursor < wfState.length && wfState[wfCursor].key === key) {
+            const node = document.querySelector(`.re-workflow-node[data-wf-key="${key}"]`);
+            if (node) wfApplyFinal(st, node);
+            wfMarchTimer = setTimeout(wfMarch, WF_STEP_FAST);
+        }
+    }
+
+    // 自动处理结束：5 秒后回到预览态（自动刷新开启时保持到页面刷新）
+    function hideWorkflowBar() {
+        if (autoRefreshEnabled) return; // 页面即将 reload，保持展示
+        clearTimeout(workflowHideTimer);
+        workflowHideTimer = setTimeout(() => {
+            wfProcessing = false;
+            renderWorkflowPreview();
+        }, 5000);
+    }
+    // ==================== 工作流预览 END ====================
 
     function fetchPageData() {
         try {
@@ -8802,6 +9396,8 @@
                     displayText += '【' + cleanShop + '】';
                 }
                 headerDataEl.innerHTML = displayText;
+                // 顶栏截断显示，悬停 title 可看全文
+                headerDataEl.title = headerDataEl.textContent;
 
                 if (orderCountNum > CONFIG.THRESHOLD.repeatCustomer) {
                     headerDataEl.classList.remove('highlight-gold');
@@ -9486,6 +10082,13 @@
                 // 流水宝开关每单重置：切单后新客户默认未开启
                 if (prevOrderNo && orderNo && prevOrderNo !== orderNo) {
                     resetLiushuiBaoSwitch();
+                    // 工作流条随切单终止本次流程，回到预览态
+                    clearTimeout(workflowHideTimer);
+                    clearTimeout(wfMarchTimer);
+                    wfCursor = -1;
+                    wfState = [];
+                    wfProcessing = false;
+                    renderWorkflowPreview();
                 }
             }
         } catch (e) {
@@ -11354,8 +11957,14 @@
                 return;
             }
 
+            // 无锁模式 + 胶囊"不满足"：跳过客服分配，仅执行客服备注 + 风控备注
+            const skipAssign = noLockModeActive && !noLockQualified;
+            // 工作流预览：初始化节点链（芝麻分开关开启才显示该节点）
+            initWorkflowBar(zhimaAutoSubmitEnabled, skipAssign);
+
             // 芝麻分自动提交（异步并行，不阻塞自动处理主流程）
             if (zhimaAutoSubmitEnabled) {
+                setWorkflowNode('zhima', 'running');
                 runZhimaSubmit(false);
             }
 
@@ -11393,7 +12002,9 @@
                 }
 
                 let completed = 0;
-                const total = 3;
+                // 无锁模式 + 胶囊"不满足"：跳过客服分配，仅执行客服备注 + 风控备注
+                const skipAssign = noLockModeActive && !noLockQualified;
+                const total = skipAssign ? 2 : 3;
                 const results = { assign: false, staffRemark: false, riskRemark: false };
 
                 function checkAllCompleted() {
@@ -11409,10 +12020,14 @@
                                 autoProcessBtn.classList.add('completed');
                                 autoProcessBtn.innerHTML = '<svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>已完成';
 
+                                const doneMsg = skipAssign ? '自动处理完成！已跳过客服分配（无锁不满足）' : '自动处理完成！';
+                                setWorkflowNode('copy', 'running');
                                 navigator.clipboard.writeText(previewContent).then(() => {
-                                    showSuccessToast('自动处理完成！即时预览已复制');
+                                    setWorkflowNode('copy', 'done', '已复制');
+                                    showSuccessToast(doneMsg + '，即时预览已复制');
                                 }).catch(() => {
-                                    showSuccessToast('自动处理完成！全部成功');
+                                    setWorkflowNode('copy', 'failed', '复制失败');
+                                    showSuccessToast(doneMsg);
                                 });
 
                                 const now = new Date();
@@ -11421,19 +12036,25 @@
                                     model: model,
                                     shop: shop,
                                     preview: riskPreviewContent,
+                                    tags: collectOrderTags(),
                                     date: now.toISOString().split('T')[0],
                                     time: now.toTimeString().split(' ')[0]
                                 };
 
+                                setWorkflowNode('history', 'running');
                                 saveHistoryRecord(record).then(() => {
+                                    setWorkflowNode('history', 'done', '已记录');
                                     renderHistoryRecords();
                                 }).catch(err => {
+                                    setWorkflowNode('history', 'failed', '记录失败');
                                 });
 
                                 setTimeout(() => {
                                     autoProcessBtn.classList.remove('completed');
                                     autoProcessBtn.innerHTML = originalContent;
                                     autoProcessBtn.disabled = false;
+                                    // 未开自动刷新时 5 秒后滑出；开启则保持到页面刷新
+                                    hideWorkflowBar();
 
                                     if (autoRefreshEnabled) {
                                         showSuccessToast('页面即将刷新...');
@@ -11446,23 +12067,35 @@
                             } else {
                                 autoProcessBtn.disabled = false;
                                 showSuccessToast(`自动处理完成！成功 ${successCount}/${total} 项`);
+                                // 部分失败：后续节点不再执行，标记跳过让蛇爬完整条链
+                                setWorkflowNode('copy', 'skipped', '未执行');
+                                setWorkflowNode('history', 'skipped', '未执行');
+                                hideWorkflowBar();
                             }
                         }, 300);
                     }
                 }
 
-                doStaffAssign(orderNo, staffName, function(success) {
-                    results.assign = success;
-                    checkAllCompleted();
-                });
+                if (!skipAssign) {
+                    setWorkflowNode('assign', 'running');
+                    doStaffAssign(orderNo, staffName, function(success) {
+                        results.assign = success;
+                        setWorkflowNode('assign', success ? 'done' : 'failed', success ? '已分配' : '分配失败');
+                        checkAllCompleted();
+                    });
+                }
 
+                setWorkflowNode('remark', 'running');
                 doStaffRemark(orderNo, previewContent, function(success) {
                     results.staffRemark = success;
+                    setWorkflowNode('remark', success ? 'done' : 'failed', success ? '已备注' : '备注失败');
                     checkAllCompleted();
                 });
 
+                setWorkflowNode('risk', 'running');
                 doRiskRemark(orderNo, collectRiskRemarkData(), function(success) {
                     results.riskRemark = success;
+                    setWorkflowNode('risk', success ? 'done' : 'failed', success ? '已风控' : '风控失败');
                     checkAllCompleted();
                 });
 
@@ -11689,6 +12322,17 @@
         reFontStyleEl.textContent = fontBold ? '#re-system-panel, #re-system-panel *, [id^="re-"], [id^="re-"] * { font-weight: 600; }' : '';
     }
 
+    // 标题栏配色：主色 → 深20% 渐变，文字色统一作用到标题/客户数据/客服名
+    function applyHeaderSettings() {
+        const settings = getAppearanceSettings();
+        const headerBg = settings.headerBg || CONFIG.DEFAULTS.headerBg;
+        const headerText = settings.headerTextColor || CONFIG.DEFAULTS.headerTextColor;
+        const target = panel || document.documentElement;
+        target.style.setProperty('--re-header-bg-1', headerBg);
+        target.style.setProperty('--re-header-bg-2', adjustColor(headerBg, -20));
+        target.style.setProperty('--re-header-text', headerText);
+    }
+
     function applyBackgroundSettings() {
         const settings = getAppearanceSettings();
         const bgColor = settings.bgColor || CONFIG.DEFAULTS.bgColor;
@@ -11781,6 +12425,52 @@
                 saveAppearanceSettings(newSettings);
                 if (colorInput) colorInput.value = CONFIG.DEFAULTS.bgColor;
                 applyBackgroundSettings();
+            });
+        }
+
+        // 标题栏背景色 / 文字颜色
+        const headerBgInput = document.getElementById('re-setting-header-bg');
+        const headerBgReset = document.getElementById('re-reset-header-bg');
+        const headerTextInput = document.getElementById('re-setting-header-text');
+        const headerTextReset = document.getElementById('re-reset-header-text');
+
+        if (headerBgInput) {
+            headerBgInput.value = settings.headerBg || CONFIG.DEFAULTS.headerBg;
+            headerBgInput.addEventListener('input', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.headerBg = this.value;
+                saveAppearanceSettings(newSettings);
+                applyHeaderSettings();
+            });
+        }
+
+        if (headerBgReset) {
+            headerBgReset.addEventListener('click', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.headerBg = CONFIG.DEFAULTS.headerBg;
+                saveAppearanceSettings(newSettings);
+                if (headerBgInput) headerBgInput.value = CONFIG.DEFAULTS.headerBg;
+                applyHeaderSettings();
+            });
+        }
+
+        if (headerTextInput) {
+            headerTextInput.value = settings.headerTextColor || CONFIG.DEFAULTS.headerTextColor;
+            headerTextInput.addEventListener('input', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.headerTextColor = this.value;
+                saveAppearanceSettings(newSettings);
+                applyHeaderSettings();
+            });
+        }
+
+        if (headerTextReset) {
+            headerTextReset.addEventListener('click', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.headerTextColor = CONFIG.DEFAULTS.headerTextColor;
+                saveAppearanceSettings(newSettings);
+                if (headerTextInput) headerTextInput.value = CONFIG.DEFAULTS.headerTextColor;
+                applyHeaderSettings();
             });
         }
 
@@ -11929,6 +12619,8 @@
 
     addPanelButton();
     applyFontSettings();
+    applyHeaderSettings();
+    renderWorkflowPreview(); // 工作流条常驻：启动即展示自动处理将执行的节点链
 
     function initAnalysisEvents() {
         // 趋势图范围切换（近7天/近14天/本月/上月），机型图联动同一范围
