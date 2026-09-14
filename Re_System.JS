@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.3.5
+// @version      6.3.6
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -121,7 +121,7 @@
             headerBg: '#6b7280',   // 标题栏背景色（默认深灰渐变主色）
             headerTextColor: '#ffffff', // 标题栏文字颜色
             switchOnColor: '#3b82f6',  // 开关激活色（默认蓝，自动亮30%生成渐变）
-            inputTint: 100,            // 输入框染色浓度（0-100%，100=与开关同色）
+            inputTint: 0,              // 输入框染色浓度（0-100%，默认0=不染色，100=与开关同色）
             glassMode: true,           // 磨砂模式（三栏白底+模糊）；关闭=全透明清晰透出壁纸
             compWhiteBg: true,         // 交互组件白底（输入框/下拉/表单卡片等）；关闭=透明保留边框
             compOpacity: 80            // 组件背景板透明度（表单卡片/信息卡/联系人/风控预览/工作流条）
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.3.5</span>
+                    <span class="re-panel-version">V6.3.6</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <span class="re-panel-staff" id="re-staff-name"></span>
@@ -4146,10 +4146,10 @@
 
         .re-action-btn {
             padding: 10px 16px;
-            border: 1px solid var(--re-accent-30, rgba(59, 130, 246, 0.3));
+            border: 1px solid rgba(59, 130, 246, 0.3);
             border-radius: 8px;
-            background: linear-gradient(135deg, var(--re-accent-10, rgba(59, 130, 246, 0.1)) 0%, var(--re-accent-05, rgba(96, 165, 250, 0.05)) 100%);
-            color: var(--re-accent-dark, #2563eb);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(96, 165, 250, 0.05) 100%);
+            color: #2563eb;
             font-size: 13px;
             cursor: pointer;
             display: flex;
@@ -4167,10 +4167,10 @@
         }
 
         .re-action-btn:hover {
-            background: linear-gradient(135deg, var(--re-accent-20, rgba(59, 130, 246, 0.2)) 0%, var(--re-accent-15, rgba(96, 165, 250, 0.15)) 100%);
-            border-color: var(--re-accent-50, rgba(59, 130, 246, 0.5));
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.15) 100%);
+            border-color: rgba(59, 130, 246, 0.5);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--re-accent-20, rgba(59, 130, 246, 0.2));
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
         .re-action-btn.disabled {
@@ -5512,21 +5512,21 @@
             justify-content: center;
             gap: 6px;
             padding: 10px 12px;
-            border: 1px solid var(--re-accent-30, rgba(59, 130, 246, 0.3));
+            border: 1px solid rgba(107, 114, 128, 0.25);
             border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
-            background: linear-gradient(135deg, var(--re-accent-10, rgba(59, 130, 246, 0.1)) 0%, var(--re-accent-05, rgba(96, 165, 250, 0.05)) 100%), linear-gradient(rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.72));
-            color: var(--re-accent-dark, #2563eb);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.7));
+            color: #4b5563;
         }
 
         .re-action-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--re-accent-20, rgba(0, 0, 0, 0.12));
-            background: linear-gradient(135deg, var(--re-accent-20, rgba(59, 130, 246, 0.2)) 0%, var(--re-accent-10, rgba(96, 165, 250, 0.1)) 100%), linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85));
-            border-color: var(--re-accent-50, rgba(59, 130, 246, 0.5));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), var(--re-comp-bg, rgba(255, 255, 255, 0.7));
+            border-color: rgba(107, 114, 128, 0.35);
         }
 
         .re-action-btn:active {
@@ -5537,7 +5537,7 @@
             width: 14px;
             height: 14px;
             flex-shrink: 0;
-            stroke: currentColor;
+            stroke: #6b7280;
         }
 
         .re-overlay {
@@ -5602,9 +5602,9 @@
 
         /* 无锁模式按钮激活态 */
         .re-action-btn.re-no-lock-btn-active {
-            border-color: var(--re-accent, #3b82f6);
-            background: var(--re-accent-10, rgba(59, 130, 246, 0.10));
-            color: var(--re-accent-dark, #1d4ed8);
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.10);
+            color: #1d4ed8;
         }
 
         /* ===== 外观扩展（V6.1.0）===== */
