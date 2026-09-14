@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      5.7
+// @version      6.0.3
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -133,7 +133,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V5.7</span>
+                    <span class="re-panel-version">V6.0.3</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <span class="re-panel-staff" id="re-staff-name"></span>
@@ -5466,24 +5466,29 @@
             background: rgba(248, 250, 252, 0.95);
         }
 
-        /* 无锁模式：主面板边缘蓝光呼吸 */
-        #re-system-panel.re-no-lock-mode {
+        /* 无锁模式：主面板边缘蓝光呼吸
+           性能注：box-shadow 动画无法 GPU 合成，会逐帧重绘整个大面板导致整机卡顿；
+           故将光圈移到 ::after（无锁期间重定义，退出后恢复原装饰渐变），仅动画 opacity（纯合成器，零重绘） */
+        #re-system-panel.re-no-lock-mode::after {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: none;
+            border-radius: 16px;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.55), 0 0 25px 4px rgba(59, 130, 246, 0.4);
             animation: re-no-lock-glow 2s ease-in-out infinite;
+            will-change: opacity;
         }
 
         @keyframes re-no-lock-glow {
-            0%, 100% {
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.35), 0 0 18px 2px rgba(59, 130, 246, 0.25);
-            }
-            50% {
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.65), 0 0 32px 6px rgba(59, 130, 246, 0.45);
-            }
+            0%, 100% { opacity: 0.45; }
+            50% { opacity: 1; }
         }
 
-        /* 低性能模式：关闭蓝光动画 */
-        #re-system-panel.re-low-perf.re-no-lock-mode {
+        /* 低性能模式：关闭蓝光动画（保留静态光圈） */
+        #re-system-panel.re-low-perf.re-no-lock-mode::after {
             animation: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 2px rgba(59, 130, 246, 0.55);
         }
 
         /* 无锁模式按钮激活态 */
@@ -5912,18 +5917,6 @@
         try {
             localStorage.setItem(CONFIG.STORAGE.restDaysKey, JSON.stringify(days));
         } catch (e) {}
-    }
-
-    function toggleRestDay(date) {
-        const restDays = getRestDays();
-        const index = restDays.indexOf(date);
-        if (index > -1) {
-            restDays.splice(index, 1);
-        } else {
-            restDays.push(date);
-        }
-        saveRestDays(restDays);
-        return index === -1;
     }
 
     function getEditedDays() {
@@ -6611,7 +6604,11 @@
     function collectOrderTags() {
         const tags = [];
         if (typeof noLockModeActive !== 'undefined' && noLockModeActive) tags.push('无锁模式');
-        if (typeof restrictAppStoreEnabled !== 'undefined' && restrictAppStoreEnabled) tags.push('禁止AppStore');
+        // 机型+胶囊开启即打标（与上锁命名口径一致）；无锁达标态不打（备注只有无锁结果，无上锁方案）
+        const restrictTagged = (typeof isRestrictAppStoreActive === 'function' && isRestrictAppStoreActive())
+            && !(typeof noLockModeActive !== 'undefined' && noLockModeActive
+                && typeof isNoLockQualified === 'function' && isNoLockQualified());
+        if (restrictTagged) tags.push('禁止AppStore');
         if (document.querySelector('#re-expand-restrict-badge .re-history-same-model')) tags.push('历史同机型');
         if (typeof isSameDeviceModel === 'function' && isSameDeviceModel()) tags.push('设备相同');
         try {
@@ -8132,12 +8129,13 @@
             liushuiBaoCheckbox.checked = localStorage.getItem(CONFIG.STORAGE.liushuiBaoStateKey) === 'true';
         }
 
-        // 开关变化时持久化（仅记忆模式）
+        // 开关变化时持久化（仅记忆模式）；并联动工作流预览（芝麻分节点随之出现/消失）
         if (liushuiBaoCheckbox) {
             liushuiBaoCheckbox.addEventListener('change', function() {
                 if (liushuiBaoMemoryEnabled) {
                     localStorage.setItem(CONFIG.STORAGE.liushuiBaoStateKey, liushuiBaoCheckbox.checked.toString());
                 }
+                if (typeof renderWorkflowPreview === 'function') renderWorkflowPreview();
             });
         }
     }
@@ -8214,9 +8212,9 @@
     // isTest: true = 测试提交（Toast 带「测试」字样，按钮禁用防连点）
     function runZhimaSubmit(isTest) {
         if (zhimaSubmitting) { if (isTest) showErrorToast('芝麻分正在提交中…'); return; }
-        // 流水宝未开启：拦截外联提交
+        // 流水宝未开启：拦截外联提交（自动处理路径已在上链前过滤，此处仅测试按钮会走到，静默跳过自动路径）
         if (!isLiushuiBaoEnabled()) {
-            showErrorToast('此客户未开启流水宝');
+            if (isTest) showErrorToast('此客户未开启流水宝');
             if (!isTest) setWorkflowNode('zhima', 'skipped', '跳过芝麻分');
             return;
         }
@@ -8448,14 +8446,39 @@
         return modelParagraph ? modelParagraph.textContent.trim() : '';
     }
 
+    // 面板打开后的统一初始化/加载序列：togglePanel 直开与身份证确认弹窗各回调路径共用
+    // （此前 5 处复制粘贴已发生漂移：取消/外点路径缺 initStaffName 或 initEditableSelects，此处统一补齐）
+    function showPanelAndLoadData() {
+        panel.classList.remove('re-panel-hidden');
+        panel.classList.add('re-panel-visible');
+        panel.classList.remove('re-panel-closing');
+        restorePanelPosition();
+        initStaffName();
+        initEditableSelects();
+        fetchPageData();
+        fetchProductData();
+        fetchOrderData();
+        if (autoFetchEnabled) {
+            setTimeout(() => {
+                const newRentDisplay = document.getElementById('re-new-rent');
+                const hasData = newRentDisplay && newRentDisplay.textContent.trim() !== '';
+                if (!hasData) {
+                    refreshOrderRiskData();
+                }
+            }, 100);
+        }
+        fetchLinkedPageData();
+        if (autoContactQueryEnabled) {
+            scheduleAutoContactQuery();
+        }
+    }
+
     function togglePanel(show) {
         if (show) {
             if (!lazyInit.appearance) {
                 lazyInit.appearance = true;
                 initAppearanceSettings();
             }
-
-            initStaffName();
 
             const idCardEl = getCurrentIdCardElement();
             const idCard = idCardEl ? idCardEl.textContent.trim() : '';
@@ -8474,27 +8497,7 @@
                 return;
             }
 
-            panel.classList.remove('re-panel-hidden');
-            panel.classList.add('re-panel-visible');
-            panel.classList.remove('re-panel-closing');
-            restorePanelPosition();
-            initEditableSelects();
-            fetchPageData();
-            fetchProductData();
-            fetchOrderData();
-            if (autoFetchEnabled) {
-                setTimeout(() => {
-                    const newRentDisplay = document.getElementById('re-new-rent');
-                    const hasData = newRentDisplay && newRentDisplay.textContent.trim() !== '';
-                    if (!hasData) {
-                        refreshOrderRiskData();
-                    }
-                }, 100);
-            }
-            fetchLinkedPageData();
-            if (autoContactQueryEnabled) {
-                scheduleAutoContactQuery();
-            }
+            showPanelAndLoadData();
         } else {
             panel.classList.add('re-panel-closing');
             setTimeout(() => {
@@ -8527,54 +8530,13 @@
 
                     if (pendingShowPanel) {
                         pendingShowPanel = false;
-                        panel.classList.remove('re-panel-hidden');
-                        panel.classList.add('re-panel-visible');
-                        panel.classList.remove('re-panel-closing');
-                        restorePanelPosition();
-                        initStaffName();
-                        initEditableSelects();
-                        fetchPageData();
-                        fetchProductData();
-                        fetchOrderData();
-                        if (autoFetchEnabled) {
-                            setTimeout(() => {
-                                const newRentDisplay = document.getElementById('re-new-rent');
-                                const hasData = newRentDisplay && newRentDisplay.textContent.trim() !== '';
-                                if (!hasData) {
-                                    refreshOrderRiskData();
-                                }
-                            }, 100);
-                        }
-                        fetchLinkedPageData();
-                        if (autoContactQueryEnabled) {
-                            scheduleAutoContactQuery();
-                        }
+                        showPanelAndLoadData();
                     }
                 }, 500);
             } else {
                 if (pendingShowPanel) {
                     pendingShowPanel = false;
-                    panel.classList.remove('re-panel-hidden');
-                    panel.classList.add('re-panel-visible');
-                    panel.classList.remove('re-panel-closing');
-                    restorePanelPosition();
-                    initStaffName();
-                    fetchPageData();
-                    fetchProductData();
-                    fetchOrderData();
-                    if (autoFetchEnabled) {
-                        setTimeout(() => {
-                            const newRentDisplay = document.getElementById('re-new-rent');
-                            const hasData = newRentDisplay && newRentDisplay.textContent.trim() !== '';
-                            if (!hasData) {
-                                refreshOrderRiskData();
-                            }
-                        }, 100);
-                    }
-                    fetchLinkedPageData();
-                    if (autoContactQueryEnabled) {
-                        scheduleAutoContactQuery();
-                    }
+                    showPanelAndLoadData();
                 }
             }
         });
@@ -8587,27 +8549,7 @@
             }
             if (pendingShowPanel) {
                 pendingShowPanel = false;
-                panel.classList.remove('re-panel-hidden');
-                panel.classList.add('re-panel-visible');
-                panel.classList.remove('re-panel-closing');
-                restorePanelPosition();
-                initEditableSelects();
-                fetchPageData();
-                fetchProductData();
-                fetchOrderData();
-                if (autoFetchEnabled) {
-                    setTimeout(() => {
-                        const newRentDisplay = document.getElementById('re-new-rent');
-                        const hasData = newRentDisplay && newRentDisplay.textContent.trim() !== '';
-                        if (!hasData) {
-                            refreshOrderRiskData();
-                        }
-                    }, 100);
-                }
-                fetchLinkedPageData();
-                if (autoContactQueryEnabled) {
-                    scheduleAutoContactQuery();
-                }
+                showPanelAndLoadData();
             }
         });
     }
@@ -8618,26 +8560,7 @@
                 confirmModal.classList.remove('re-modal-visible');
                 if (pendingShowPanel) {
                     pendingShowPanel = false;
-                    panel.classList.remove('re-panel-hidden');
-                    panel.classList.add('re-panel-visible');
-                    panel.classList.remove('re-panel-closing');
-                    restorePanelPosition();
-                    fetchPageData();
-                    fetchProductData();
-                    fetchOrderData();
-                    if (autoFetchEnabled) {
-                        setTimeout(() => {
-                            const newRentDisplay = document.getElementById('re-new-rent');
-                            const hasData = newRentDisplay && newRentDisplay.textContent.trim() !== '';
-                            if (!hasData) {
-                                refreshOrderRiskData();
-                            }
-                        }, 100);
-                    }
-                    fetchLinkedPageData();
-                    if (autoContactQueryEnabled) {
-                        scheduleAutoContactQuery();
-                    }
+                    showPanelAndLoadData();
                 }
             }
         });
@@ -8660,8 +8583,6 @@
         const isClickOnManageModal = manageModal && manageModal.contains(e.target);
         const multiSelectManageModal = document.getElementById('re-multi-select-manage-modal');
         const isClickOnMultiSelectManageModal = multiSelectManageModal && multiSelectManageModal.contains(e.target);
-        const iframeModal = document.getElementById('re-contact-edit-modal');
-        const isClickOnIframeModal = iframeModal && iframeModal.contains(e.target);
         const genericIframeModal = document.getElementById('re-generic-iframe-modal');
         const isClickOnGenericIframeModal = genericIframeModal && genericIframeModal.contains(e.target);
         const modelOrdersModal = document.getElementById('re-model-orders-modal');
@@ -8677,7 +8598,7 @@
         const isClickOnHistHoverCard = e.target.closest && e.target.closest('.re-history-hover-card');
         const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnIframeModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -8845,17 +8766,11 @@
         });
     });
 
-    function generateOrderNo() {
-        let orderNo = '';
-        for (let i = 0; i < 10; i++) {
-            orderNo += Math.floor(Math.random() * 10);
-        }
-        return orderNo;
-    }
-
-    const orderNoEl = document.getElementById('re-order-no');
-    if (orderNoEl) {
-        orderNoEl.textContent = generateOrderNo();
+    // 面板当前订单号：占位符视为未获取（不生成随机号兜底，避免真实订单未加载时误提交）
+    function getPanelOrderNo() {
+        const el = document.getElementById('re-order-no');
+        const text = el ? el.textContent.trim() : '';
+        return (text && text !== '【无参数】') ? text : '';
     }
 
     function getPageDataByXPath(xpath) {
@@ -8940,18 +8855,25 @@
         return isRestrictAppStoreModel() && restrictAppStoreEnabled;
     }
 
+    // 上锁字段名三态：非无锁「审核价格」；无锁内看机型+胶囊开关——AppStore机型且胶囊亮「禁止AppStore」，其余「正常上锁」
+    // （无锁内点胶囊可实时切换上锁命名；非AppStore机型胶囊不渲染，恒为正常上锁）
+    function getLockLabel() {
+        if (!noLockModeActive) return '审核价格';
+        return isRestrictAppStoreActive() ? '禁止AppStore' : '正常上锁';
+    }
+
     function setRestrictAppStoreEnabled(enabled) {
         restrictAppStoreEnabled = enabled;
         GM_setValue('re-restrict-appstore-enabled', enabled);
 
-        // 与无锁模式互斥：开启禁止AppStore时自动退出无锁模式
-        if (enabled && typeof noLockModeActive !== 'undefined' && noLockModeActive) {
-            exitNoLockMode();
-        }
-
         // 刷新胶囊开关状态
         const badge = document.querySelector('#re-expand-restrict-badge .re-restrict-appstore');
         if (badge) badge.classList.toggle('active', enabled);
+
+        // 无锁模式内切换胶囊时，同步刷新上锁字段命名（亮=禁止AppStore，灭=正常上锁）
+        if (typeof noLockModeActive !== 'undefined' && noLockModeActive) {
+            refreshNoLockUI();
+        }
 
         // 刷新主预览与风控预览标签
         if (typeof updatePreview === 'function') updatePreview();
@@ -9067,8 +8989,8 @@
         if (btn) btn.classList.toggle('re-no-lock-btn-active', noLockModeActive);
         panel.classList.toggle('re-no-lock-mode', noLockModeActive);
 
-        // 审核价格 → 正常上锁（仅改名）
-        if (auditLabel) auditLabel.textContent = noLockModeActive ? '正常上锁' : '审核价格';
+        // 审核价格 → 上锁方式命名（无锁内AppStore机型=禁止AppStore，其余=正常上锁）
+        if (auditLabel) auditLabel.textContent = getLockLabel();
 
         // 达标时隐藏正常上锁行（正常上锁输入框 + 审核结果下拉整行消失，只留无锁结果）
         if (auditRow) auditRow.style.display = qualified ? 'none' : '';
@@ -9158,11 +9080,11 @@
         if (hint) hint.style.display = preview ? '' : 'none';
 
         const defs = [
+            { key: 'copy', label: '复制预览', doneText: '已复制' },
             { key: 'assign', label: '客服分配', doneText: '已分配' },
             { key: 'remark', label: '客服备注', doneText: '已备注' },
             { key: 'risk', label: '风控备注', doneText: '已风控' },
             { key: 'zhima', label: '芝麻分', doneText: '已芝麻分' },
-            { key: 'copy', label: '复制预览', doneText: '已复制' },
             { key: 'history', label: '记录历史', doneText: '已记录' }
         ];
         workflowNodesConfig = defs.filter(d => d.key !== 'zhima' || showZhima);
@@ -9214,7 +9136,7 @@
     function renderWorkflowPreview() {
         if (wfProcessing) return;
         const skipAssign = noLockModeActive && !isNoLockQualified();
-        initWorkflowBar(zhimaAutoSubmitEnabled, skipAssign, true);
+        initWorkflowBar(zhimaAutoSubmitEnabled && isLiushuiBaoEnabled(), skipAssign, true);
     }
 
     // 蛇头推进：按顺序逐节点点亮；有结果的快速定格滑过，无结果的保持 running 等真实回调
@@ -9481,7 +9403,9 @@
             // 任一命中 → 弹窗警示 + 匹配序列号标红；②命中 → 主面板补显"历史同机型"胶囊
             const orderToken = extractModelToken(cachedProductModel);
             const sameDeviceSuspect = isSameDeviceModel();
-            const currentOrderNo = (document.getElementById('re-order-no')?.textContent || '').trim();
+            // 当前订单号：面板占位时回退到行内「查看」按钮的 dataset.id，避免当前单被当历史单误判
+            const currentOrderNo = getPanelOrderNo()
+                || (getCurrentOrderRow()?.querySelector('button.show-sensitive-data')?.dataset.id || '');
             const historyMatched = orders.filter(o =>
                 o.orderNo !== currentOrderNo
                 && orderToken && extractModelToken(o.model) === orderToken
@@ -9734,12 +9658,6 @@
             const tdXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]';
             const tdEl = getElementByXPath(tdXPath);
             const tdText = tdEl ? tdEl.textContent || tdEl.innerText : '';
-
-            function findValueAfterLabel(text, label) {
-                const regex = new RegExp(label + '[：:]\\s*([^\\n]+?)(?=\\s*(?:店铺|商品|套餐|机型|最低|办单|逾期|离线|出资|普通|\\n|$))', 'i');
-                const match = text.match(regex);
-                return match ? match[1].trim() : '';
-            }
 
             function findShopRemark(text, label) {
                 const regex = new RegExp(label + '[：:]\\s*([\\s\\S]+?)(?=\\s*店铺历史成交单量)', 'i');
@@ -10096,8 +10014,7 @@
     }
 
     function refreshOrderRiskData() {
-        const orderNoEl = document.getElementById('re-order-no');
-        const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
+        const orderNo = getPanelOrderNo();
 
         if (!orderNo) {
             return;
@@ -10261,10 +10178,8 @@
                             legalStatusDisplay.classList.add('re-value-danger');
                         }
 
-                        const orderNoEl = document.getElementById('re-order-no');
-                        const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
-
                         legalStatusDisplay.onclick = function() {
+                            const orderNo = getPanelOrderNo();
                             if (orderNo) {
                                 const legalDetailUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.legalStatus + '?out_order_no=' + orderNo;
                                 openIframeModal(legalDetailUrl, '法律状态详情');
@@ -10708,7 +10623,7 @@
         }
     }
 
-    function validatePrice(input, priceName) {
+    function validatePrice(input) {
         let inputValue = parseFloat(input.value.replace(/,/g, ''));
         if (isNaN(inputValue)) return true;
 
@@ -10746,7 +10661,7 @@
     if (auditResultInput) {
         auditResultInput.addEventListener('blur', function() {
             if (this.value.trim()) {
-                validatePrice(this, '审核价格');
+                validatePrice(this);
             }
         });
     }
@@ -10755,7 +10670,7 @@
     if (expandResultInput) {
         expandResultInput.addEventListener('blur', function() {
             if (this.value.trim()) {
-                validatePrice(this, '拓展价格');
+                validatePrice(this);
             }
         });
     }
@@ -10916,7 +10831,7 @@
         const previewBox = document.querySelector('.re-preview-box');
 
         if (staffRemarkBtn) {
-            if (!previewContent || previewContent === '请先填 审核价格' || previewContent === '请先填 正常上锁' || previewContent === '请先填 无锁结果' || previewContent === '订单取消') {
+            if (!previewContent || previewContent === '请先填 审核价格' || previewContent === '请先填 正常上锁' || previewContent === '请先填 禁止AppStore' || previewContent === '请先填 无锁结果' || previewContent === '订单取消') {
                 staffRemarkBtn.classList.add('disabled');
                 staffRemarkBtn.setAttribute('disabled', 'true');
             } else {
@@ -10942,10 +10857,10 @@
                     previewMain.textContent = cachedName || '';
                 }
             } else if (auditText.trim() === '') {
-                previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 ' + (noLockModeActive ? '正常上锁' : '审核价格') + '</span>';
+                previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 ' + getLockLabel() + '</span>';
             } else if (noLockModeActive) {
-                // 无锁模式话术：客户姓名 | 正常上锁：价格，审核结果
-                let previewText = (cachedName ? cachedName : '') + ' | 正常上锁：' + auditText + '，' + orderResult;
+                // 无锁模式话术：客户姓名 | 上锁方式（AppStore机型=禁止AppStore，其余=正常上锁）：价格，审核结果
+                let previewText = (cachedName ? cachedName : '') + ' | ' + getLockLabel() + '：' + auditText + '，' + orderResult;
                 previewMain.textContent = previewText;
             } else {
                 let previewText = '';
@@ -10991,7 +10906,7 @@
 
         const finalContent = previewContentEl ? previewContentEl.textContent.trim() : '';
         if (previewBox) {
-            if (!finalContent || finalContent === '请先填 审核价格' || finalContent === '请先填 正常上锁' || finalContent === '请先填 无锁结果') {
+            if (!finalContent || finalContent === '请先填 审核价格' || finalContent === '请先填 正常上锁' || finalContent === '请先填 禁止AppStore' || finalContent === '请先填 无锁结果') {
                 previewBox.classList.add('empty');
             } else {
                 previewBox.classList.remove('empty');
@@ -11074,8 +10989,8 @@
         const parts = [];
 
         const oldDeviceChecked = getCachedElement('oldDevice', '#re-old-device')?.checked || false;
-        const oldDeviceSelect = cachedElements.oldDeviceSelect?.value || panel.querySelector('.re-old-device-select')?.value || '';
-        const oldDeviceAmount = cachedElements.oldDeviceAmount?.value || panel.querySelector('.re-old-device-select')?.closest('.re-form-inline')?.querySelector('.re-switch-content input')?.value || '';
+        const oldDeviceSelect = getCachedElement('oldDeviceSelect', '.re-old-device-select')?.value || '';
+        const oldDeviceAmount = getCachedElement('oldDeviceAmount', '#re-old-device-amount')?.value || '';
         if (oldDeviceChecked) {
             if (oldDeviceAmount) parts.push('旧机置换：' + oldDeviceAmount);
         } else {
@@ -11083,9 +10998,9 @@
         }
 
         const workOptionChecked = getCachedElement('workOption', '#re-work-option')?.checked || false;
-        const workContent = cachedElements.workContent?.value || panel.querySelector('#re-work-option')?.closest('.re-form-inline')?.querySelector('.re-switch-content input')?.value || '';
-        const workAmount = cachedElements.workAmount?.value || panel.querySelector('#re-work-option')?.closest('.re-form-inline')?.querySelector('.re-switch-content')?.querySelectorAll('input')[1]?.value || '';
-        const workSalaryType = cachedElements.workSalaryType?.value || panel.querySelector('#re-work-option')?.closest('.re-form-inline')?.querySelector('.re-switch-content select')?.value || '';
+        const workContent = getCachedElement('workContent', '#re-work-content')?.value || '';
+        const workAmount = getCachedElement('workAmount', '#re-work-amount')?.value || '';
+        const workSalaryType = getCachedElement('workSalaryType', '#re-salary-type')?.value || '';
         const workProofValues = getMultiSelectValues('re-work-proof');
         if (workOptionChecked) {
             let workText = '工作内容：';
@@ -11122,7 +11037,8 @@
         const noLockQualified = isNoLockQualified();
         if (auditPrice && !noLockQualified) {
             if (noLockModeActive) {
-                parts.push('正常上锁：' + auditPrice + '，' + auditResult);
+                // 无锁内上锁方式按机型命名：AppStore机型=禁止AppStore，其余=正常上锁
+                parts.push(getLockLabel() + '：' + auditPrice + '，' + auditResult);
             } else {
                 parts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
             }
@@ -11317,52 +11233,15 @@
 
     if (contactEditBtn) {
         contactEditBtn.addEventListener('click', function() {
-            const orderNoEl = document.getElementById('re-order-no');
-            const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
+            const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
                 showTooltip('订单序号为空', window.innerWidth / 2, window.innerHeight / 2);
                 return;
             }
 
-            let iframeModal = document.getElementById('re-contact-edit-modal');
-            if (!iframeModal) {
-                iframeModal = document.createElement('div');
-                iframeModal.id = 're-contact-edit-modal';
-                iframeModal.className = 're-iframe-modal';
-                iframeModal.innerHTML = `
-                    <div class="re-iframe-modal-content">
-                        <div class="re-iframe-modal-header">
-                            <span class="re-iframe-modal-title">编辑联系人</span>
-                            <button class="re-iframe-modal-close">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="re-iframe-modal-body">
-                            <iframe id="re-contact-edit-iframe" frameborder="0"></iframe>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(iframeModal);
-
-                iframeModal.querySelector('.re-iframe-modal-close').addEventListener('click', function() {
-                    iframeModal.classList.remove('show');
-                });
-
-                iframeModal.addEventListener('click', function(e) {
-                    if (e.target === iframeModal) {
-                        iframeModal.classList.remove('show');
-                    }
-                });
-            }
-
-            const iframe = document.getElementById('re-contact-edit-iframe');
             const editUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.replenishAudit + `?out_order_no=${encodeURIComponent(orderNo)}`;
-            iframe.src = editUrl;
-            iframeModal.classList.add('show');
+            openIframeModal(editUrl, '编辑联系人');
         });
     }
 
@@ -11407,8 +11286,7 @@
     const staffAssignBtn = document.getElementById('re-btn-staff-assign');
     if (staffAssignBtn) {
         staffAssignBtn.addEventListener('click', function() {
-            const orderNoEl = document.getElementById('re-order-no');
-            const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
+            const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
                 showTooltip('订单序号为空', window.innerWidth / 2, window.innerHeight / 2);
@@ -11449,6 +11327,7 @@
 
         let loadTimeout = null;
         let completed = false;
+        let formSubmitted = false;   // 表单已提交，等待 iframe 二次加载确认
 
         function cleanup() {
             if (loadTimeout) clearTimeout(loadTimeout);
@@ -11474,6 +11353,12 @@
 
         iframe.onload = function() {
             if (completed) return;
+
+            // 表单提交后的二次加载：服务端已受理，确认成功
+            if (formSubmitted) {
+                handleResult(true, '客服分配成功');
+                return;
+            }
 
             try {
                 const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -11515,9 +11400,11 @@
                     form.submit();
                 }
 
+                formSubmitted = true;
+                // 兜底：AJAX 提交不触发二次加载时，超时后确认成功
                 setTimeout(() => {
                     handleResult(true, '客服分配成功');
-                }, 500);
+                }, 2000);
 
             } catch (e) {
                 handleResult(false, '操作异常: ' + e.message);
@@ -11630,8 +11517,7 @@
                 return;
             }
 
-            const orderNoEl = document.getElementById('re-order-no');
-            const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
+            const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
                 showTooltip('订单序号为空', window.innerWidth / 2, window.innerHeight / 2);
@@ -11646,55 +11532,12 @@
                 return;
             }
 
-            const remarkUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.staffRemark + '?out_order_no=' + orderNo;
-
-            if (typeof GM_xmlhttpRequest === 'undefined') {
-                showTooltip('GM_xmlhttpRequest不可用', window.innerWidth / 2, window.innerHeight / 2);
-                return;
-            }
-
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: remarkUrl,
-                onload: function(response) {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(response.responseText, 'text/html');
-
-                    const contentTextarea = doc.getElementById('content');
-                    const outOrderNoInput = doc.querySelector('input[name="out_order_no"]');
-
-                    if (contentTextarea) {
-                        const postData = 'classify=0&content=' + encodeURIComponent(previewContent) + '&out_order_no=' + encodeURIComponent(orderNo);
-
-                        GM_xmlhttpRequest({
-                            method: 'POST',
-                            url: CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.staffRemark,
-                            data: postData,
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            onload: function(postResponse) {
-                                try {
-                                    const result = JSON.parse(postResponse.responseText);
-                                    if (result.status) {
-                                        showSuccessToast('客服备注 已添加！');
-                                    } else {
-                                        showTooltip(result.msg || '提交失败', window.innerWidth / 2, window.innerHeight / 2);
-                                    }
-                                } catch (e) {
-                                    showSuccessToast('客服备注 已添加！');
-                                }
-                            },
-                            onerror: function(postError) {
-                                showTooltip('备注提交失败', window.innerWidth / 2, window.innerHeight / 2);
-                            }
-                        });
-                    } else {
-                        showTooltip('页面解析失败', window.innerWidth / 2, window.innerHeight / 2);
-                    }
-                },
-                onerror: function(error) {
-                    showTooltip('访问备注页面失败', window.innerWidth / 2, window.innerHeight / 2);
+            // 复用自动处理的公共提交函数（POST 直达，不再先 GET 预检）
+            doStaffRemark(orderNo, previewContent, function(success, msg) {
+                if (success) {
+                    showSuccessToast('客服备注 已添加！');
+                } else {
+                    showTooltip('备注提交失败' + (msg ? '（' + msg + '）' : ''), window.innerWidth / 2, window.innerHeight / 2);
                 }
             });
         });
@@ -11707,8 +11550,7 @@
                 return;
             }
 
-            const orderNoEl = document.getElementById('re-order-no');
-            const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
+            const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
                 showTooltip('订单序号为空', window.innerWidth / 2, window.innerHeight / 2);
@@ -11723,175 +11565,18 @@
                 return;
             }
 
-            const remarkUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.riskQuestion + '?out_order_no=' + orderNo;
-
-            if (typeof GM_xmlhttpRequest === 'undefined') {
-                showTooltip('GM_xmlhttpRequest不可用', window.innerWidth / 2, window.innerHeight / 2);
-                return;
-            }
-
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: remarkUrl,
-                onload: function(response) {
-                    // 独立填充面审风控表单对应字段
-                    const wechatBill = (document.getElementById('re-wechat-flow')?.value || '').trim();
-                    const alipayBill = (document.getElementById('re-alipay-flow')?.value || '').trim();
-                    const alipayCreditScore = (document.getElementById('re-zhima-credit')?.value || '').trim();
-                    const huabeiLimit = (document.getElementById('re-huabei-status')?.value || '').trim();
-                    const fenfuLimit = (document.getElementById('re-wechat-fenfu')?.value || '').trim();
-                    const douyinPay = (document.getElementById('re-douyin-pay')?.value || '').trim();
-                    const meituanPay = (document.getElementById('re-meituan-pay')?.value || '').trim();
-                    const wechatCreditScore = (document.getElementById('re-wechat-credit-score')?.value || '').trim();
-                    const shareRent = (document.getElementById('re-share-rent')?.value || '').trim();
-
-                    let salary = '';
-                    const workOptionChecked = document.getElementById('re-work-option')?.checked || false;
-                    if (!workOptionChecked) {
-                        salary = '无任何工作情况证明';
-                    } else {
-                        const workContent = (document.getElementById('re-work-content')?.value || '').trim();
-                        const workAmount = (document.getElementById('re-work-amount')?.value || '').trim();
-                        const salaryType = (document.getElementById('re-salary-type')?.value || '').trim();
-                        const workProofValues = getMultiSelectValues('re-work-proof');
-                        salary = workContent;
-                        if (workAmount && salaryType) salary += (salary ? '，' : '') + salaryType + workAmount;
-                        else if (workAmount) salary += (salary ? '，' : '') + workAmount;
-                        if (workProofValues.length > 0) {
-                            salary += (salary ? '，' : '') + workProofValues.join('、');
-                        } else {
-                            salary += (salary ? '，' : '') + '无任何工作材料证明此工作';
-                        }
-                    }
-
-                    // 旧机处理
-                    let oldDevice = '';
-                    const oldDeviceChecked = document.getElementById('re-old-device')?.checked;
-                    if (oldDeviceChecked) {
-                        const oldDeviceAmount = (document.getElementById('re-old-device-amount')?.value || '').trim();
-                        oldDevice = oldDeviceAmount ? '旧机置换：' + oldDeviceAmount : '旧机保留';
-                    } else {
-                        const oldDeviceType = (document.getElementById('re-old-device-type')?.value || '').trim();
-                        oldDevice = oldDeviceType || '旧机不保留';
-                    }
-
-                    // 收集备注信息（包含审核结果、降低幅度、办理方式）
-                    let remarkParts = [];
-                    const otherRemark = (document.getElementById('re-other-remark')?.value || '').trim();
-                    if (otherRemark) {
-                        remarkParts.push(otherRemark);
-                    }
-
-                    // 添加审核结果
-                    const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
-                    const auditResult = (document.getElementById('re-order-result')?.value || '').trim();
-                    const noLockQualified = isNoLockQualified();
-                    if (auditPrice && auditResult && !noLockQualified) {
-                        if (noLockModeActive) {
-                            remarkParts.push('正常上锁：' + auditPrice + '，' + auditResult);
-                        } else {
-                            remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
-                        }
-                    }
-
-                    // 添加拓展业务 / 无锁结果
-                    const expandPrice = (document.getElementById('re-expand-result')?.value || '').trim();
-                    if (noLockModeActive) {
-                        // 无锁模式：无锁结果段不依赖拓展开关（不达标时与正常上锁段并存）
-                        const expandResultQ = (document.getElementById('re-expand-order-result')?.value || '').trim();
-                        if (expandPrice) {
-                            remarkParts.push('无锁结果：' + expandPrice + '，' + expandResultQ);
-                        }
-                    } else {
-                        const expandChecked = document.getElementById('re-rent-expand')?.checked || false;
-                        if (expandChecked) {
-                            const expandType = (document.getElementById('re-expand-type')?.value || '').trim();
-                            const expandResult = (document.getElementById('re-expand-order-result')?.value || '').trim();
-                            if (expandType && expandPrice) {
-                                remarkParts.push(expandType.replace(/：$/, '') + '：' + expandPrice + ' ' + expandResult);
-                            }
-                        }
-                    }
-
-                    // 添加降低幅度（达标态下价格取无锁结果）
-                    const phoneCostText = (document.getElementById('re-phone-cost')?.value || '').trim();
-                    const phoneCost = parseFloat(phoneCostText.replace(/[¥,]/g, '')) || 0;
-                    const auditPriceNum = parseFloat(noLockQualified ? expandPrice : auditPrice) || 0;
-                    const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
-                    const v4Risk = parseFloat(v4RiskText) || 0;
-
-                    if (phoneCost > 0 && auditPriceNum > 0 && v4Risk > 0) {
-                        const ratio1 = auditPriceNum / phoneCost;
-                        const ratio2 = v4Risk / phoneCost;
-                        const reductionPercent = ((ratio1 - ratio2) * 100).toFixed(1);
-
-                        if (parseFloat(reductionPercent) < 0) {
-                            remarkParts.push('降低幅度：降低' + Math.abs(reductionPercent) + '%');
-                        } else {
-                            remarkParts.push('降低幅度：提高' + reductionPercent + '%');
-                        }
-                    }
-
-                    // 添加办理方式
-                    const handleMethod = (document.getElementById('re-handle-method')?.value || '').trim();
-                    if (handleMethod) {
-                        remarkParts.push('办理方式：' + handleMethod);
-                    }
-
-                    // 用分号连接所有备注部分
-                    const finalRemark = remarkParts.join('；');
-
-                    const params = {
-                        operator: '1',
-                        budget: '',
-                        old_device: oldDevice,
-                        alipay_credit_score: alipayCreditScore,
-                        wechat_credit_score: wechatCreditScore,
-                        huabei_limit: huabeiLimit,
-                        alipay_bill: alipayBill,
-                        meituan_pay: meituanPay,
-                        fenfu_limit: fenfuLimit,
-                        wechat_bill: wechatBill,
-                        douyin_pay: douyinPay,
-                        salary: salary,
-                        share_rent: shareRent,
-                        remark: finalRemark,
-                        out_order_no: orderNo
-                    };
-                    const postData = Object.entries(params).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
-
-                    GM_xmlhttpRequest({
-                        method: 'POST',
-                        url: CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.riskRemark,
-                        data: postData,
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        onload: function(postResponse) {
-                            try {
-                                const result = JSON.parse(postResponse.responseText);
-                                if (result.status || result.code === 0) {
-                                    showSuccessToast('风控备注 已添加！');
-                                } else {
-                                    showTooltip(result.msg || result.message || '提交失败', window.innerWidth / 2, window.innerHeight / 2);
-                                }
-                            } catch (e) {
-                                showSuccessToast('风控备注 已添加！');
-                            }
-                        },
-                        onerror: function(postError) {
-                            showTooltip('备注提交失败', window.innerWidth / 2, window.innerHeight / 2);
-                        }
-                    });
-                },
-                onerror: function(error) {
-                    showTooltip('访问备注页面失败', window.innerWidth / 2, window.innerHeight / 2);
+            // 复用自动处理的公共收集+提交函数（与自动处理完全同源）
+            doRiskRemark(orderNo, collectRiskRemarkData(), function(success, msg) {
+                if (success) {
+                    showSuccessToast('风控备注 已添加！');
+                } else {
+                    showTooltip('备注提交失败' + (msg ? '（' + msg + '）' : ''), window.innerWidth / 2, window.innerHeight / 2);
                 }
             });
         });
     }
 
-    // 无锁模式按钮：点击进入/退出；进入前校验综合风险T1/T2、V4刷新与禁止AppStore互斥
+    // 无锁模式按钮：点击进入/退出；进入前校验综合风险T1/T2、V4刷新（与禁止AppStore已不互斥，上锁命名按机型自动判定）
     const noLockModeBtn = document.getElementById('re-btn-no-lock');
     if (noLockModeBtn) {
         noLockModeBtn.addEventListener('click', function() {
@@ -11908,10 +11593,6 @@
                 const v4RiskText = (document.getElementById('re-v4-risk')?.textContent || '').trim();
                 if (!v4RiskText) {
                     showErrorToast('请等待风控刷新');
-                    return;
-                }
-                if (isRestrictAppStoreActive()) {
-                    showErrorToast('与禁止AppStore互斥，请先关闭禁止AppStore');
                     return;
                 }
                 noLockModeActive = true;
@@ -11935,8 +11616,7 @@
     const autoProcessBtn = document.getElementById('re-btn-auto-process');
     if (autoProcessBtn) {
         autoProcessBtn.addEventListener('click', function() {
-            const orderNoEl = document.getElementById('re-order-no');
-            const orderNo = orderNoEl ? orderNoEl.textContent.trim() : '';
+            const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
                 showTooltip('订单序号为空', window.innerWidth / 2, window.innerHeight / 2);
@@ -11952,19 +11632,18 @@
             const requiredPrice = requiredPriceInput ? requiredPriceInput.value.trim() : '';
 
             if (orderResult !== '取消' && !requiredPrice) {
-                showTooltip(noLockQualified ? '请填写无锁结果' : '请填写审核价格', window.innerWidth / 2, window.innerHeight / 2);
+                showTooltip(noLockQualified ? '请填写无锁结果' : ('请填写' + getLockLabel()), window.innerWidth / 2, window.innerHeight / 2);
                 if (requiredPriceInput) requiredPriceInput.focus();
                 return;
             }
 
             // 无锁模式 + 胶囊"不满足"：跳过客服分配，仅执行客服备注 + 风控备注
             const skipAssign = noLockModeActive && !noLockQualified;
-            // 工作流预览：初始化节点链（芝麻分开关开启才显示该节点）
-            initWorkflowBar(zhimaAutoSubmitEnabled, skipAssign);
+            // 工作流预览：初始化节点链（芝麻分节点需「主动提交」设置与流水宝开关同时开启才上链）
+            initWorkflowBar(zhimaAutoSubmitEnabled && isLiushuiBaoEnabled(), skipAssign);
 
-            // 芝麻分自动提交（异步并行，不阻塞自动处理主流程）
-            if (zhimaAutoSubmitEnabled) {
-                setWorkflowNode('zhima', 'running');
+            // 芝麻分自动提交（异步并行，不阻塞自动处理主流程；流水宝未开启时直接不参与）
+            if (zhimaAutoSubmitEnabled && isLiushuiBaoEnabled()) {
                 runZhimaSubmit(false);
             }
 
@@ -12002,10 +11681,9 @@
                 }
 
                 let completed = 0;
-                // 无锁模式 + 胶囊"不满足"：跳过客服分配，仅执行客服备注 + 风控备注
-                const skipAssign = noLockModeActive && !noLockQualified;
                 const total = skipAssign ? 2 : 3;
                 const results = { assign: false, staffRemark: false, riskRemark: false };
+                const failMsgs = [];   // 收集失败项原因，部分失败时透传到 Toast 便于定位
 
                 function checkAllCompleted() {
                     completed++;
@@ -12021,14 +11699,7 @@
                                 autoProcessBtn.innerHTML = '<svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>已完成';
 
                                 const doneMsg = skipAssign ? '自动处理完成！已跳过客服分配（无锁不满足）' : '自动处理完成！';
-                                setWorkflowNode('copy', 'running');
-                                navigator.clipboard.writeText(previewContent).then(() => {
-                                    setWorkflowNode('copy', 'done', '已复制');
-                                    showSuccessToast(doneMsg + '，即时预览已复制');
-                                }).catch(() => {
-                                    setWorkflowNode('copy', 'failed', '复制失败');
-                                    showSuccessToast(doneMsg);
-                                });
+                                showSuccessToast(doneMsg + (copyOk ? '，即时预览已复制' : '，预览复制失败'));
 
                                 const now = new Date();
                                 const record = {
@@ -12041,7 +11712,6 @@
                                     time: now.toTimeString().split(' ')[0]
                                 };
 
-                                setWorkflowNode('history', 'running');
                                 saveHistoryRecord(record).then(() => {
                                     setWorkflowNode('history', 'done', '已记录');
                                     renderHistoryRecords();
@@ -12066,9 +11736,8 @@
 
                             } else {
                                 autoProcessBtn.disabled = false;
-                                showSuccessToast(`自动处理完成！成功 ${successCount}/${total} 项`);
-                                // 部分失败：后续节点不再执行，标记跳过让蛇爬完整条链
-                                setWorkflowNode('copy', 'skipped', '未执行');
+                                showSuccessToast(`自动处理完成！成功 ${successCount}/${total} 项` + (failMsgs.length ? '，' + failMsgs.join('；') : ''));
+                                // 部分失败：记录历史不再执行（复制已在流程启动时完成），标记跳过让蛇爬完整条链
                                 setWorkflowNode('history', 'skipped', '未执行');
                                 hideWorkflowBar();
                             }
@@ -12076,25 +11745,34 @@
                     }
                 }
 
+                // 复制预览先行（工作流首节点）：启动即写入剪贴板，提交部分失败时文本也已就绪便于手动善后
+                let copyOk = false;
+                navigator.clipboard.writeText(previewContent).then(() => {
+                    copyOk = true;
+                    setWorkflowNode('copy', 'done', '已复制');
+                }).catch(() => {
+                    setWorkflowNode('copy', 'failed', '复制失败');
+                });
+
                 if (!skipAssign) {
-                    setWorkflowNode('assign', 'running');
-                    doStaffAssign(orderNo, staffName, function(success) {
+                    doStaffAssign(orderNo, staffName, function(success, msg) {
                         results.assign = success;
+                        if (!success) failMsgs.push('客服分配：' + (msg || '未知原因'));
                         setWorkflowNode('assign', success ? 'done' : 'failed', success ? '已分配' : '分配失败');
                         checkAllCompleted();
                     });
                 }
 
-                setWorkflowNode('remark', 'running');
-                doStaffRemark(orderNo, previewContent, function(success) {
+                doStaffRemark(orderNo, previewContent, function(success, msg) {
                     results.staffRemark = success;
+                    if (!success) failMsgs.push('客服备注：' + (msg || '未知原因'));
                     setWorkflowNode('remark', success ? 'done' : 'failed', success ? '已备注' : '备注失败');
                     checkAllCompleted();
                 });
 
-                setWorkflowNode('risk', 'running');
-                doRiskRemark(orderNo, collectRiskRemarkData(), function(success) {
+                doRiskRemark(orderNo, collectRiskRemarkData(), function(success, msg) {
                     results.riskRemark = success;
+                    if (!success) failMsgs.push('风控备注：' + (msg || '未知原因'));
                     setWorkflowNode('risk', success ? 'done' : 'failed', success ? '已风控' : '风控失败');
                     checkAllCompleted();
                 });
@@ -12121,13 +11799,22 @@
             url: CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.staffRemark,
             data: 'classify=0&content=' + encodeURIComponent(content) + '&out_order_no=' + encodeURIComponent(orderNo),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            timeout: 15000,
             onload: function(response) {
                 try {
                     const result = JSON.parse(response.responseText);
-                    callback(result.status === true);
-                } catch (e) { callback(true); }
+                    // 成功判定兜底：status 真值 / code 宽松等于0（兼容字符串"0"）/ success 字段
+                    const ok = !!result.status || result.code == 0 || result.success == true;
+                    callback(ok, ok ? '' : ('服务端返回: ' + String(response.responseText).slice(0, 100)));
+                } catch (e) {
+                    // 非 JSON 响应：2xx/3xx 均视为成功
+                    // 后端为 PRG 模式：POST 提交成功返回 302 重定向（实测已确认），仅 4xx/5xx 为真失败
+                    const ok = response.status >= 200 && response.status < 400;
+                    callback(ok, ok ? '' : ('HTTP ' + response.status));
+                }
             },
-            onerror: function() { callback(false); }
+            onerror: function() { callback(false, '网络错误'); },
+            ontimeout: function() { callback(false, '请求超时'); }
         });
     }
 
@@ -12184,7 +11871,8 @@
         const noLockQualified = isNoLockQualified();
         if (auditPrice && auditResult && !noLockQualified) {
             if (noLockModeActive) {
-                remarkParts.push('正常上锁：' + auditPrice + '，' + auditResult);
+                // 无锁内上锁方式按机型命名：AppStore机型=禁止AppStore，其余=正常上锁
+                remarkParts.push(getLockLabel() + '：' + auditPrice + '，' + auditResult);
             } else {
                 remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
             }
@@ -12281,13 +11969,22 @@
             url: CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.riskRemark,
             data: dataStr,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            timeout: 15000,
             onload: function(response) {
                 try {
                     const result = JSON.parse(response.responseText);
-                    callback(result.status === true || result.code === 0);
-                } catch (e) { callback(true); }
+                    // 成功判定兜底：status 真值 / code 宽松等于0（兼容字符串"0"）/ success 字段
+                    const ok = !!result.status || result.code == 0 || result.success == true;
+                    callback(ok, ok ? '' : ('服务端返回: ' + String(response.responseText).slice(0, 100)));
+                } catch (e) {
+                    // 非 JSON 响应：2xx/3xx 均视为成功
+                    // 后端为 PRG 模式：POST 提交成功返回 302 重定向（实测已确认），仅 4xx/5xx 为真失败
+                    const ok = response.status >= 200 && response.status < 400;
+                    callback(ok, ok ? '' : ('HTTP ' + response.status));
+                }
             },
-            onerror: function() { callback(false); }
+            onerror: function() { callback(false, '网络错误'); },
+            ontimeout: function() { callback(false, '请求超时'); }
         });
     }
 
@@ -12587,11 +12284,7 @@
         panelBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             currentOrderRow = viewButton.closest('#table tbody tr');
-            const orderNo = viewButton.dataset.id;
-            if (orderNo) {
-                if (window.rePanelOrderNo) {
-                    window.rePanelOrderNo.value = orderNo;
-                }
+            if (viewButton.dataset.id) {
                 togglePanel(true);
             }
         });
