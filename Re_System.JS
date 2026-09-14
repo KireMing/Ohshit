@@ -5645,6 +5645,8 @@
         }
 
         /* ===== 养成模块（V6.4.0）===== */
+        /* 养成页撑满中列高度，让日志区吃掉剩余空间（页面显示时为 display:flex） */
+        #re-page-pet { min-height: 100%; }
         .re-pet-wrap {
             display: flex;
             flex-direction: column;
@@ -5765,7 +5767,9 @@
         .re-pet-hint { font-size: 11px; color: #9ca3af; line-height: 1.5; }
         .re-pet-log-title { font-size: 12px; font-weight: 600; color: #6b7280; }
         .re-pet-log {
-            max-height: 130px;
+            flex: 1 1 auto;    /* 吃掉页面剩余高度 */
+            min-height: 150px; /* 再小也保底可见 5 条左右 */
+            max-height: 420px; /* 防超长面板下日志喧宾夺主 */
             overflow-y: auto;
             display: flex;
             flex-direction: column;
