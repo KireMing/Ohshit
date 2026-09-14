@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.0.3
+// @version      6.2.4
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -119,7 +119,11 @@
             fontSize: 14,
             fontBold: false,
             headerBg: '#6b7280',   // 标题栏背景色（默认深灰渐变主色）
-            headerTextColor: '#ffffff' // 标题栏文字颜色
+            headerTextColor: '#ffffff', // 标题栏文字颜色
+            switchOnColor: '#3b82f6',  // 开关激活色（默认蓝，自动亮30%生成渐变）
+            glassMode: true,           // 磨砂模式（三栏白底+模糊）；关闭=全透明清晰透出壁纸
+            compWhiteBg: true,         // 交互组件白底（输入框/下拉/表单卡片等）；关闭=透明保留边框
+            compOpacity: 80            // 组件背景板透明度（表单卡片/信息卡/联系人/风控预览/工作流条）
         },
         CHART: {
             hitRadius: 15,
@@ -133,7 +137,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.0.3</span>
+                    <span class="re-panel-version">V6.2.4</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <span class="re-panel-staff" id="re-staff-name"></span>
@@ -591,6 +595,16 @@
                                                         <button class="re-reset-icon-btn" id="re-reset-header-text" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
                                                     </div>
                                                 </div>
+                                                <div class="re-appearance-item">
+                                                    <div class="re-appearance-header">
+                                                        <span class="re-appearance-title">开关激活色</span>
+                                                        <span class="re-appearance-desc">所有开关打开时的颜色</span>
+                                                    </div>
+                                                    <div class="re-appearance-control">
+                                                        <input type="color" id="re-setting-switch-color" value="#3b82f6" class="re-color-picker">
+                                                        <button class="re-reset-icon-btn" id="re-reset-switch-color" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="re-appearance-group">背景</div>
                                             <div class="re-appearance-bg">
@@ -616,6 +630,40 @@
                                                 <div class="re-appearance-control">
                                                     <input type="range" id="re-setting-bg-opacity" min="0" max="100" value="80" class="re-range-slider">
                                                     <span id="re-opacity-value" class="re-opacity-text">80%</span>
+                                                </div>
+                                            </div>
+                                            <div class="re-appearance-item">
+                                                <div class="re-appearance-header">
+                                                    <span class="re-appearance-title">磨砂模式</span>
+                                                    <span class="re-appearance-desc">关闭后全透明，完全显示壁纸</span>
+                                                </div>
+                                                <div class="re-appearance-control">
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-glass-mode" checked>
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="re-appearance-item">
+                                                <div class="re-appearance-header">
+                                                    <span class="re-appearance-title">交互组件白底</span>
+                                                    <span class="re-appearance-desc">关闭输入框等组件的白色背景</span>
+                                                </div>
+                                                <div class="re-appearance-control">
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-comp-white-bg" checked>
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="re-appearance-item">
+                                                <div class="re-appearance-header">
+                                                    <span class="re-appearance-title">组件背景透明度</span>
+                                                    <span class="re-appearance-desc">卡片/信息区/工作流背景板</span>
+                                                </div>
+                                                <div class="re-appearance-control">
+                                                    <input type="range" id="re-setting-comp-opacity" min="0" max="100" value="80" class="re-range-slider">
+                                                    <span id="re-comp-opacity-value" class="re-opacity-text">80%</span>
                                                 </div>
                                             </div>
                                             </div>
@@ -1064,6 +1112,9 @@
             flex-direction: column;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
+            /* 提升独立合成层：backdrop-filter 的模糊采样结果可被浏览器缓存，
+               面板内滚动/输入不再触发三栏大面积重模糊（拖拽/滚动卡顿主因） */
+            transform: translateZ(0);
         }
 
         .re-column-left {
@@ -1645,7 +1696,7 @@
             font-size: 11px;
             font-weight: 600;
             font-family: inherit;
-            transition: all 0.12s ease;
+            transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
         }
 
         .re-history-day-more:hover {
@@ -1669,7 +1720,7 @@
             font-size: 11px;
             font-weight: 600;
             font-family: inherit;
-            transition: all 0.12s ease;
+            transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
         }
 
         .re-history-day-collapse:hover {
@@ -1902,7 +1953,8 @@
             pointer-events: none;
             opacity: 0;
             transform: translateY(6px) scale(0.9);
-            transition: opacity 0.16s linear, transform 0.16s linear, left 0.16s linear, top 0.16s linear, width 0.16s linear, min-height 0.16s linear, padding 0.16s linear, box-shadow 0.16s linear;
+            /* 仅合成器属性过渡：left/top/width 等布局属性由 JS 直接定位，不参与动画 */
+            transition: opacity 0.16s linear, transform 0.16s linear, box-shadow 0.16s linear;
             z-index: 2147483647;
         }
 
@@ -1933,6 +1985,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            /* Lightbox 放大为一次性动画，保留布局过渡保证放大平滑 */
+            transition: opacity 0.16s linear, transform 0.16s linear, box-shadow 0.16s linear, left 0.16s linear, top 0.16s linear, width 0.16s linear, min-height 0.16s linear, padding 0.16s linear;
         }
 
         .re-history-hover-card.zoomed .re-history-hover-card-name {
@@ -2069,7 +2123,7 @@
         }
 
         .re-form-group {
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 10px;
             padding: 14px;
             border: 1px solid rgba(107, 114, 128, 0.15);
@@ -2213,7 +2267,7 @@
             font-size: 12px;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.1s ease;
+            transition: background-color 0.1s ease, border-color 0.1s ease, color 0.1s ease;
         }
 
         .re-rtab:hover {
@@ -3268,7 +3322,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
+            transition: background-color 0.1s ease, border-color 0.1s ease;
         }
 
         .re-multi-select-box svg {
@@ -3277,7 +3331,7 @@
             color: #ffffff;
             opacity: 0;
             transform: scale(0.5);
-            transition: all 0.1s ease;
+            transition: opacity 0.1s ease, transform 0.1s ease;
         }
 
         .re-multi-select-item.sel .re-multi-select-box {
@@ -3324,7 +3378,7 @@
             color: #6b7280;
             padding: 6px 9px;
             border-radius: 6px;
-            transition: all 0.1s ease;
+            transition: background-color 0.1s ease, color 0.1s ease;
             font-family: inherit;
         }
 
@@ -3479,7 +3533,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
+            transition: background-color 0.1s ease, color 0.1s ease;
         }
 
         .re-msmanage-close:hover {
@@ -3566,7 +3620,7 @@
             border: 1px solid transparent;
             border-radius: 8px;
             cursor: grab;
-            transition: all 0.12s ease;
+            transition: background-color 0.12s ease, border-color 0.12s ease;
             font-size: 13px;
         }
 
@@ -3667,7 +3721,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: all 0.1s ease;
+            transition: background-color 0.1s ease, color 0.1s ease, opacity 0.1s ease;
         }
 
         .re-msmanage-item:hover .re-msmanage-del {
@@ -3709,7 +3763,7 @@
             font-size: 12px;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.1s ease;
+            transition: background-color 0.1s ease, border-color 0.1s ease, color 0.1s ease;
         }
 
         .re-msmanage-reset:hover {
@@ -4154,7 +4208,7 @@
         .re-contact-info {
             margin-top: 12px;
             padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 10px;
             border: 1px solid rgba(107, 114, 128, 0.15);
             display: flex;
@@ -4328,7 +4382,7 @@
         .re-risk-preview {
             margin-top: 12px;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 10px;
             border: 1px solid rgba(107, 114, 128, 0.15);
             overflow: hidden;
@@ -4348,7 +4402,7 @@
         .re-workflow-bar {
             margin-top: 12px;
             padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 10px;
             border: 1px solid rgba(107, 114, 128, 0.15);
             overflow: hidden;
@@ -4527,7 +4581,7 @@
             font-size: 12px;
             color: #4b5563;
             line-height: 1.6;
-            max-height: calc(1.6em * 5);
+            max-height: calc(1.6em * 3);
             overflow: hidden;
             word-break: break-all;
             cursor: default;
@@ -4556,6 +4610,7 @@
             margin-top: 8px;
             padding-top: 8px;
             border-top: 1px dashed rgba(107, 114, 128, 0.2);
+            white-space: pre-line; /* 支持主行+拓展行两行展示 */
         }
 
         .re-risk-reduction.increase {
@@ -4569,7 +4624,7 @@
         .re-data-section {
             display: flex;
             gap: 16px;
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -4890,7 +4945,7 @@
         }
 
         .re-info-card {
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 12px;
@@ -5496,6 +5551,45 @@
             border-color: #3b82f6;
             background: rgba(59, 130, 246, 0.10);
             color: #1d4ed8;
+        }
+
+        /* ===== 外观扩展（V6.1.0）===== */
+        /* 开关激活色：由设置里的取色器控制（默认蓝 #3b82f6），JS 写入 --re-switch-on-1/2 渐变变量 */
+        .re-switch input:checked + .re-switch-slider {
+            background: linear-gradient(135deg, var(--re-switch-on-1, #3b82f6) 0%, var(--re-switch-on-2, #60a5fa) 100%);
+        }
+
+        /* 磨砂模式关闭：三栏列背景全透明、去模糊，壁纸清晰透出（标题栏配色不受影响） */
+        #re-system-panel.re-glass-off .re-column {
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        /* 交互组件白底关闭：透明化但保留边框轮廓（输入框/下拉/多选头/全部六类背景板/历史搜索框/月份标题） */
+        #re-system-panel.re-no-comp-bg .re-input,
+        #re-system-panel.re-no-comp-bg .re-select,
+        #re-system-panel.re-no-comp-bg .re-multi-select-header,
+        #re-system-panel.re-no-comp-bg .re-form-group,
+        #re-system-panel.re-no-comp-bg .re-data-section,
+        #re-system-panel.re-no-comp-bg .re-info-card,
+        #re-system-panel.re-no-comp-bg .re-contact-info,
+        #re-system-panel.re-no-comp-bg .re-risk-preview,
+        #re-system-panel.re-no-comp-bg .re-workflow-bar,
+        #re-system-panel.re-no-comp-bg .re-history-search-input,
+        #re-system-panel.re-no-comp-bg .re-history-month-header {
+            background: transparent !important;
+        }
+        #re-system-panel.re-no-comp-bg .re-input:focus,
+        #re-system-panel.re-no-comp-bg .re-select:focus,
+        #re-system-panel.re-no-comp-bg .re-history-search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        #re-system-panel.re-no-comp-bg .re-input[readonly] {
+            background: rgba(107, 114, 128, 0.08);
+        }
+        #re-system-panel.re-no-comp-bg .re-history-month-header:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
     `;
 
@@ -11094,7 +11188,30 @@
             }
         }
 
+        // 拓展降低幅度：拓展开启且填了拓展价格时，按拓展价格额外算一条（无锁达标态主行已用无锁结果，不再重复）
+        let expandReductionText = '';
+        const expandPriceNum = parseFloat(expandPriceVal) || 0;
+        const expandActive = !noLockModeActive && (getCachedElement('rentExpand', '#re-rent-expand')?.checked || false);
+        if (expandActive && expandPriceNum > 0) {
+            const phoneCostText2 = getCachedElement('phoneCost', '#re-phone-cost')?.value || '';
+            const phoneCost2 = parseFloat(phoneCostText2.replace(/[¥,]/g, '')) || 0;
+            const v4Risk2 = parseFloat(getCachedElement('v4Risk', '#re-v4-risk')?.textContent || '') || 0;
+            if (phoneCost2 > 0 && v4Risk2 > 0) {
+                const expandPercent = ((expandPriceNum - v4Risk2) / phoneCost2 * 100).toFixed(1);
+                if (parseFloat(expandPercent) < 0) {
+                    expandReductionText = '拓展降低幅度：降低' + Math.abs(expandPercent) + '%';
+                } else {
+                    expandReductionText = '拓展降低幅度：提高' + expandPercent + '%';
+                }
+                // 追加到降低幅度行下方展示（沿用配色规则）
+                if (reductionEl) {
+                    reductionEl.textContent += '\n' + expandReductionText;
+                }
+            }
+        }
+
         if (reductionText) parts.push(reductionText);
+        if (expandReductionText) parts.push(expandReductionText);
 
         const handleMethod = getCachedElement('handleMethod', '#re-handle-method')?.value || '';
         if (handleMethod) parts.push('办理方式：' + handleMethod);
@@ -11107,7 +11224,7 @@
                 riskPreviewText.classList.remove('has-more', 'clickable');
 
                 const lineHeight = parseFloat(getComputedStyle(riskPreviewText).lineHeight);
-                const maxHeight = lineHeight * 5;
+                const maxHeight = lineHeight * 3;
 
                 requestAnimationFrame(() => {
                     if (riskPreviewText.scrollHeight > maxHeight + 2) {
@@ -12030,6 +12147,28 @@
         target.style.setProperty('--re-header-text', headerText);
     }
 
+    // 开关激活色：主色 → 亮30% 渐变，作用到全部 .re-switch
+    function applySwitchColor() {
+        const settings = getAppearanceSettings();
+        const color = settings.switchOnColor || CONFIG.DEFAULTS.switchOnColor;
+        const target = panel || document.documentElement;
+        target.style.setProperty('--re-switch-on-1', color);
+        target.style.setProperty('--re-switch-on-2', adjustColor(color, 30));
+    }
+
+    // 磨砂模式 / 交互组件白底 / 组件背景板透明度
+    function applyAppearanceFlags() {
+        const settings = getAppearanceSettings();
+        const glassMode = settings.glassMode !== undefined ? settings.glassMode : CONFIG.DEFAULTS.glassMode;
+        const compWhiteBg = settings.compWhiteBg !== undefined ? settings.compWhiteBg : CONFIG.DEFAULTS.compWhiteBg;
+        const compOpacity = settings.compOpacity !== undefined ? settings.compOpacity : CONFIG.DEFAULTS.compOpacity;
+        if (!panel) return;
+        panel.classList.toggle('re-glass-off', !glassMode);
+        panel.classList.toggle('re-no-comp-bg', !compWhiteBg);
+        // 组件背景板：按透明度生成白色底（0=全透明，100=不透明白）
+        panel.style.setProperty('--re-comp-bg', `rgba(255, 255, 255, ${compOpacity / 100})`);
+    }
+
     function applyBackgroundSettings() {
         const settings = getAppearanceSettings();
         const bgColor = settings.bgColor || CONFIG.DEFAULTS.bgColor;
@@ -12168,6 +12307,70 @@
                 saveAppearanceSettings(newSettings);
                 if (headerTextInput) headerTextInput.value = CONFIG.DEFAULTS.headerTextColor;
                 applyHeaderSettings();
+            });
+        }
+
+        // 开关激活色
+        const switchColorInput = document.getElementById('re-setting-switch-color');
+        const switchColorReset = document.getElementById('re-reset-switch-color');
+
+        if (switchColorInput) {
+            switchColorInput.value = settings.switchOnColor || CONFIG.DEFAULTS.switchOnColor;
+            switchColorInput.addEventListener('input', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.switchOnColor = this.value;
+                saveAppearanceSettings(newSettings);
+                applySwitchColor();
+            });
+        }
+
+        if (switchColorReset) {
+            switchColorReset.addEventListener('click', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.switchOnColor = CONFIG.DEFAULTS.switchOnColor;
+                saveAppearanceSettings(newSettings);
+                if (switchColorInput) switchColorInput.value = CONFIG.DEFAULTS.switchOnColor;
+                applySwitchColor();
+            });
+        }
+
+        // 磨砂模式 / 交互组件白底
+        const glassModeInput = document.getElementById('re-setting-glass-mode');
+        const compWhiteBgInput = document.getElementById('re-setting-comp-white-bg');
+
+        if (glassModeInput) {
+            glassModeInput.checked = settings.glassMode !== undefined ? settings.glassMode : CONFIG.DEFAULTS.glassMode;
+            glassModeInput.addEventListener('change', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.glassMode = this.checked;
+                saveAppearanceSettings(newSettings);
+                applyAppearanceFlags();
+            });
+        }
+
+        if (compWhiteBgInput) {
+            compWhiteBgInput.checked = settings.compWhiteBg !== undefined ? settings.compWhiteBg : CONFIG.DEFAULTS.compWhiteBg;
+            compWhiteBgInput.addEventListener('change', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.compWhiteBg = this.checked;
+                saveAppearanceSettings(newSettings);
+                applyAppearanceFlags();
+            });
+        }
+
+        // 组件背景透明度
+        const compOpacityInput = document.getElementById('re-setting-comp-opacity');
+        const compOpacityValue = document.getElementById('re-comp-opacity-value');
+
+        if (compOpacityInput) {
+            compOpacityInput.value = settings.compOpacity !== undefined ? settings.compOpacity : CONFIG.DEFAULTS.compOpacity;
+            if (compOpacityValue) compOpacityValue.textContent = compOpacityInput.value + '%';
+            compOpacityInput.addEventListener('input', function() {
+                const newSettings = getAppearanceSettings();
+                newSettings.compOpacity = parseInt(this.value, 10) || 0;
+                saveAppearanceSettings(newSettings);
+                if (compOpacityValue) compOpacityValue.textContent = this.value + '%';
+                applyAppearanceFlags();
             });
         }
 
@@ -12313,6 +12516,8 @@
     addPanelButton();
     applyFontSettings();
     applyHeaderSettings();
+    applySwitchColor();
+    applyAppearanceFlags();
     renderWorkflowPreview(); // 工作流条常驻：启动即展示自动处理将执行的节点链
 
     function initAnalysisEvents() {
