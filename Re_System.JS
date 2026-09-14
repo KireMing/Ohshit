@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.3.6
+// @version      6.4.1
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.3.6</span>
+                    <span class="re-panel-version">V6.4.1</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <span class="re-panel-staff" id="re-staff-name"></span>
@@ -163,6 +163,9 @@
                             </li>
                             <li class="re-nav-item" data-page="analysis" title="分析">
                                 <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            </li>
+                            <li class="re-nav-item" data-page="pet" title="养成">
+                                <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="16" rx="4.2" ry="3.6"/><circle cx="6.5" cy="10.5" r="1.7"/><circle cx="12" cy="8" r="1.7"/><circle cx="17.5" cy="10.5" r="1.7"/></svg>
                             </li>
                         </ul>
                     </div>
@@ -765,6 +768,40 @@
                                     <div id="re-model-chart-wrap" class="re-model-chart-wrap"></div>
                                     <div class="re-model-legend" id="re-model-legend"></div>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- 养成页：五只纸绘伙伴，养满一只解锁下一只，已解锁可自由切换主养 -->
+                        <div class="re-form-section" id="re-page-pet" style="display: none;">
+                            <div class="re-pet-wrap">
+                                <div class="re-pet-tabs" id="re-pet-tabs"></div>
+                                <div class="re-pet-main">
+                                    <div class="re-pet-stage-box" id="re-pet-stage-box">
+                                        <div class="re-pet-stage" id="re-pet-stage"></div>
+                                    </div>
+                                    <div class="re-pet-info">
+                                        <div class="re-pet-name-row">
+                                            <span class="re-pet-name" id="re-pet-name">小猫</span>
+                                            <span class="re-pet-line" id="re-pet-line">招财线</span>
+                                        </div>
+                                        <div class="re-pet-stage-name" id="re-pet-stage-name">纸蛋</div>
+                                        <div class="re-pet-level-row">
+                                            <span class="re-pet-level" id="re-pet-level">Lv 1</span>
+                                            <span class="re-pet-mood" id="re-pet-mood"></span>
+                                        </div>
+                                        <div class="re-pet-exp-bar">
+                                            <div class="re-pet-exp-fill" id="re-pet-exp-fill"></div>
+                                            <span class="re-pet-exp-text" id="re-pet-exp-text">0 / 50</span>
+                                        </div>
+                                        <div class="re-pet-stats">
+                                            <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-today-exp">0</span><label class="re-pet-stat-l">今日经验</label></div>
+                                            <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-total-exp">0</span><label class="re-pet-stat-l">累计经验</label></div>
+                                            <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-feed-count">0</span><label class="re-pet-stat-l">喂养次数</label></div>
+                                        </div>
+                                        <div class="re-pet-hint" id="re-pet-hint">办单即喂养：客服分配 +3 · 客服备注 +5 · 风控备注 +5 · 自动处理完成 +7 · 记录历史 +2</div>
+                                    </div>
+                                </div>
+                                <div class="re-pet-log-title">喂养日志</div>
+                                <div class="re-pet-log" id="re-pet-log"></div>
                             </div>
                         </div>
                     </div>
@@ -5607,6 +5644,261 @@
             color: #1d4ed8;
         }
 
+        /* ===== 养成模块（V6.4.0）===== */
+        .re-pet-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex: 1 0 auto;
+            min-height: 0;
+        }
+        .re-pet-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .re-pet-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(107, 114, 128, 0.25);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            font-size: 12px;
+            color: #4b5563;
+            cursor: pointer;
+            transition: border-color .15s, color .15s, transform .15s;
+        }
+        .re-pet-tab:hover { transform: translateY(-1px); border-color: rgba(59, 130, 246, 0.5); }
+        .re-pet-tab.active {
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        .re-pet-tab .re-pet-tab-lock { font-size: 11px; color: #9ca3af; }
+        .re-pet-tab .re-pet-tab-lv { font-size: 11px; color: #9ca3af; }
+        .re-pet-tab.active .re-pet-tab-lv { color: #3b82f6; }
+        .re-pet-main {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+        .re-pet-stage-box {
+            flex-shrink: 0;
+            width: 220px;
+            height: 205px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid rgba(107, 114, 128, 0.15);
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            overflow: hidden;
+            position: relative;
+        }
+        .re-pet-stage-box svg { width: 190px; height: auto; }
+        .re-pet-stage-box svg.re-pet-sad { filter: grayscale(0.65); }
+        .re-pet-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .re-pet-name-row { display: flex; align-items: center; gap: 10px; }
+        .re-pet-name { font-size: 18px; font-weight: 700; color: #1f2937; }
+        .re-pet-line {
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+        }
+        .re-pet-stage-name { font-size: 13px; color: #6b7280; }
+        .re-pet-level-row { display: flex; align-items: center; gap: 12px; }
+        .re-pet-level { font-size: 14px; font-weight: 700; color: #d97706; }
+        .re-pet-mood { font-size: 12px; color: #6b7280; }
+        .re-pet-exp-bar {
+            position: relative;
+            height: 18px;
+            border-radius: 999px;
+            background: rgba(107, 114, 128, 0.15);
+            overflow: hidden;
+        }
+        .re-pet-exp-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            transition: width .5s ease;
+        }
+        .re-pet-exp-fill.re-pet-exp-flash { animation: re-pet-flash .6s ease 2; }
+        @keyframes re-pet-flash {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.8); }
+        }
+        .re-pet-exp-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #374151;
+            text-shadow: 0 0 3px rgba(255,255,255,.8);
+        }
+        .re-pet-stats { display: flex; gap: 10px; }
+        .re-pet-stat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 4px;
+            border-radius: 8px;
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            border: 1px solid rgba(107, 114, 128, 0.15);
+        }
+        .re-pet-stat-v { font-size: 15px; font-weight: 700; color: #1f2937; }
+        .re-pet-stat-l { font-size: 11px; color: #9ca3af; }
+        .re-pet-hint { font-size: 11px; color: #9ca3af; line-height: 1.5; }
+        .re-pet-log-title { font-size: 12px; font-weight: 600; color: #6b7280; }
+        .re-pet-log {
+            max-height: 130px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-right: 4px;
+        }
+        .re-pet-log-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            border: 1px solid rgba(107, 114, 128, 0.1);
+        }
+        .re-pet-log-item .re-pet-log-text { color: #4b5563; }
+        .re-pet-log-item .re-pet-log-time { color: #9ca3af; flex-shrink: 0; font-size: 11px; }
+        /* 升级彩带粒子：仅动画 transform/opacity（GPU 合成，零重绘） */
+        .re-pet-confetti {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            width: 7px;
+            height: 7px;
+            border-radius: 2px;
+            pointer-events: none;
+            animation: re-pet-confetti-fly .9s ease-out forwards;
+        }
+        @keyframes re-pet-confetti-fly {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translate(var(--re-cx), var(--re-cy)) rotate(var(--re-cr)) scale(.4); opacity: 0; }
+        }
+        @media (max-width: 1100px) {
+            .re-pet-main { flex-direction: column; }
+            .re-pet-stage-box { width: 100%; height: 190px; }
+        }
+        /* 浮层宠物（拖出面板后挂在 body 上，z-index 低于主面板一档可被面板覆盖） */
+        #re-pet-float {
+            position: fixed;
+            z-index: 2147483646;
+            width: 120px;
+            height: 120px;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        #re-pet-float.re-pet-float-dragging { cursor: grabbing; }
+        #re-pet-float .re-pet-float-inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #re-pet-float .re-pet-float-inner svg { width: 108px; height: auto; pointer-events: none; }
+        #re-pet-float.re-pet-float-sad .re-pet-float-inner svg { filter: grayscale(0.65); }
+        /* 喂养蹦跳：仅动画 transform/opacity（GPU 合成） */
+        #re-pet-float.re-pet-float-hop .re-pet-float-inner { animation: re-pet-hop .55s ease; }
+        @keyframes re-pet-hop {
+            0% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-14px) scale(1.06); }
+            55% { transform: translateY(0) scale(1); }
+            75% { transform: translateY(-6px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        /* 经验气泡 */
+        #re-pet-float .re-pet-float-bubble {
+            position: absolute;
+            top: -6px;
+            right: -4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #b45309;
+            background: rgba(233, 188, 79, 0.95);
+            border: 1px solid #b98f2e;
+            border-radius: 999px;
+            padding: 1px 8px;
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #re-pet-float.re-pet-float-hop .re-pet-float-bubble { animation: re-pet-bubble 1.1s ease forwards; }
+        @keyframes re-pet-bubble {
+            0% { opacity: 0; transform: translateY(4px); }
+            25% { opacity: 1; transform: translateY(-6px); }
+            80% { opacity: 1; transform: translateY(-14px); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        /* hover 信息提示 */
+        #re-pet-float .re-pet-float-tip {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #4b5563;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(107, 114, 128, 0.25);
+            border-radius: 8px;
+            padding: 4px 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .15s;
+        }
+        #re-pet-float:hover .re-pet-float-tip { opacity: 1; }
+        /* 拖出时的跟手预览 */
+        #re-pet-carry {
+            position: fixed;
+            z-index: 2147483650;
+            width: 96px;
+            height: 96px;
+            pointer-events: none;
+            opacity: 0.9;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,.18));
+        }
+        #re-pet-carry svg { width: 100%; height: 100%; }
+        /* 展示区「外出中」空窝状态 */
+        .re-pet-stage-box.re-pet-away {
+            border-style: dashed;
+            background: transparent;
+        }
+        .re-pet-away-hint {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+        .re-pet-away-hint svg { width: 54px; height: auto; opacity: .55; }
+
         /* ===== 外观扩展（V6.1.0）===== */
         /* 开关激活色：由设置里的取色器控制（默认蓝 #3b82f6），JS 写入 --re-switch-on-1/2 渐变变量 */
         .re-switch input:checked + .re-switch-slider {
@@ -8226,7 +8518,8 @@
         appearance: false,
         history: false,
         analysis: false,
-        analysisEvents: false
+        analysisEvents: false,
+        pet: false
     };
 
     function loadAutoAgeSetting() {
@@ -8672,6 +8965,7 @@
         restorePanelPosition();
         initStaffName();
         initEditableSelects();
+        petDailySign();
         fetchPageData();
         fetchProductData();
         fetchOrderData();
@@ -8814,8 +9108,10 @@
         const isClickOnMultiSelectDrop = e.target.closest && e.target.closest('.re-multi-select-dropdown');
         const isClickOnHistHoverCard = e.target.closest && e.target.closest('.re-history-hover-card');
         const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
+        // 浮层宠物挂在 body 上，点击/拖动它不应触发面板外点关闭
+        const isClickOnPetFloat = e.target.closest && e.target.closest('#re-pet-float');
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer && !isClickOnPetFloat) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -8933,7 +9229,7 @@
             navItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
 
-            const pages = ['re-page-data', 're-page-settings', 're-page-history', 're-page-analysis'];
+            const pages = ['re-page-data', 're-page-settings', 're-page-history', 're-page-analysis', 're-page-pet'];
             const rightColumn = document.getElementById('re-right-column');
             const pageType = this.getAttribute('data-page') || 'data';
 
@@ -8969,6 +9265,14 @@
                     renderModelAnalysis();
                 }
                 // 数据不变时静默重绘（drawOrderChart 内部指纹比对跳过动画）
+            }
+
+            if (pageType === 'pet') {
+                if (!lazyInit.pet) {
+                    lazyInit.pet = true;
+                    initPetPage();
+                }
+                renderPetPage();
             }
         });
     });
@@ -11584,6 +11888,7 @@
             if (completed) return;
             completed = true;
             cleanup();
+            if (success) gainPetExp('assign', '客服分配');
             callback(success, message);
         }
 
@@ -11940,6 +12245,7 @@
 
                                 const doneMsg = skipAssign ? '自动处理完成！已跳过客服分配（无锁不满足）' : '自动处理完成！';
                                 showSuccessToast(doneMsg + (copyOk ? '，即时预览已复制' : '，预览复制失败'));
+                                gainPetExp('autoBonus', '自动处理完成');
 
                                 const now = new Date();
                                 const record = {
@@ -11953,6 +12259,7 @@
                                 };
 
                                 saveHistoryRecord(record).then(() => {
+                                    gainPetExp('history', '记录历史');
                                     setWorkflowNode('history', 'done', '已记录');
                                     renderHistoryRecords();
                                 }).catch(err => {
@@ -12045,11 +12352,13 @@
                     const result = JSON.parse(response.responseText);
                     // 成功判定兜底：status 真值 / code 宽松等于0（兼容字符串"0"）/ success 字段
                     const ok = !!result.status || result.code == 0 || result.success == true;
+                    if (ok) gainPetExp('staffRemark', '客服备注');
                     callback(ok, ok ? '' : ('服务端返回: ' + String(response.responseText).slice(0, 100)));
                 } catch (e) {
                     // 非 JSON 响应：2xx/3xx 均视为成功
                     // 后端为 PRG 模式：POST 提交成功返回 302 重定向（实测已确认），仅 4xx/5xx 为真失败
                     const ok = response.status >= 200 && response.status < 400;
+                    if (ok) gainPetExp('staffRemark', '客服备注');
                     callback(ok, ok ? '' : ('HTTP ' + response.status));
                 }
             },
@@ -12215,17 +12524,772 @@
                     const result = JSON.parse(response.responseText);
                     // 成功判定兜底：status 真值 / code 宽松等于0（兼容字符串"0"）/ success 字段
                     const ok = !!result.status || result.code == 0 || result.success == true;
+                    if (ok) gainPetExp('riskRemark', '风控备注');
                     callback(ok, ok ? '' : ('服务端返回: ' + String(response.responseText).slice(0, 100)));
                 } catch (e) {
                     // 非 JSON 响应：2xx/3xx 均视为成功
                     // 后端为 PRG 模式：POST 提交成功返回 302 重定向（实测已确认），仅 4xx/5xx 为真失败
                     const ok = response.status >= 200 && response.status < 400;
+                    if (ok) gainPetExp('riskRemark', '风控备注');
                     callback(ok, ok ? '' : ('HTTP ' + response.status));
                 }
             },
             onerror: function() { callback(false, '网络错误'); },
             ontimeout: function() { callback(false, '请求超时'); }
         });
+    }
+
+    /* ===================== 养成模块（V6.4.0）=====================
+       五只纸绘伙伴（猫/狗/龙/机器人/狐狸）；养满一只（Lv50）解锁下一只，
+       已解锁可自由切换主养；经验只挂真实成功节点，每日上限 200 防刷。
+       性能约束：升级彩带仅动画 transform/opacity（GPU 合成），不碰 box-shadow。 */
+    const PET_DB_NAME = 'VideoReviewPetDB';
+    const PET_STORE_NAME = 'petState';
+    const PET_MAX_LEVEL = 50;
+    const PET_DAILY_CAP = 200;
+
+    const PET_DEFS = [
+        { id: 'cat',    name: '小猫',     line: '招财线', stages: ['纸蛋', '破壳崽', '小学徒', '打工猫', '招财完全体'] },
+        { id: 'dog',    name: '小狗',     line: '旺财线', stages: ['纸蛋', '奶狗崽', '小跟班', '巡逻犬', '旺财完全体'] },
+        { id: 'dragon', name: '小龙',     line: '进宝线', stages: ['纸蛋', '龙崽', '小蛟', '行云龙', '金龙完全体'] },
+        { id: 'robot',  name: '小机器人', line: '效率线', stages: ['纸蛋', '零件盒', '拼装体', '智能体', '超算完全体'] },
+        { id: 'fox',    name: '小狐狸',   line: '慧眼线', stages: ['纸蛋', '小狐狸', '机灵狐', '掌柜狐', '九尾完全体'] }
+    ];
+
+    const PET_EXP_RULES = { assign: 3, staffRemark: 5, riskRemark: 5, autoBonus: 7, history: 2, dailySign: 1 };
+
+    let petStateCache = null;
+
+    function petDefaultState() {
+        return {
+            activePet: 0,
+            pets: PET_DEFS.map((_, i) => ({ level: 1, exp: 0, unlocked: i === 0, lastFeed: 0, totalExp: 0, feedCount: 0 })),
+            daily: { date: '', exp: 0, signed: false },
+            float: { active: false, x: 24, y: 24 },
+            log: []
+        };
+    }
+
+    function openPetDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(PET_DB_NAME, 1);
+            request.onupgradeneeded = function(e) {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(PET_STORE_NAME)) {
+                    db.createObjectStore(PET_STORE_NAME, { keyPath: 'id' });
+                }
+            };
+            request.onsuccess = function() { resolve(request.result); };
+            request.onerror = function() { reject(request.error); };
+        });
+    }
+
+    function loadPetState() {
+        return new Promise((resolve) => {
+            openPetDB().then(db => {
+                try {
+                    const req = db.transaction(PET_STORE_NAME, 'readonly').objectStore(PET_STORE_NAME).get('main');
+                    req.onsuccess = function() {
+                        const def = petDefaultState();
+                        const saved = req.result;
+                        if (saved) {
+                            def.activePet = saved.activePet || 0;
+                            if (def.activePet >= PET_DEFS.length) def.activePet = 0;
+                            const savedPets = saved.pets || [];
+                            PET_DEFS.forEach((_, i) => { Object.assign(def.pets[i], savedPets[i] || {}); });
+                            def.daily = Object.assign(def.daily, saved.daily || {});
+                            def.float = Object.assign(def.float, saved.float || {});
+                            def.log = Array.isArray(saved.log) ? saved.log : [];
+                        }
+                        resolve(def);
+                    };
+                    req.onerror = function() { resolve(petDefaultState()); };
+                } catch (e) { resolve(petDefaultState()); }
+            }).catch(() => resolve(petDefaultState()));
+        });
+    }
+
+    function savePetState() {
+        if (!petStateCache) return;
+        openPetDB().then(db => {
+            try {
+                db.transaction(PET_STORE_NAME, 'readwrite').objectStore(PET_STORE_NAME).put(Object.assign({ id: 'main' }, petStateCache));
+            } catch (e) {}
+        }).catch(() => {});
+    }
+
+    function petExpNeeded(level) { return Math.floor(50 * Math.pow(level, 1.5)); }
+
+    function petStageOf(level) { return level >= PET_MAX_LEVEL ? 4 : Math.floor(level / 10); }
+
+    function petMoodOf(pet) {
+        if (!pet.lastFeed) return 50;
+        const days = Math.floor((Date.now() - pet.lastFeed) / 86400000);
+        return Math.max(10, 100 - Math.min(90, days * 25));
+    }
+
+    function petMoodText(mood) {
+        if (mood >= 80) return '心情超好';
+        if (mood >= 60) return '心情不错';
+        if (mood >= 30) return '有点想你';
+        return '蔫了，快办单喂它';
+    }
+
+    function petLog(text) {
+        if (!petStateCache) return;
+        petStateCache.log.unshift({ t: Date.now(), text: text });
+        if (petStateCache.log.length > 30) petStateCache.log.length = 30;
+    }
+
+    function isPetPageVisible() {
+        const el = document.getElementById('re-page-pet');
+        return !!el && el.style.display !== 'none';
+    }
+
+    /* ---------- 纸绘 SVG 纸娃娃系统（纸绘风：暖铅笔描边 + 纸底 + 低饱和填色） ---------- */
+    const PET_PAL = {
+        ink: '#5B5142', paper: '#FBF5E6', paper2: '#F8F0DC', blush: '#EDC7BC', gold: '#E9BC4F',
+        cat: '#E8B478', dog: '#C89B6E', dragon: '#7FBFA8', robot: '#9DB4C9', fox: '#E8946A', red: '#D97B6C'
+    };
+
+    function petSvgWrap(inner, cls) {
+        return `<svg viewBox="0 0 160 150" ${cls ? `class="${cls}"` : ''} role="img">${petGround()}${inner}</svg>`;
+    }
+
+    function petGround() {
+        return `<path d="M34 140 q46 5 92 0" fill="none" stroke="#B9AA8C" stroke-width="1.6" stroke-linecap="round"/>`;
+    }
+
+    // 通用小脸：圆眼(幼年)/笑眼(成长) + 腮红 + w嘴
+    function petFace(hx, hy, opts) {
+        const P = PET_PAL;
+        const eye = opts.smile
+            ? `<path d="M${hx-11} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><path d="M${hx+3} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>`
+            : `<circle cx="${hx-7}" cy="${hy}" r="2.6" fill="${P.ink}"/><circle cx="${hx+7}" cy="${hy}" r="2.6" fill="${P.ink}"/>`;
+        const mouth = opts.tongue
+            ? `<path d="M${hx-3} ${hy+8} q3 4 6 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/><path d="M${hx-1} ${hy+10} q1 3 2 0 z" fill="${P.red}"/>`
+            : `<path d="M${hx-3} ${hy+8} q3 3 6 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>`;
+        return `${eye}<ellipse cx="${hx-15}" cy="${hy+6}" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="${hx+15}" cy="${hy+6}" rx="3.6" ry="2.2" fill="${P.blush}"/>${mouth}`;
+    }
+
+    // 蛋壳帽：破壳阶段头顶的半片蛋壳
+    function petShellHat(hx, hy, w) {
+        const P = PET_PAL;
+        return `<path d="M${hx-w} ${hy} q${w*0.5} -26 ${w*2} 0 q-${w*0.6} 6 -${w*2} 0 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/><path d="M${hx-w+6} ${hy-9} l2 4 M${hx+2} ${hy-13} l2 4 M${hx+w-2} ${hy-8} l2 4" stroke="${P.ink}" stroke-width="1.4" stroke-linecap="round"/>`;
+    }
+
+    // 蛋阶段：五只共享蛋形 + 各自花纹
+    function petEggSVG(petId) {
+        const P = PET_PAL;
+        let deco = '';
+        if (petId === 'cat') deco = `<g fill="#D9C49A"><circle cx="72" cy="66" r="2.4"/><circle cx="90" cy="74" r="2.8"/><circle cx="74" cy="86" r="2"/><circle cx="92" cy="94" r="2.4"/><circle cx="68" cy="98" r="2.2"/></g>`;
+        else if (petId === 'dog') deco = `<g fill="${P.dog}" opacity=".5"><circle cx="74" cy="66" r="2"/><circle cx="80" cy="66" r="2"/><circle cx="77" cy="70" r="2"/><ellipse cx="77" cy="78" rx="4" ry="3"/></g>`;
+        else if (petId === 'dragon') deco = `<g fill="${P.dragon}" opacity=".6"><path d="M72 62 l4 6 -4 6 -4 -6 Z"/><path d="M90 76 l4 6 -4 6 -4 -6 Z"/><path d="M72 92 l4 6 -4 6 -4 -6 Z"/></g>`;
+        else if (petId === 'robot') deco = `<g stroke="${P.robot}" stroke-width="1.6" fill="none"><path d="M70 60 h10 v10 h10"/><path d="M70 88 h8 v-8 h8"/><circle cx="92" cy="94" r="1.6" fill="${P.robot}" stroke="none"/></g>`;
+        else deco = `<g stroke="${P.fox}" stroke-width="2" stroke-linecap="round" fill="none"><path d="M68 58 q8 12 0 24"/><path d="M86 66 q8 12 0 24"/></g>`;
+        return petSvgWrap(`<path d="M80 44 C 96 44 107 66 107 82 C 107 97 94 107 80 107 C 66 107 53 97 53 82 C 53 66 64 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M72 50 l4 5 -3 4 5 4" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${deco}
+            <g stroke="${P.ink}" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M114 48 h6 l-6 5 h6"/><path d="M122 36 h5 l-5 4 h5"/></g>`);
+    }
+
+    // 小猫 · 招财线
+    function petCatSVG(stage) {
+        const P = PET_PAL, C = P.cat;
+        if (stage === 0) return petEggSVG('cat');
+        if (stage === 1) return petSvgWrap(`
+            <path d="M46 68 L36 46 L58 56 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M114 68 L124 46 L102 56 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M48 65 L42 53 L55 59 Z" fill="${C}"/><path d="M112 65 L118 53 L105 59 Z" fill="${C}"/>
+            <path d="M80 52 C 92 52 100 61 100 72 C 100 83 91 90 80 90 C 69 90 60 83 60 72 C 60 61 68 52 80 52 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petShellHat(68, 46, 14)}
+            <path d="M64 96 C 74 92 86 92 96 96 L 96 108 C 86 112 74 112 64 108 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 72, {})}
+            <path d="M96 104 q14 -3 11 -17" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/>`);
+        if (stage === 2) return petSvgWrap(`
+            <path d="M52 60 L40 32 L66 46 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M108 60 L120 32 L94 46 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M55 55 L48 38 L62 47 Z" fill="${C}"/><path d="M105 55 L112 38 L98 47 Z" fill="${C}"/>
+            <path d="M80 44 C 94 44 104 54 104 66 C 104 77 93 84 80 84 C 67 84 56 77 56 66 C 56 54 66 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 64, {})}
+            <path d="M60 84 C 72 80 88 80 100 84 L 102 102 C 88 108 72 108 58 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M56 86 q12 7 24 0 l3 10 q-15 9 -30 0 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M100 92 q15 -2 12 -16" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/>
+            <path d="M80 22 l2 4 4.5 .6 -3.2 3.2 .8 4.5 -4.1 -2.1 -4.1 2.1 .8 -4.5 -3.2 -3.2 4.5 -.6 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
+        if (stage === 3) return petSvgWrap(`
+            <path d="M54 58 L42 30 L68 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M106 58 L118 30 L92 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M58 53 L51 36 L64 45 Z" fill="${C}"/><path d="M102 53 L109 36 L96 45 Z" fill="${C}"/>
+            <path d="M80 40 C 96 40 106 51 106 64 C 106 76 94 83 80 83 C 66 83 54 76 54 64 C 54 51 64 40 80 40 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 60, { smile: true })}
+            <path d="M58 82 C 72 78 88 78 102 82 L 104 106 C 88 112 72 112 56 106 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M66 88 q14 8 28 0" fill="none" stroke="${P.red}" stroke-width="4"/>
+            <circle cx="80" cy="96" r="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.6"/>
+            <rect x="92" y="88" width="14" height="10" rx="2" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.6"/><path d="M95 92 h8 M95 94.5 h5" stroke="#B9AA8C" stroke-width="1.2"/>
+            <path d="M104 96 q-10 8 -22 6" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/>
+            <g stroke="${P.ink}" stroke-width="1.4" stroke-linecap="round"><path d="M52 62 l-8 -2 M52 66 l-8 2 M108 62 l8 -2 M108 66 l8 2"/></g>`);
+        return petSvgWrap(`
+            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 12 v-7"/><path d="M58 16 l-4 -6"/><path d="M102 16 l4 -6"/><path d="M42 28 l-6 -5"/><path d="M118 28 l6 -5"/><path d="M32 48 l-7 1"/><path d="M128 48 l7 1"/></g>
+            <path d="M80 72 C 100 72 112 90 112 110 C 112 124 98 130 80 130 C 62 130 48 124 48 110 C 48 90 60 72 80 72 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M66 92 q14 9 28 0 l4 14 q-18 11 -36 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <g transform="rotate(-8 80 110)"><rect x="68" y="94" width="24" height="32" rx="5" fill="${P.gold}" stroke="${P.ink}" stroke-width="2"/><circle cx="80" cy="110" r="7" fill="none" stroke="#B98F2E" stroke-width="1.4"/><path d="M80 106 v8 M76 110 h8" stroke="${P.ink}" stroke-width="1.6"/></g>
+            <path d="M52 84 C 42 78 34 66 34 54" fill="none" stroke="${P.ink}" stroke-width="8" stroke-linecap="round"/><path d="M52 84 C 42 78 34 66 34 54" fill="none" stroke="${P.paper}" stroke-width="4.4" stroke-linecap="round"/><circle cx="34" cy="52" r="5.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="34" cy="52" r="2.2" fill="${P.blush}"/>
+            <circle cx="80" cy="74" r="4.5" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/><path d="M77 74 h6 M80 71 v6" stroke="${P.ink}" stroke-width="1.2"/>
+            <path d="M80 18 C 98 18 110 30 110 44 C 110 58 96 66 80 66 C 64 66 50 58 50 44 C 50 30 62 18 80 18 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M56 30 L46 8 L72 20 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/><path d="M104 30 L114 8 L88 20 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M59 26 L54 13 L68 19 Z" fill="${P.red}"/><path d="M101 26 L106 13 L92 19 Z" fill="${P.red}"/>
+            ${petFace(80, 44, { smile: true })}
+            <g stroke="${P.ink}" stroke-width="1.5" stroke-linecap="round"><path d="M50 46 l-8 -2 M50 51 l-8 2 M110 46 l8 -2 M110 51 l8 2"/></g>`);
+    }
+
+    // 小狗 · 旺财线
+    function petDogSVG(stage) {
+        const P = PET_PAL, C = P.dog;
+        if (stage === 0) return petEggSVG('dog');
+        if (stage === 1) return petSvgWrap(`
+            <ellipse cx="62" cy="58" rx="9" ry="13" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(18 62 58)"/><ellipse cx="98" cy="58" rx="9" ry="13" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-18 98 58)"/>
+            <path d="M80 52 C 92 52 100 61 100 72 C 100 83 91 90 80 90 C 69 90 60 83 60 72 C 60 61 68 52 80 52 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petShellHat(70, 44, 13)}
+            ${petFace(80, 72, { tongue: true })}
+            <path d="M64 94 C 74 90 86 90 96 94 L 96 106 C 86 110 74 110 64 106 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M98 100 q10 1 8 -12" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
+        if (stage === 2) return petSvgWrap(`
+            <ellipse cx="56" cy="56" rx="11" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(16 56 56)"/><ellipse cx="104" cy="56" rx="11" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-16 104 56)"/>
+            <path d="M80 44 C 94 44 104 54 104 66 C 104 78 93 85 80 85 C 67 85 56 78 56 66 C 56 54 66 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 64, {})}
+            <ellipse cx="80" cy="59" rx="7" ry="5" fill="${P.blush}" opacity=".7"/>
+            <path d="M58 84 C 72 80 88 80 102 84 L 104 104 C 88 110 72 110 56 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M70 92 h20 l-4 6 h-12 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/><circle cx="80" cy="96" r="1.6" fill="${P.ink}"/>
+            <path d="M104 94 q12 2 9 -14" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
+        if (stage === 3) return petSvgWrap(`
+            <path d="M56 58 L44 34 L70 46 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M104 58 L116 34 L90 46 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M59 55 L51 40 L66 48 Z" fill="${P.paper}" opacity=".65"/><path d="M101 55 L109 40 L94 48 Z" fill="${P.paper}" opacity=".65"/>
+            <path d="M80 42 C 96 42 106 52 106 65 C 106 77 94 84 80 84 C 66 84 54 77 54 65 C 54 52 64 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 62, { smile: true })}
+            <ellipse cx="80" cy="56" rx="8" ry="5.5" fill="${P.blush}" opacity=".7"/><circle cx="77" cy="55" r="1.8" fill="${P.ink}"/><circle cx="83" cy="55" r="1.8" fill="${P.ink}"/>
+            <path d="M58 82 C 72 78 88 78 102 82 L 104 106 C 88 112 72 112 56 106 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M72 90 q8 -4 16 0 q-4 8 -8 8 q-4 0 -8 -8 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
+            <rect x="90" y="90" width="14" height="10" rx="2" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.6"/><path d="M93 94 h8 M93 96.5 h5" stroke="#B9AA8C" stroke-width="1.2"/>
+            <path d="M104 96 q-12 8 -24 5" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
+        return petSvgWrap(`
+            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 12 v-7"/><path d="M60 16 l-3 -6"/><path d="M100 16 l3 -6"/></g>
+            <path d="M80 70 C 102 70 114 90 114 108 C 114 122 100 128 80 128 C 60 128 46 122 46 108 C 46 90 58 70 80 70 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M68 100 q12 8 24 0 l3 12 q-15 9 -30 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M74 118 l4 -8 4 8 -4 3 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M64 106 l6 -4 1 5 -5 3 Z M96 106 l-6 -4 -1 5 5 3 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M78 82 q6 5 12 0 l2 6 q-8 5 -16 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M58 86 C 46 82 38 70 38 58 C 44 64 46 70 54 72 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M80 20 C 98 20 110 32 110 46 C 110 60 96 68 80 68 C 64 68 50 60 50 46 C 50 32 62 20 80 20 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <ellipse cx="58" cy="30" rx="10" ry="14" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(14 58 30)"/><ellipse cx="102" cy="30" rx="10" ry="14" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-14 102 30)"/>
+            <ellipse cx="80" cy="40" rx="9" ry="6" fill="${P.blush}" opacity=".7"/><circle cx="76.5" cy="39" r="1.9" fill="${P.ink}"/><circle cx="83.5" cy="39" r="1.9" fill="${P.ink}"/>
+            <path d="M66 52 q4 -5 8 0 M86 52 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M76 57 q4 4 8 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/><path d="M78 59 q2 3 4 0 z" fill="${P.red}"/>
+            <path d="M114 100 q10 2 8 -12" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
+    }
+
+    // 小龙 · 进宝线
+    function petDragonSVG(stage) {
+        const P = PET_PAL, C = P.dragon;
+        if (stage === 0) return petEggSVG('dragon');
+        if (stage === 1) return petSvgWrap(`
+            <path d="M70 44 l-6 -12 10 4 Z M90 44 l6 -12 -10 4 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M80 50 C 92 50 100 59 100 70 C 100 81 91 88 80 88 C 69 88 60 81 60 70 C 60 59 68 50 80 50 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petShellHat(70, 42, 13)}
+            ${petFace(80, 70, {})}
+            <circle cx="80" cy="64" r="3" fill="${C}" opacity=".7"/>
+            <path d="M64 92 C 74 88 86 88 96 92 L 96 104 C 86 108 74 108 64 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M60 96 l-8 6 M60 100 l-8 6" stroke="${C}" stroke-width="2" stroke-linecap="round"/>
+            <path d="M98 98 q12 -2 9 -14" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M104 78 l3 -4 3 4 -3 2 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4"/>`);
+        if (stage === 2) return petSvgWrap(`
+            <path d="M66 40 l-8 -15 12 5 Z M94 40 l8 -15 -12 5 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M80 42 C 94 42 104 52 104 64 C 104 76 93 83 80 83 C 67 83 56 76 56 64 C 56 52 66 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 62, { smile: true })}
+            <circle cx="80" cy="55" r="3.4" fill="${C}" opacity=".7"/>
+            <path d="M56 82 C 70 78 90 78 104 82 L 106 102 C 90 108 70 108 54 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M64 88 h32 M64 94 h32" stroke="${C}" stroke-width="2.4" stroke-linecap="round" opacity=".6"/>
+            <path d="M52 92 q-6 8 -16 6 q4 -10 16 -6 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round" opacity=".85"/>
+            <path d="M104 92 q12 -2 9 -15" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M110 71 l3 -4 3 4 -3 2 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4"/>`);
+        if (stage === 3) return petSvgWrap(`
+            <path d="M62 36 l-10 -18 14 6 Z M98 36 l10 -18 -14 6 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M80 38 C 96 38 108 49 108 62 C 108 75 95 82 80 82 C 65 82 52 75 52 62 C 52 49 64 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petFace(80, 58, { smile: true })}
+            <circle cx="80" cy="50" r="4" fill="${C}" opacity=".7"/>
+            <path d="M66 70 q4 6 8 0 M86 70 q4 6 8 0" fill="none" stroke="${C}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M56 80 C 70 76 90 76 104 80 L 106 104 C 90 110 70 110 54 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <g stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round"><path d="M62 88 h24 M62 94 h24 M62 100 h24"/></g>
+            <path d="M46 92 q-8 10 -20 8 q5 -12 20 -8 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M104 94 q13 -2 10 -16" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M111 70 l3.5 -5 3.5 5 -3.5 2.5 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4"/>
+            <path d="M80 22 l2.5 5 5.5 .8 -4 3.9 .9 5.5 -4.9 -2.6 -4.9 2.6 .9 -5.5 -4 -3.9 5.5 -.8 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
+        return petSvgWrap(`
+            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 10 v-6"/><path d="M56 14 l-5 -5"/><path d="M104 14 l5 -5"/></g>
+            <path d="M46 132 q14 -6 34 0 q20 6 34 0" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+            <ellipse cx="58" cy="126" rx="16" ry="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><ellipse cx="102" cy="126" rx="16" ry="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M80 70 C 104 70 118 88 118 108 C 118 122 102 130 80 130 C 58 130 42 122 42 108 C 42 88 56 70 80 70 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M66 92 q14 9 28 0 l4 14 q-18 11 -36 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="80" cy="112" r="9" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2"/><circle cx="80" cy="112" r="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4"/>
+            <path d="M42 88 q-14 4 -24 -6 q10 -2 14 -12 q8 8 10 18 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M118 88 q14 4 24 -6 q-10 -2 -14 -12 q-8 8 -10 18 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M80 22 C 100 22 112 34 112 48 C 112 62 97 70 80 70 C 63 70 48 62 48 48 C 48 34 60 22 80 22 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M64 32 l-12 -20 16 7 Z M96 32 l12 -20 -16 7 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M67 28 l-8 -13 L70 20 Z M93 28 l8 -13 L90 20 Z" fill="${P.red}"/>
+            <path d="M66 46 q5 -6 10 0 M84 46 q5 -6 10 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M74 56 q6 5 12 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M60 52 q-8 4 -14 0 M100 52 q8 4 14 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <ellipse cx="64" cy="54" rx="3.4" ry="2.2" fill="${P.blush}"/><ellipse cx="96" cy="54" rx="3.4" ry="2.2" fill="${P.blush}"/>`);
+    }
+
+    // 小机器人 · 效率线
+    function petRobotSVG(stage) {
+        const P = PET_PAL, C = P.robot;
+        if (stage === 0) return petEggSVG('robot');
+        if (stage === 1) return petSvgWrap(`
+            <path d="M80 24 v-8" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="80" cy="13" r="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
+            <rect x="58" y="50" width="44" height="38" rx="8" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <rect x="66" y="58" width="28" height="16" rx="4" fill="${C}" opacity=".5" stroke="${P.ink}" stroke-width="1.6"/>
+            <circle cx="74" cy="66" r="2.4" fill="${P.ink}"/><circle cx="86" cy="66" r="2.4" fill="${P.ink}"/>
+            <path d="M74 80 q6 4 12 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="62" y="88" width="36" height="10" rx="5" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="70" cy="103" r="6" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="90" cy="103" r="6" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M64 98 v10 M76 98 v10 M84 98 v10 M96 98 v10" stroke="${P.ink}" stroke-width="1.4"/>`);
+        if (stage === 2) return petSvgWrap(`
+            <path d="M80 22 v-10" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="80" cy="9" r="3.2" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
+            <rect x="54" y="46" width="52" height="42" rx="9" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <rect x="62" y="54" width="36" height="18" rx="4" fill="${C}" opacity=".45" stroke="${P.ink}" stroke-width="1.6"/>
+            <path d="M68 62 q3 -4 6 0 M86 62 q3 -4 6 0" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+            <path d="M76 70 q4 3 8 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="70" y="78" width="20" height="6" rx="3" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" opacity=".9"/>
+            <rect x="60" y="88" width="40" height="12" rx="5" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M44 60 q-10 4 -8 16" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="80" r="4" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M116 60 q10 4 8 16" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/><circle cx="122" cy="80" r="4" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <circle cx="68" cy="106" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="106" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M61 101 v10 M75 101 v10 M85 101 v10 M99 101 v10" stroke="${P.ink}" stroke-width="1.4"/>`);
+        if (stage === 3) return petSvgWrap(`
+            <path d="M80 22 v-12" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><circle cx="80" cy="7" r="3.4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/>
+            <path d="M74 12 l-5 -5 M86 12 l5 -5" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="52" y="42" width="56" height="44" rx="10" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <rect x="60" y="50" width="40" height="20" rx="4" fill="${C}" opacity=".4" stroke="${P.ink}" stroke-width="1.6"/>
+            <path d="M66 59 q3 -4 6 0 M88 59 q3 -4 6 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M75 68 q5 4 10 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="42" y="34" width="12" height="8" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.6"/><rect x="106" y="34" width="12" height="8" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.6"/>
+            <rect x="64" y="86" width="32" height="8" rx="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.6"/>
+            <path d="M44 58 q-14 6 -10 22" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><circle cx="36" cy="84" r="4.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="36" cy="84" r="1.8" fill="${C}"/>
+            <path d="M116 58 q14 6 10 22" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><circle cx="124" cy="84" r="4.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="124" cy="84" r="1.8" fill="${C}"/>
+            <rect x="54" y="94" width="52" height="12" rx="6" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="66" cy="112" r="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="94" cy="112" r="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M58 107 v10 M74 107 v10 M86 107 v10 M102 107 v10" stroke="${P.ink}" stroke-width="1.4"/>`);
+        return petSvgWrap(`
+            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 14 v-9"/><path d="M56 18 l-6 -6"/><path d="M104 18 l6 -6"/><path d="M40 34 l-8 -4"/><path d="M120 34 l8 -4"/></g>
+            <path d="M40 58 q-16 8 -12 28 q2 10 12 12" fill="none" stroke="${C}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M120 58 q16 8 12 28 q-2 10 -12 12" fill="none" stroke="${C}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M36 62 l-4 8 8 2 M124 62 l4 8 -8 2" stroke="${P.gold}" stroke-width="2" stroke-linecap="round"/>
+            <path d="M80 62 C 104 62 118 84 118 104 C 118 120 102 128 80 128 C 58 128 42 120 42 104 C 42 84 56 62 80 62 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <rect x="60" y="84" width="40" height="24" rx="5" fill="${C}" opacity=".4" stroke="${P.ink}" stroke-width="2"/>
+            <circle cx="72" cy="96" r="2.6" fill="${P.ink}"/><circle cx="88" cy="96" r="2.6" fill="${P.ink}"/>
+            <path d="M74 103 q6 4 12 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="68" y="114" width="24" height="8" rx="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/>
+            <circle cx="80" cy="66" r="6" fill="${P.gold}" stroke="${P.ink}" stroke-width="2"/><path d="M80 63 v6 M77 66 h6" stroke="${P.ink}" stroke-width="1.4"/>
+            <path d="M80 26 v-12" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><circle cx="80" cy="11" r="3.6" fill="${P.gold}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M72 18 l-7 -6 M88 18 l7 -6" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+            <rect x="50" y="44" width="60" height="42" rx="10" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <rect x="40" y="36" width="14" height="9" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/><rect x="106" y="36" width="14" height="9" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
+            <path d="M60 54 q4 -5 8 0 M92 54 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
+            <ellipse cx="64" cy="60" rx="3.2" ry="2" fill="${P.blush}"/><ellipse cx="96" cy="60" rx="3.2" ry="2" fill="${P.blush}"/>
+            <path d="M74 66 q6 5 12 0" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>`);
+    }
+
+    // 小狐狸 · 慧眼线
+    function petFoxSVG(stage) {
+        const P = PET_PAL, C = P.fox;
+        if (stage === 0) return petEggSVG('fox');
+        if (stage === 1) return petSvgWrap(`
+            <path d="M58 52 L44 24 L72 42 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M102 52 L116 24 L88 42 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M62 47 L53 32 L70 41 Z" fill="${P.paper}" opacity=".75"/><path d="M98 47 L107 32 L90 41 Z" fill="${P.paper}" opacity=".75"/>
+            <path d="M80 50 C 92 50 100 59 100 70 C 100 81 91 88 80 88 C 69 88 60 81 60 70 C 60 59 68 50 80 50 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            ${petShellHat(72, 42, 12)}
+            ${petFace(80, 70, {})}
+            <path d="M76 78 q4 4 8 0 l-2 4 -2 -2 -2 2 Z" fill="${P.ink}"/>
+            <path d="M64 90 C 74 86 86 86 96 90 L 96 102 C 86 106 74 106 64 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M98 96 q14 -4 12 -18 q-2 -6 -6 -6" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/>`);
+        if (stage === 2) return petSvgWrap(`
+            <path d="M54 50 L38 18 L70 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M106 50 L122 18 L90 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M59 44 L49 27 L68 37 Z" fill="${P.paper}" opacity=".75"/><path d="M101 44 L111 27 L92 37 Z" fill="${P.paper}" opacity=".75"/>
+            <path d="M80 42 C 94 42 104 52 104 64 C 104 76 93 83 80 83 C 67 83 56 76 56 64 C 56 52 66 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M68 62 q4 -5 8 0 M84 62 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>
+            <ellipse cx="66" cy="68" rx="3.4" ry="2.2" fill="${P.blush}"/><ellipse cx="94" cy="68" rx="3.4" ry="2.2" fill="${P.blush}"/>
+            <path d="M76 74 q4 4 8 0 l-2 4 -2 -2 -2 2 Z" fill="${P.ink}"/>
+            <path d="M58 82 C 72 78 88 78 102 82 L 104 102 C 88 108 72 108 56 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <circle cx="100" cy="52" r="7" fill="none" stroke="${P.ink}" stroke-width="2"/><path d="M95 47 l-4 -4 M100 47 v-4" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M104 92 q16 -5 13 -21 q-2 -7 -7 -7" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M110 64 q2 -5 6 -4" fill="none" stroke="${C}" stroke-width="3.4" stroke-linecap="round"/>`);
+        if (stage === 3) return petSvgWrap(`
+            <path d="M52 46 L34 10 L70 34 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M108 46 L126 10 L90 34 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M58 40 L47 21 L68 33 Z" fill="${P.paper}" opacity=".8"/><path d="M102 40 L113 21 L92 33 Z" fill="${P.paper}" opacity=".8"/>
+            <path d="M80 38 C 96 38 106 49 106 62 C 106 75 95 82 80 82 C 65 82 54 75 54 62 C 54 49 64 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M66 58 q4 -5 8 0 M86 58 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
+            <ellipse cx="64" cy="64" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="96" cy="64" rx="3.6" ry="2.2" fill="${P.blush}"/>
+            <path d="M76 70 q4 4 8 0 l-2 5 -2 -2 -2 2 Z" fill="${P.ink}"/>
+            <path d="M56 80 C 70 76 90 76 104 80 L 106 104 C 90 110 70 110 54 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M66 88 h28 M66 94 h28 M66 100 h28" stroke="${C}" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
+            <g stroke="${P.ink}" stroke-width="1.6"><rect x="88" y="90" width="10" height="14" rx="2" fill="${P.paper}"/><path d="M90 96 v4 M94 94 v7 M97 97 v3" stroke-width="1.2"/><circle cx="93" cy="93" r="3.4" fill="none"/></g>
+            <path d="M106 92 q17 -5 14 -22 q-2 -8 -8 -8" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M112 62 q3 -5 7 -4" fill="none" stroke="${C}" stroke-width="3.6" stroke-linecap="round"/>
+            <path d="M80 22 l2.2 4.4 4.8 .7 -3.5 3.4 .8 4.8 -4.3 -2.3 -4.3 2.3 .8 -4.8 -3.5 -3.4 4.8 -.7 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
+        return petSvgWrap(`
+            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 12 v-7"/><path d="M58 16 l-4 -6"/><path d="M102 16 l4 -6"/><path d="M40 30 l-7 -4"/><path d="M120 30 l7 -4"/></g>
+            <g stroke="${P.ink}" stroke-width="2" stroke-linejoin="round" fill="${C}">
+                <path d="M44 100 Q30 88 34 72 Q46 78 50 84 Z"/><path d="M54 96 Q42 82 46 66 Q58 74 62 82 Z"/><path d="M64 94 Q56 78 60 62 Q70 72 74 82 Z"/>
+                <path d="M116 100 Q130 88 126 72 Q114 78 110 84 Z"/><path d="M106 96 Q118 82 114 66 Q102 74 98 82 Z"/><path d="M96 94 Q104 78 100 62 Q90 72 86 82 Z"/>
+            </g>
+            <path d="M80 68 C 100 68 112 86 112 106 C 112 120 98 128 80 128 C 62 128 48 120 48 106 C 48 86 60 68 80 68 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M66 88 q14 9 28 0 l4 14 q-18 11 -36 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M76 96 q4 4 8 0 l-2 5 -2 -2 -2 2 Z" fill="${P.ink}"/>
+            <path d="M48 66 L30 30 L62 52 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/><path d="M112 66 L130 30 L98 52 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <path d="M54 58 L43 39 L64 50 Z" fill="${P.paper}" opacity=".85"/><path d="M106 58 L117 39 L96 50 Z" fill="${P.paper}" opacity=".85"/>
+            <path d="M80 18 C 98 18 110 31 110 46 C 110 60 96 68 80 68 C 64 68 50 60 50 46 C 50 31 62 18 80 18 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M64 44 q5 -6 10 0 M86 44 q5 -6 10 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
+            <ellipse cx="62" cy="50" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="98" cy="50" rx="3.6" ry="2.2" fill="${P.blush}"/>
+            <path d="M76 56 q4 4 8 0 l-2 5 -2 -2 -2 2 Z" fill="${P.ink}"/>`);
+    }
+
+    const PET_RENDERERS = { cat: petCatSVG, dog: petDogSVG, dragon: petDragonSVG, robot: petRobotSVG, fox: petFoxSVG };
+
+    function buildPetSVG(petIdx, mood) {
+        const pet = petStateCache ? petStateCache.pets[petIdx] : null;
+        const stage = pet ? petStageOf(pet.level) : 0;
+        const svg = PET_RENDERERS[PET_DEFS[petIdx].id](stage);
+        return mood < 30 ? svg.replace('<svg ', '<svg class="re-pet-sad" ') : svg;
+    }
+
+    /* ---------- 经验系统 ---------- */
+    function gainPetExp(ruleKey, label) {
+        if (!petStateCache) return; // 状态未加载完成时不喂（面板打开必先走 petDailySign 加载）
+        const st = petStateCache;
+        const today = new Date().toISOString().split('T')[0];
+        if (st.daily.date !== today) st.daily = { date: today, exp: 0, signed: false };
+        const amount = PET_EXP_RULES[ruleKey] || 0;
+        if (!amount) return;
+        const pet = st.pets[st.activePet];
+        if (!pet || !pet.unlocked) return;
+
+        if (st.daily.exp >= PET_DAILY_CAP) {
+            petLog(`${label}（今日经验已满 ${PET_DAILY_CAP}，只记账不涨）`);
+            savePetState();
+            return;
+        }
+        const gain = Math.min(amount, PET_DAILY_CAP - st.daily.exp);
+        st.daily.exp += gain;
+        pet.exp += gain;
+        pet.totalExp += gain;
+        pet.feedCount += 1;
+        pet.lastFeed = Date.now();
+        petLog(`${label} +${gain}`);
+        petFloatCelebrate(gain); // 桌面浮层蹦跳 + 经验气泡
+
+        // 升级循环（一次可能连升多级，Toast 合并为一条）
+        const def = PET_DEFS[st.activePet];
+        const msgs = [];
+        while (pet.level < PET_MAX_LEVEL && pet.exp >= petExpNeeded(pet.level)) {
+            pet.exp -= petExpNeeded(pet.level);
+            pet.level += 1;
+            const evolved = petStageOf(pet.level) > petStageOf(pet.level - 1);
+            if (evolved) msgs.push(`进化为「${def.stages[petStageOf(pet.level)]}」`);
+        }
+        if (pet.level >= PET_MAX_LEVEL) {
+            pet.exp = 0;
+            const nextIdx = st.activePet + 1;
+            if (nextIdx < st.pets.length && !st.pets[nextIdx].unlocked) {
+                st.pets[nextIdx].unlocked = true;
+                msgs.push(`已满级！解锁新伙伴：${PET_DEFS[nextIdx].name}`);
+            } else if (msgs.length === 0) {
+                msgs.push('已满级');
+            }
+        }
+        if (msgs.length) {
+            showSuccessToast(`${def.name} Lv${pet.level} ${msgs.join('，')}`);
+            petCelebrate();
+            refreshPetFloat(); // 进化后浮层形象同步换新
+        }
+        savePetState();
+        if (isPetPageVisible()) renderPetPage();
+    }
+
+    // 升级/进化庆祝：经验条闪光 + 彩带粒子（transform/opacity 动画，GPU 合成零重绘）
+    function petCelebrate() {
+        const box = document.getElementById('re-pet-stage-box');
+        const fill = document.getElementById('re-pet-exp-fill');
+        if (fill) {
+            fill.classList.remove('re-pet-exp-flash');
+            void fill.offsetWidth; // 强制重排以重启动画
+            fill.classList.add('re-pet-exp-flash');
+            setTimeout(() => fill.classList.remove('re-pet-exp-flash'), 1300);
+        }
+        if (!box) return;
+        const colors = ['#E9BC4F', '#E8B478', '#7FBFA8', '#9DB4C9', '#E8946A', '#D97B6C'];
+        for (let i = 0; i < 14; i++) {
+            const c = document.createElement('span');
+            c.className = 're-pet-confetti';
+            const ang = Math.random() * Math.PI * 2;
+            const dist = 55 + Math.random() * 60;
+            c.style.setProperty('--re-cx', `${Math.cos(ang) * dist}px`);
+            c.style.setProperty('--re-cy', `${Math.sin(ang) * dist - 30}px`);
+            c.style.setProperty('--re-cr', `${Math.floor(Math.random() * 540 - 270)}deg`);
+            c.style.background = colors[i % colors.length];
+            c.style.animationDelay = `${Math.random() * 0.15}s`;
+            box.appendChild(c);
+            setTimeout(() => c.remove(), 1100);
+        }
+    }
+
+    // 每日签到：面板打开时加载宠物状态并 +1（每天一次）；若宠物在外则恢复桌面浮层
+    function petDailySign() {
+        loadPetState().then(st => {
+            petStateCache = st;
+            mountPetFloat();
+            const today = new Date().toISOString().split('T')[0];
+            if (st.daily.date === today && st.daily.signed) return;
+            gainPetExp('dailySign', '每日签到');
+            st.daily.signed = true;
+            savePetState();
+            if (isPetPageVisible()) renderPetPage();
+        });
+    }
+
+    /* ---------- 养成页渲染 ---------- */
+    function renderPetPage() {
+        if (!petStateCache) return;
+        const st = petStateCache;
+        const idx = st.activePet;
+        const def = PET_DEFS[idx];
+        const pet = st.pets[idx];
+        const mood = petMoodOf(pet);
+        const stage = petStageOf(pet.level);
+
+        const tabsEl = document.getElementById('re-pet-tabs');
+        if (tabsEl) {
+            tabsEl.innerHTML = PET_DEFS.map((d, i) => {
+                const p = st.pets[i];
+                if (!p.unlocked) {
+                    return `<div class="re-pet-tab" style="cursor:not-allowed;opacity:.55;">${d.name}<span class="re-pet-tab-lock">未解锁 · 养满${PET_DEFS[i - 1].name}</span></div>`;
+                }
+                return `<div class="re-pet-tab ${i === idx ? 'active' : ''}" data-pet="${i}">${d.name}<span class="re-pet-tab-lv">Lv${p.level}</span></div>`;
+            }).join('');
+        }
+
+        const stageEl = document.getElementById('re-pet-stage');
+        const stageBoxEl = document.getElementById('re-pet-stage-box');
+        if (stageEl) {
+            if (st.float.active) {
+                // 外出中：展示区显示空窝提示（真身在 body 浮层上）
+                if (stageBoxEl) stageBoxEl.classList.add('re-pet-away');
+                stageEl.innerHTML = `<div class="re-pet-away-hint">
+                    <svg viewBox="0 0 120 70" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 62 Q36 40 60 48 Q84 40 106 62"/><path d="M18 62 L102 62"/><path d="M30 60 Q40 52 52 56" opacity=".6"/></svg>
+                    <span>${def.name}在桌面上溜达（双击桌面上的它可收回）</span>
+                </div>`;
+            } else {
+                if (stageBoxEl) stageBoxEl.classList.remove('re-pet-away');
+                stageEl.innerHTML = buildPetSVG(idx, mood);
+            }
+        }
+
+        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        setText('re-pet-name', def.name);
+        setText('re-pet-line', def.line);
+        setText('re-pet-stage-name', `形态：${def.stages[stage]}`);
+        setText('re-pet-level', pet.level >= PET_MAX_LEVEL ? 'Lv MAX' : `Lv ${pet.level}`);
+        setText('re-pet-mood', `心情 ${mood} · ${petMoodText(mood)}`);
+        setText('re-pet-exp-text', pet.level >= PET_MAX_LEVEL ? 'MAX' : `${pet.exp} / ${petExpNeeded(pet.level)}`);
+        const fillEl = document.getElementById('re-pet-exp-fill');
+        if (fillEl) fillEl.style.width = pet.level >= PET_MAX_LEVEL ? '100%' : `${Math.min(100, Math.floor(pet.exp / petExpNeeded(pet.level) * 100))}%`;
+        setText('re-pet-today-exp', `${st.daily.exp} / ${PET_DAILY_CAP}`);
+        setText('re-pet-total-exp', pet.totalExp);
+        setText('re-pet-feed-count', pet.feedCount);
+
+        const hintEl = document.getElementById('re-pet-hint');
+        if (hintEl) {
+            const nextIdx = idx + 1;
+            hintEl.textContent = nextIdx < PET_DEFS.length && !st.pets[nextIdx].unlocked
+                ? `养满 ${def.name}（Lv${PET_MAX_LEVEL}）解锁下一只：${PET_DEFS[nextIdx].name} · 今日经验上限 ${PET_DAILY_CAP}`
+                : `办单即喂养：分配+3 · 客服备注+5 · 风控备注+5 · 自动处理+7 · 历史+2 · 今日上限 ${PET_DAILY_CAP}`;
+        }
+
+        const logEl = document.getElementById('re-pet-log');
+        if (logEl) {
+            logEl.innerHTML = st.log.length === 0
+                ? `<div class="re-pet-log-item"><span class="re-pet-log-text">还没有喂养记录，去办一单试试</span><span class="re-pet-log-time"></span></div>`
+                : st.log.map(item => {
+                    const d = new Date(item.t);
+                    const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    const md = `${d.getMonth() + 1}-${d.getDate()}`;
+                    return `<div class="re-pet-log-item"><span class="re-pet-log-text">${item.text}</span><span class="re-pet-log-time">${md} ${hm}</span></div>`;
+                  }).join('');
+        }
+    }
+
+    /* ---------- 浮层宠物：拖出面板后挂在 body 上（fixed 避开面板 transform 祖先） ---------- */
+    function getPetFloatEl() { return document.getElementById('re-pet-float'); }
+
+    function petFloatTipText() {
+        if (!petStateCache) return '';
+        const idx = petStateCache.activePet;
+        const def = PET_DEFS[idx];
+        const pet = petStateCache.pets[idx];
+        const mood = petMoodOf(pet);
+        return `${def.name} · Lv${pet.level >= PET_MAX_LEVEL ? 'MAX' : pet.level} · ${petMoodText(mood)} · 双击收回`;
+    }
+
+    function mountPetFloat() {
+        if (!petStateCache || !petStateCache.float.active) return;
+        let el = getPetFloatEl();
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 're-pet-float';
+            el.innerHTML = '<div class="re-pet-float-inner"></div><span class="re-pet-float-bubble"></span><span class="re-pet-float-tip"></span>';
+            document.body.appendChild(el);
+            bindPetFloatDrag(el);
+            el.addEventListener('dblclick', function() {
+                petRecallFloat(true);
+            });
+        }
+        refreshPetFloat();
+    }
+
+    function refreshPetFloat() {
+        const el = getPetFloatEl();
+        if (!el || !petStateCache) return;
+        const f = petStateCache.float;
+        const idx = petStateCache.activePet;
+        const pet = petStateCache.pets[idx];
+        el.style.left = `${Math.max(0, Math.min(f.x, window.innerWidth - 120))}px`;
+        el.style.top = `${Math.max(0, Math.min(f.y, window.innerHeight - 120))}px`;
+        el.querySelector('.re-pet-float-inner').innerHTML = buildPetSVG(idx, petMoodOf(pet));
+        el.classList.toggle('re-pet-float-sad', petMoodOf(pet) < 30);
+        el.querySelector('.re-pet-float-tip').textContent = petFloatTipText();
+    }
+
+    function unmountPetFloat() {
+        const el = getPetFloatEl();
+        if (el) el.remove();
+    }
+
+    function petRecallFloat(withToast) {
+        if (!petStateCache) return;
+        petStateCache.float.active = false;
+        savePetState();
+        unmountPetFloat();
+        if (withToast) showSuccessToast('宠物已收回面板');
+        if (isPetPageVisible()) renderPetPage();
+    }
+
+    function petFloatCelebrate(gain) {
+        const el = getPetFloatEl();
+        if (!el) return;
+        const bubble = el.querySelector('.re-pet-float-bubble');
+        if (bubble) bubble.textContent = `+${gain}`;
+        el.classList.remove('re-pet-float-hop');
+        void el.offsetWidth; // 强制重排以重启动画
+        el.classList.add('re-pet-float-hop');
+        setTimeout(() => el.classList.remove('re-pet-float-hop'), 1200);
+    }
+
+    let petFloatDragging = false;
+
+    function bindPetFloatDrag(el) {
+        el.addEventListener('mousedown', function(e) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            petFloatDragging = true;
+            el.classList.add('re-pet-float-dragging');
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const rect = el.getBoundingClientRect();
+            const originX = rect.left;
+            const originY = rect.top;
+
+            function onMove(ev) {
+                if (!petFloatDragging) return;
+                const nx = Math.max(0, Math.min(originX + ev.clientX - startX, window.innerWidth - 120));
+                const ny = Math.max(0, Math.min(originY + ev.clientY - startY, window.innerHeight - 120));
+                el.style.left = `${nx}px`;
+                el.style.top = `${ny}px`;
+            }
+            function onUp() {
+                petFloatDragging = false;
+                el.classList.remove('re-pet-float-dragging');
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                if (petStateCache) {
+                    petStateCache.float.x = parseFloat(el.style.left) || 24;
+                    petStateCache.float.y = parseFloat(el.style.top) || 24;
+                    savePetState();
+                }
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    /* 从养成页展示区拖出：按住宠物移动超过阈值即带出，松手落位为 body 浮层 */
+    function bindPetStageCarry() {
+        const box = document.getElementById('re-pet-stage-box');
+        if (!box) return;
+        box.addEventListener('mousedown', function(e) {
+            if (e.button !== 0 || !petStateCache || petStateCache.float.active) return;
+            e.preventDefault();
+            const startX = e.clientX;
+            const startY = e.clientY;
+            let carrying = false;
+            let ghost = null;
+
+            function onMove(ev) {
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                if (!carrying && Math.hypot(dx, dy) > 14) {
+                    carrying = true;
+                    ghost = document.createElement('div');
+                    ghost.id = 're-pet-carry';
+                    document.body.appendChild(ghost);
+                    document.body.style.userSelect = 'none';
+                }
+                if (carrying && ghost) {
+                    ghost.style.left = `${ev.clientX - 48}px`;
+                    ghost.style.top = `${ev.clientY - 48}px`;
+                }
+            }
+            function onUp(ev) {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                document.body.style.userSelect = '';
+                if (ghost) ghost.remove();
+                if (!carrying || !petStateCache) return;
+                // 拖出面板：落位为浮层（视口内 clamp）
+                petStateCache.float.active = true;
+                petStateCache.float.x = Math.max(0, Math.min(ev.clientX - 48, window.innerWidth - 120));
+                petStateCache.float.y = Math.max(0, Math.min(ev.clientY - 48, window.innerHeight - 120));
+                petLog('宠物外出（拖出面板）');
+                savePetState();
+                mountPetFloat();
+                renderPetPage();
+                showSuccessToast('宠物已带到桌面，双击可收回');
+            }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    }
+
+    function initPetPage() {
+        bindPetStageCarry();
+        const tabsEl = document.getElementById('re-pet-tabs');
+        if (tabsEl) {
+            tabsEl.addEventListener('click', function(e) {
+                const tab = e.target.closest('.re-pet-tab[data-pet]');
+                if (!tab || !petStateCache) return;
+                const i = parseInt(tab.getAttribute('data-pet'), 10);
+                if (!petStateCache.pets[i].unlocked) {
+                    showErrorToast(`养满 ${PET_DEFS[i - 1].name}（Lv${PET_MAX_LEVEL}）后解锁`);
+                    return;
+                }
+                petStateCache.activePet = i;
+                petLog(`切换主养：${PET_DEFS[i].name}`);
+                savePetState();
+                renderPetPage();
+                refreshPetFloat(); // 浮层跟随切换主养换形象
+            });
+        }
     }
 
     function getAppearanceSettings() {
@@ -12815,6 +13879,8 @@
     applySwitchColor();
     applyAppearanceFlags();
     renderWorkflowPreview(); // 工作流条常驻：启动即展示自动处理将执行的节点链
+    // 页面加载即恢复桌面宠物（若上次拖出过）；签到经验仍等面板打开时算
+    loadPetState().then(st => { petStateCache = st; mountPetFloat(); });
 
     function initAnalysisEvents() {
         // 趋势图范围切换（近7天/近14天/本月/上月），机型图联动同一范围
