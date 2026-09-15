@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.4.1
+// @version      6.4.5
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,10 +138,13 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.4.1</span>
+                    <span class="re-panel-version">V6.4.5</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
-                <span class="re-panel-staff" id="re-staff-name"></span>
+                <div class="re-panel-header-right">
+                    <span class="re-panel-points" id="re-panel-points" title="宠物点数（审核机型每日结算）"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="8" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="17" cy="8" r="2"/><path d="M12 11c-3 0-5.5 2.2-5.5 4.4 0 1.5 1.2 2.6 2.8 2.6 1 0 1.7-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1.1 2.8-2.6C17.5 13.2 15 11 12 11z"/></svg><span id="re-panel-points-num">0.0</span></span>
+                    <span class="re-panel-staff" id="re-staff-name"></span>
+                </div>
             </div>
             <div class="re-panel-resize-handle"></div>
             <div class="re-drag-ghost">
@@ -797,11 +800,44 @@
                                             <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-total-exp">0</span><label class="re-pet-stat-l">累计经验</label></div>
                                             <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-feed-count">0</span><label class="re-pet-stat-l">喂养次数</label></div>
                                         </div>
-                                        <div class="re-pet-hint" id="re-pet-hint">办单即喂养：客服分配 +3 · 客服备注 +5 · 风控备注 +5 · 自动处理完成 +7 · 记录历史 +2</div>
+                                        <div class="re-pet-hint" id="re-pet-hint">办单即喂养：分配+2 · 客服备注+3 · 风控备注+3 · 自动处理+5 · 历史+2 · 一单全自动共+15 · 单日无上限</div>
                                     </div>
                                 </div>
-                                <div class="re-pet-log-title">喂养日志</div>
-                                <div class="re-pet-log" id="re-pet-log"></div>
+                                <div class="re-pet-bottom">
+                                    <div class="re-pet-log-col">
+                                        <div class="re-pet-log-title">喂养日志</div>
+                                        <div class="re-pet-log" id="re-pet-log"></div>
+                                    </div>
+                                    <div class="re-pet-shop-col">
+                                        <div class="re-pet-shop-head">
+                                            <span class="re-pet-shop-title">宠物道具</span>
+                                            <span class="re-pet-points" id="re-pet-points">点数 0.0</span>
+                                        </div>
+                                        <div class="re-pet-shop" id="re-pet-shop">
+                                            <div class="re-pet-item">
+                                                <div class="re-pet-item-name-row">
+                                                    <span class="re-pet-item-name">倍数丸</span>
+                                                    <span class="re-pet-item-tag" id="re-pet-double-tag" style="display:none;">生效中</span>
+                                                </div>
+                                                <div class="re-pet-item-desc">当日获得经验 ×2</div>
+                                                <div class="re-pet-item-foot">
+                                                    <span class="re-pet-item-price">40 点</span>
+                                                    <button class="re-pet-item-btn" data-item="doublePill" id="re-pet-double-btn">购买</button>
+                                                </div>
+                                            </div>
+                                            <div class="re-pet-item">
+                                                <div class="re-pet-item-name-row">
+                                                    <span class="re-pet-item-name">直升丸</span>
+                                                </div>
+                                                <div class="re-pet-item-desc">直接升 1 级</div>
+                                                <div class="re-pet-item-foot">
+                                                    <span class="re-pet-item-price">500 点</span>
+                                                    <button class="re-pet-item-btn" data-item="levelPill" id="re-pet-level-btn">购买</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1139,10 +1175,31 @@
             white-space: nowrap;
         }
 
+        .re-panel-header-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto; /* 右组整体贴右，点数徽章紧贴客服名左侧 */
+        }
+        /* 宠物点数徽章：深灰主题（V6.4.4） */
+        .re-panel-points {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(24, 24, 27, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #d4d4d8;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+        .re-panel-points svg { flex-shrink: 0; opacity: 0.85; }
+
         .re-panel-staff {
             font-size: 12px;
             color: var(--re-header-text, rgba(255, 255, 255, 0.85));
-            margin-left: auto;
             padding-right: 16px;
         }
 
@@ -5788,6 +5845,83 @@
         }
         .re-pet-log-item .re-pet-log-text { color: #4b5563; }
         .re-pet-log-item .re-pet-log-time { color: #9ca3af; flex-shrink: 0; font-size: 11px; }
+        /* 喂养日志（左）+ 宠物道具（右）左右结构（V6.4.5） */
+        .re-pet-bottom {
+            flex: 1 1 auto;
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            min-height: 0;
+        }
+        .re-pet-log-col {
+            flex: 1 1 58%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .re-pet-shop-col {
+            flex: 1 1 42%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 宠物道具区（V6.4.3：点数商店；V6.4.5 两道具一行横排） */
+        .re-pet-shop-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .re-pet-shop-title { font-size: 12px; font-weight: 600; color: #6b7280; }
+        .re-pet-points { font-size: 12px; font-weight: 700; color: #d97706; }
+        .re-pet-shop {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .re-pet-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            border: 1px solid rgba(107, 114, 128, 0.15);
+        }
+        .re-pet-item-name-row { display: flex; align-items: center; justify-content: space-between; }
+        .re-pet-item-name { font-size: 13px; font-weight: 700; color: #1f2937; }
+        .re-pet-item-tag {
+            font-size: 10px;
+            padding: 1px 8px;
+            border-radius: 999px;
+            background: rgba(233, 188, 79, 0.25);
+            color: #b45309;
+            border: 1px solid rgba(185, 143, 46, 0.4);
+        }
+        .re-pet-item-desc { font-size: 11px; color: #9ca3af; line-height: 1.5; }
+        .re-pet-item-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+        }
+        .re-pet-item-price { font-size: 12px; font-weight: 600; color: #d97706; }
+        .re-pet-item-btn {
+            padding: 3px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .re-pet-item-btn:hover { background: rgba(59, 130, 246, 0.2); }
+        .re-pet-item-btn:disabled {
+            cursor: not-allowed;
+            border-color: rgba(107, 114, 128, 0.25);
+            background: rgba(107, 114, 128, 0.08);
+            color: #9ca3af;
+        }
         /* 升级彩带粒子：仅动画 transform/opacity（GPU 合成，零重绘） */
         .re-pet-confetti {
             position: absolute;
@@ -5806,6 +5940,8 @@
         @media (max-width: 1100px) {
             .re-pet-main { flex-direction: column; }
             .re-pet-stage-box { width: 100%; height: 190px; }
+            .re-pet-bottom { flex-direction: column; }
+            .re-pet-log { max-height: 220px; flex: none; }
         }
         /* 浮层宠物（拖出面板后挂在 body 上，z-index 低于主面板一档可被面板覆盖） */
         #re-pet-float {
@@ -12264,6 +12400,7 @@
 
                                 saveHistoryRecord(record).then(() => {
                                     gainPetExp('history', '记录历史');
+                                    addPetModelPoints(record.model); // 宠物点数：按审核机型计点，次日结算
                                     setWorkflowNode('history', 'done', '已记录');
                                     renderHistoryRecords();
                                 }).catch(err => {
@@ -12545,12 +12682,12 @@
 
     /* ===================== 养成模块（V6.4.0）=====================
        五只纸绘伙伴（猫/狗/龙/机器人/狐狸）；养满一只（Lv50）解锁下一只，
-       已解锁可自由切换主养；经验只挂真实成功节点，每日上限 200 防刷。
+       已解锁可自由切换主养；经验只挂真实成功节点，单日无上限多劳多得，
+       一单全自动处理合计 +15（分配2+客服备注3+风控备注3+完成奖励5+历史2）。
        性能约束：升级彩带仅动画 transform/opacity（GPU 合成），不碰 box-shadow。 */
     const PET_DB_NAME = 'VideoReviewPetDB';
     const PET_STORE_NAME = 'petState';
     const PET_MAX_LEVEL = 50;
-    const PET_DAILY_CAP = 200;
 
     const PET_DEFS = [
         { id: 'cat',    name: '小猫',     line: '招财线', stages: ['纸蛋', '破壳崽', '小学徒', '打工猫', '招财完全体'] },
@@ -12560,7 +12697,7 @@
         { id: 'fox',    name: '小狐狸',   line: '慧眼线', stages: ['纸蛋', '小狐狸', '机灵狐', '掌柜狐', '九尾完全体'] }
     ];
 
-    const PET_EXP_RULES = { assign: 3, staffRemark: 5, riskRemark: 5, autoBonus: 7, history: 2, dailySign: 1 };
+    const PET_EXP_RULES = { assign: 2, staffRemark: 3, riskRemark: 3, autoBonus: 5, history: 2, dailySign: 1 };
 
     let petStateCache = null;
 
@@ -12570,6 +12707,9 @@
             pets: PET_DEFS.map((_, i) => ({ level: 1, exp: 0, unlocked: i === 0, lastFeed: 0, totalExp: 0, feedCount: 0 })),
             daily: { date: '', exp: 0, signed: false },
             float: { active: false, x: 24, y: 24 },
+            points: 0,          // 可用宠物点数（审核机型日结而来）
+            pendingPoints: 0,   // 今日待结算点数（次日入账）
+            doubleDate: '',     // 倍数丸生效日（当日有效）
             log: []
         };
     }
@@ -12603,6 +12743,9 @@
                             PET_DEFS.forEach((_, i) => { Object.assign(def.pets[i], savedPets[i] || {}); });
                             def.daily = Object.assign(def.daily, saved.daily || {});
                             def.float = Object.assign(def.float, saved.float || {});
+                            def.points = typeof saved.points === 'number' ? saved.points : 0;
+                            def.pendingPoints = typeof saved.pendingPoints === 'number' ? saved.pendingPoints : 0;
+                            def.doubleDate = saved.doubleDate || '';
                             def.log = Array.isArray(saved.log) ? saved.log : [];
                         }
                         resolve(def);
@@ -12958,29 +13101,135 @@
         return mood < 30 ? svg.replace('<svg ', '<svg class="re-pet-sad" ') : svg;
     }
 
+    /* ---------- 宠物点数（V6.4.3）：按审核机型计点，每日结算入账 ---------- */
+    // 机型点数规则：提取机型文本首个 1-2 位数字 ÷ 10（苹果17→1.7、苹果16→1.6，依次类推），无数字默认 1.0
+    function petModelPoints(modelText) {
+        const m = String(modelText || '').match(/(\d{1,2})/);
+        if (!m) return 1;
+        const n = parseInt(m[1], 10);
+        return (n >= 1 && n <= 30) ? n / 10 : 1;
+    }
+
+    // 审核一单（记录历史成功）即累计待结算点数，次日日切时入账
+    function addPetModelPoints(modelText) {
+        if (!petStateCache) return;
+        const st = petStateCache;
+        const today = new Date().toISOString().split('T')[0];
+        if (st.daily.date !== today) {
+            settlePetPoints();
+            st.daily = { date: today, exp: 0, signed: false };
+        }
+        const pts = petModelPoints(modelText);
+        st.pendingPoints = Math.round((st.pendingPoints + pts) * 10) / 10;
+        petLog(`审核机型「${modelText}」点数 +${pts.toFixed(1)}（待结算）`);
+        savePetState();
+        if (isPetPageVisible()) renderPetPage();
+    }
+
+    // 每日结算：昨日待结算点数转为可用余额
+    function settlePetPoints() {
+        if (!petStateCache) return;
+        const st = petStateCache;
+        if (st.pendingPoints > 0) {
+            st.points = Math.round((st.points + st.pendingPoints) * 10) / 10;
+            petLog(`昨日审核点数结算 +${st.pendingPoints.toFixed(1)}（余额 ${st.points.toFixed(1)}）`);
+            st.pendingPoints = 0;
+            updatePetPointsBadge();
+        }
+    }
+
+    // 标题栏客服名左侧的点数徽章（深灰主题）刷新
+    function updatePetPointsBadge() {
+        const numEl = document.getElementById('re-panel-points-num');
+        if (!numEl) return;
+        numEl.textContent = petStateCache ? petStateCache.points.toFixed(1) : '0.0';
+    }
+
+    /* ---------- 宠物道具（V6.4.3）：点数商店 ---------- */
+    const PET_ITEMS = {
+        doublePill: { name: '倍数丸', price: 40, desc: '当日所有获得经验×2' },
+        levelPill:  { name: '直升丸', price: 500, desc: '直接升1级' }
+    };
+
+    function buyPetItem(itemId) {
+        if (!petStateCache) return;
+        const st = petStateCache;
+        const item = PET_ITEMS[itemId];
+        if (!item) return;
+        const pet = st.pets[st.activePet];
+        if (!pet || !pet.unlocked) return;
+        const today = new Date().toISOString().split('T')[0];
+
+        if (st.points < item.price) {
+            showErrorToast(`宠物点数不足（余额 ${st.points.toFixed(1)}，需 ${item.price}）`);
+            return;
+        }
+
+        if (itemId === 'doublePill') {
+            if (st.doubleDate === today) {
+                showErrorToast('倍数丸今日已生效，无需重复购买');
+                return;
+            }
+            st.points = Math.round((st.points - item.price) * 10) / 10;
+            st.doubleDate = today;
+            petLog(`使用道具：倍数丸（-${item.price}点，今日经验×2）`);
+            showSuccessToast('倍数丸已生效：今日所有获得经验×2');
+        } else if (itemId === 'levelPill') {
+            if (pet.level >= PET_MAX_LEVEL) {
+                showErrorToast('当前伙伴已满级，无需直升丸');
+                return;
+            }
+            st.points = Math.round((st.points - item.price) * 10) / 10;
+            pet.level += 1;
+            petLog(`使用道具：直升丸（-${item.price}点，升至 Lv${pet.level}）`);
+            // 升级可能触发进化 / 满级解锁下一只
+            const def = PET_DEFS[st.activePet];
+            const msgs = [];
+            if (petStageOf(pet.level) > petStageOf(pet.level - 1)) {
+                msgs.push(`进化为「${def.stages[petStageOf(pet.level)]}」`);
+            }
+            if (pet.level >= PET_MAX_LEVEL) {
+                pet.exp = 0;
+                const nextIdx = st.activePet + 1;
+                if (nextIdx < st.pets.length && !st.pets[nextIdx].unlocked) {
+                    st.pets[nextIdx].unlocked = true;
+                    msgs.push(`已满级！解锁新伙伴：${PET_DEFS[nextIdx].name}`);
+                } else if (!msgs.length) {
+                    msgs.push('已满级');
+                }
+            }
+            showSuccessToast(`${def.name} ${msgs.length ? msgs.join('，') : `升级！Lv${pet.level}`}`);
+            petCelebrate();
+            refreshPetFloat();
+        }
+        updatePetPointsBadge(); // 扣点后刷新标题栏徽章
+        savePetState();
+        renderPetPage();
+    }
+
     /* ---------- 经验系统 ---------- */
     function gainPetExp(ruleKey, label) {
         if (!petStateCache) return; // 状态未加载完成时不喂（面板打开必先走 petDailySign 加载）
         const st = petStateCache;
         const today = new Date().toISOString().split('T')[0];
-        if (st.daily.date !== today) st.daily = { date: today, exp: 0, signed: false };
+        if (st.daily.date !== today) {
+            settlePetPoints(); // 跨天先结算昨日审核点数
+            st.daily = { date: today, exp: 0, signed: false };
+        }
         const amount = PET_EXP_RULES[ruleKey] || 0;
         if (!amount) return;
         const pet = st.pets[st.activePet];
         if (!pet || !pet.unlocked) return;
 
-        if (st.daily.exp >= PET_DAILY_CAP) {
-            petLog(`${label}（今日经验已满 ${PET_DAILY_CAP}，只记账不涨）`);
-            savePetState();
-            return;
-        }
-        const gain = Math.min(amount, PET_DAILY_CAP - st.daily.exp);
+        // 单日无上限：多劳多得（今日经验仅作统计展示）；倍数丸当日经验×2
+        const doubled = st.doubleDate === today;
+        const gain = doubled ? amount * 2 : amount;
         st.daily.exp += gain;
         pet.exp += gain;
         pet.totalExp += gain;
         pet.feedCount += 1;
         pet.lastFeed = Date.now();
-        petLog(`${label} +${gain}`);
+        petLog(`${label} +${gain}${doubled ? '（倍数丸×2）' : ''}`);
         petFloatCelebrate(gain); // 桌面浮层蹦跳 + 经验气泡
 
         // 升级循环（一次可能连升多级，Toast 合并为一条）
@@ -13043,6 +13292,7 @@
         loadPetState().then(st => {
             petStateCache = st;
             mountPetFloat();
+            updatePetPointsBadge();
             const today = new Date().toISOString().split('T')[0];
             if (st.daily.date === today && st.daily.signed) return;
             gainPetExp('dailySign', '每日签到');
@@ -13098,16 +13348,33 @@
         setText('re-pet-exp-text', pet.level >= PET_MAX_LEVEL ? 'MAX' : `${pet.exp} / ${petExpNeeded(pet.level)}`);
         const fillEl = document.getElementById('re-pet-exp-fill');
         if (fillEl) fillEl.style.width = pet.level >= PET_MAX_LEVEL ? '100%' : `${Math.min(100, Math.floor(pet.exp / petExpNeeded(pet.level) * 100))}%`;
-        setText('re-pet-today-exp', `${st.daily.exp} / ${PET_DAILY_CAP}`);
+        setText('re-pet-today-exp', `${st.daily.exp}`);
         setText('re-pet-total-exp', pet.totalExp);
         setText('re-pet-feed-count', pet.feedCount);
+        setText('re-pet-points', `点数 ${st.points.toFixed(1)}${st.pendingPoints > 0 ? `（待结算 ${st.pendingPoints.toFixed(1)}）` : ''}`);
+
+        // 道具状态：倍数丸生效标记/按钮态、直升丸满级禁用
+        const doubleActive = st.doubleDate === new Date().toISOString().split('T')[0];
+        const doubleTag = document.getElementById('re-pet-double-tag');
+        const doubleBtn = document.getElementById('re-pet-double-btn');
+        const levelBtn = document.getElementById('re-pet-level-btn');
+        if (doubleTag) doubleTag.style.display = doubleActive ? '' : 'none';
+        if (doubleBtn) {
+            doubleBtn.disabled = doubleActive;
+            doubleBtn.textContent = doubleActive ? '生效中' : '购买';
+        }
+        if (levelBtn) {
+            const maxed = pet.level >= PET_MAX_LEVEL;
+            levelBtn.disabled = maxed;
+            levelBtn.textContent = maxed ? '已满级' : '购买';
+        }
 
         const hintEl = document.getElementById('re-pet-hint');
         if (hintEl) {
             const nextIdx = idx + 1;
             hintEl.textContent = nextIdx < PET_DEFS.length && !st.pets[nextIdx].unlocked
-                ? `养满 ${def.name}（Lv${PET_MAX_LEVEL}）解锁下一只：${PET_DEFS[nextIdx].name} · 今日经验上限 ${PET_DAILY_CAP}`
-                : `办单即喂养：分配+3 · 客服备注+5 · 风控备注+5 · 自动处理+7 · 历史+2 · 今日上限 ${PET_DAILY_CAP}`;
+                ? `养满 ${def.name}（Lv${PET_MAX_LEVEL}）解锁下一只：${PET_DEFS[nextIdx].name} · 单日经验无上限`
+                : `办单即喂养：分配+2 · 客服备注+3 · 风控备注+3 · 自动处理+5 · 历史+2 · 一单全自动共+15 · 单日无上限`;
         }
 
         const logEl = document.getElementById('re-pet-log');
@@ -13292,6 +13559,16 @@
                 savePetState();
                 renderPetPage();
                 refreshPetFloat(); // 浮层跟随切换主养换形象
+            });
+        }
+
+        // 道具购买（事件委托）
+        const shopEl = document.getElementById('re-pet-shop');
+        if (shopEl) {
+            shopEl.addEventListener('click', function(e) {
+                const btn = e.target.closest('.re-pet-item-btn');
+                if (!btn || btn.disabled) return;
+                buyPetItem(btn.getAttribute('data-item'));
             });
         }
     }
@@ -13884,7 +14161,7 @@
     applyAppearanceFlags();
     renderWorkflowPreview(); // 工作流条常驻：启动即展示自动处理将执行的节点链
     // 页面加载即恢复桌面宠物（若上次拖出过）；签到经验仍等面板打开时算
-    loadPetState().then(st => { petStateCache = st; mountPetFloat(); });
+    loadPetState().then(st => { petStateCache = st; mountPetFloat(); updatePetPointsBadge(); });
 
     function initAnalysisEvents() {
         // 趋势图范围切换（近7天/近14天/本月/上月），机型图联动同一范围
