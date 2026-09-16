@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.4.5
+// @version      6.4.8
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.4.5</span>
+                    <span class="re-panel-version">V6.4.8</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <div class="re-panel-header-right">
@@ -12819,12 +12819,6 @@
         return `${eye}<ellipse cx="${hx-15}" cy="${hy+6}" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="${hx+15}" cy="${hy+6}" rx="3.6" ry="2.2" fill="${P.blush}"/>${mouth}`;
     }
 
-    // 蛋壳帽：破壳阶段头顶的半片蛋壳
-    function petShellHat(hx, hy, w) {
-        const P = PET_PAL;
-        return `<path d="M${hx-w} ${hy} q${w*0.5} -26 ${w*2} 0 q-${w*0.6} 6 -${w*2} 0 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/><path d="M${hx-w+6} ${hy-9} l2 4 M${hx+2} ${hy-13} l2 4 M${hx+w-2} ${hy-8} l2 4" stroke="${P.ink}" stroke-width="1.4" stroke-linecap="round"/>`;
-    }
-
     // 蛋阶段：五只共享蛋形 + 各自花纹
     function petEggSVG(petId) {
         const P = PET_PAL;
@@ -12844,13 +12838,26 @@
         const P = PET_PAL, C = P.cat;
         if (stage === 0) return petEggSVG('cat');
         if (stage === 1) return petSvgWrap(`
-            <path d="M46 68 L36 46 L58 56 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M114 68 L124 46 L102 56 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M48 65 L42 53 L55 59 Z" fill="${C}"/><path d="M112 65 L118 53 L105 59 Z" fill="${C}"/>
-            <path d="M80 52 C 92 52 100 61 100 72 C 100 83 91 90 80 90 C 69 90 60 83 60 72 C 60 61 68 52 80 52 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petShellHat(68, 46, 14)}
-            <path d="M64 96 C 74 92 86 92 96 96 L 96 108 C 86 112 74 112 64 108 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 72, {})}
-            <path d="M96 104 q14 -3 11 -17" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/>`);
+            <path d="M102 116 q17 -6 12 -23" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
+            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M56 54 L44 34 L70 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M104 54 L116 34 L90 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M58 50 L52 39 L66 45 Z" fill="${C}"/><path d="M102 50 L108 39 L94 45 Z" fill="${C}"/>
+            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <g transform="rotate(-5 80 38)">
+                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/>
+            <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
+            <ellipse cx="59" cy="71" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="101" cy="71" rx="4" ry="2.4" fill="${P.blush}"/>
+            <path d="M75 71 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M78 73.5 q2 2.5 4 0 z" fill="${P.red}"/>
+            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
         if (stage === 2) return petSvgWrap(`
             <path d="M52 60 L40 32 L66 46 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M108 60 L120 32 L94 46 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
             <path d="M55 55 L48 38 L62 47 Z" fill="${C}"/><path d="M105 55 L112 38 L98 47 Z" fill="${C}"/>
@@ -12890,12 +12897,27 @@
         const P = PET_PAL, C = P.dog;
         if (stage === 0) return petEggSVG('dog');
         if (stage === 1) return petSvgWrap(`
-            <ellipse cx="62" cy="58" rx="9" ry="13" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(18 62 58)"/><ellipse cx="98" cy="58" rx="9" ry="13" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-18 98 58)"/>
-            <path d="M80 52 C 92 52 100 61 100 72 C 100 83 91 90 80 90 C 69 90 60 83 60 72 C 60 61 68 52 80 52 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petShellHat(70, 44, 13)}
-            ${petFace(80, 72, { tongue: true })}
-            <path d="M64 94 C 74 90 86 90 96 94 L 96 106 C 86 110 74 110 64 106 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M98 100 q10 1 8 -12" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
+            <path d="M102 114 q16 -4 13 -22" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>
+            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
+            <circle cx="99" cy="110" r="4.2" fill="${C}" opacity=".55"/>
+            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
+            <ellipse cx="53" cy="62" rx="9" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(16 53 62)"/><ellipse cx="107" cy="62" rx="9" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-16 107 62)"/>
+            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <g transform="rotate(-5 80 38)">
+                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/>
+            <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
+            <ellipse cx="58" cy="72" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="102" cy="72" rx="4" ry="2.4" fill="${P.blush}"/>
+            <ellipse cx="80" cy="67" rx="4" ry="3" fill="${P.ink}"/><circle cx="81.5" cy="66" r="1" fill="${P.paper}"/>
+            <path d="M76 72 q4 4 8 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M78 74 q2 3 4 0 z" fill="${P.red}"/>
+            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
         if (stage === 2) return petSvgWrap(`
             <ellipse cx="56" cy="56" rx="11" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(16 56 56)"/><ellipse cx="104" cy="56" rx="11" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-16 104 56)"/>
             <path d="M80 44 C 94 44 104 54 104 66 C 104 78 93 85 80 85 C 67 85 56 78 56 66 C 56 54 66 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
@@ -12935,14 +12957,29 @@
         const P = PET_PAL, C = P.dragon;
         if (stage === 0) return petEggSVG('dragon');
         if (stage === 1) return petSvgWrap(`
-            <path d="M70 44 l-6 -12 10 4 Z M90 44 l6 -12 -10 4 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M80 50 C 92 50 100 59 100 70 C 100 81 91 88 80 88 C 69 88 60 81 60 70 C 60 59 68 50 80 50 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petShellHat(70, 42, 13)}
-            ${petFace(80, 70, {})}
-            <circle cx="80" cy="64" r="3" fill="${C}" opacity=".7"/>
-            <path d="M64 92 C 74 88 86 88 96 92 L 96 104 C 86 108 74 108 64 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M60 96 l-8 6 M60 100 l-8 6" stroke="${C}" stroke-width="2" stroke-linecap="round"/>
-            <path d="M98 98 q12 -2 9 -14" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M104 78 l3 -4 3 4 -3 2 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4"/>`);
+            <path d="M102 116 q17 -6 12 -23" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M108 79 l3.5 -5 3.5 5 -3.5 2.5 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
+            <path d="M71 116 h18 M73 122 h14" stroke="${C}" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>
+            <path d="M104 96 l8 -2 -3.5 6.5 Z M107 109 l8 -1 -4.5 6.5 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M64 48 l-9 -13 13 4 Z M96 48 l9 -13 -13 4 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <g transform="rotate(-5 80 38)">
+                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/>
+            <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
+            <ellipse cx="58" cy="72" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="102" cy="72" rx="4" ry="2.4" fill="${P.blush}"/>
+            <circle cx="75" cy="68" r="1.1" fill="${P.ink}"/><circle cx="85" cy="68" r="1.1" fill="${P.ink}"/>
+            <path d="M75 71 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M84 72.5 l1.6 3 1.6 -3 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width=".7"/>
+            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
         if (stage === 2) return petSvgWrap(`
             <path d="M66 40 l-8 -15 12 5 Z M94 40 l8 -15 -12 5 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
             <path d="M80 42 C 94 42 104 52 104 64 C 104 76 93 83 80 83 C 67 83 56 76 56 64 C 56 52 66 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
@@ -12986,14 +13023,25 @@
         const P = PET_PAL, C = P.robot;
         if (stage === 0) return petEggSVG('robot');
         if (stage === 1) return petSvgWrap(`
-            <path d="M80 24 v-8" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="80" cy="13" r="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
-            <rect x="58" y="50" width="44" height="38" rx="8" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <rect x="66" y="58" width="28" height="16" rx="4" fill="${C}" opacity=".5" stroke="${P.ink}" stroke-width="1.6"/>
-            <circle cx="74" cy="66" r="2.4" fill="${P.ink}"/><circle cx="86" cy="66" r="2.4" fill="${P.ink}"/>
-            <path d="M74 80 q6 4 12 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <rect x="62" y="88" width="36" height="10" rx="5" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="70" cy="103" r="6" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="90" cy="103" r="6" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M64 98 v10 M76 98 v10 M84 98 v10 M96 98 v10" stroke="${P.ink}" stroke-width="1.4"/>`);
+            <path d="M106 118 q12 -2 10 -13 q-1 -6 -7 -4" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <circle cx="80" cy="112" r="5" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/><path d="M80 109.5 v5 M77.5 112 h5" stroke="${P.ink}" stroke-width="1.2"/>
+            <circle cx="58" cy="106" r="1.4" fill="${P.ink}" opacity=".6"/><circle cx="102" cy="106" r="1.4" fill="${P.ink}" opacity=".6"/>
+            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <rect x="63" y="52" width="34" height="23" rx="6" fill="${C}" opacity=".45" stroke="${P.ink}" stroke-width="1.6"/>
+            <circle cx="71" cy="61" r="3.6" fill="${P.ink}"/><circle cx="89" cy="61" r="3.6" fill="${P.ink}"/>
+            <circle cx="72.3" cy="59.7" r="1.2" fill="${P.paper}"/><circle cx="90.3" cy="59.7" r="1.2" fill="${P.paper}"/>
+            <path d="M75 69 q5 3 10 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <ellipse cx="57" cy="71" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="103" cy="71" rx="3.6" ry="2.2" fill="${P.blush}"/>
+            <g transform="rotate(-5 80 38)">
+                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <path d="M78 14 v-7" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="78" cy="5" r="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
+            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
         if (stage === 2) return petSvgWrap(`
             <path d="M80 22 v-10" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="80" cy="9" r="3.2" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
             <rect x="54" y="46" width="52" height="42" rx="9" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
@@ -13045,14 +13093,28 @@
         const P = PET_PAL, C = P.fox;
         if (stage === 0) return petEggSVG('fox');
         if (stage === 1) return petSvgWrap(`
-            <path d="M58 52 L44 24 L72 42 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M102 52 L116 24 L88 42 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M62 47 L53 32 L70 41 Z" fill="${P.paper}" opacity=".75"/><path d="M98 47 L107 32 L90 41 Z" fill="${P.paper}" opacity=".75"/>
-            <path d="M80 50 C 92 50 100 59 100 70 C 100 81 91 88 80 88 C 69 88 60 81 60 70 C 60 59 68 50 80 50 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petShellHat(72, 42, 12)}
-            ${petFace(80, 70, {})}
-            <path d="M76 78 q4 4 8 0 l-2 4 -2 -2 -2 2 Z" fill="${P.ink}"/>
-            <path d="M64 90 C 74 86 86 86 96 90 L 96 102 C 86 106 74 106 64 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M98 96 q14 -4 12 -18 q-2 -6 -6 -6" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/>`);
+            <path d="M100 118 q19 -5 15 -26" fill="none" stroke="${P.ink}" stroke-width="5.5" stroke-linecap="round"/>
+            <path d="M100 118 q19 -5 15 -26" fill="none" stroke="${C}" stroke-width="2.6" stroke-linecap="round"/>
+            <circle cx="115" cy="91" r="5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
+            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
+            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M56 54 L40 22 L74 44 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M104 54 L120 22 L86 44 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M60 47 L50 30 L70 42 Z" fill="${P.paper}" opacity=".8"/><path d="M100 47 L110 30 L90 42 Z" fill="${P.paper}" opacity=".8"/>
+            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
+            <ellipse cx="64" cy="76" rx="11" ry="9" fill="${P.paper}"/><ellipse cx="96" cy="76" rx="11" ry="9" fill="${P.paper}"/><ellipse cx="80" cy="83" rx="10" ry="6" fill="${P.paper}"/>
+            <g transform="rotate(-5 80 38)">
+                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
+                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle cx="67" cy="62" r="4" fill="${P.ink}"/><circle cx="93" cy="62" r="4" fill="${P.ink}"/>
+            <circle cx="68.5" cy="60.5" r="1.3" fill="${P.paper}"/><circle cx="94.5" cy="60.5" r="1.3" fill="${P.paper}"/>
+            <path d="M77.5 70 l2.5 -2 2.5 2 -2.5 3.5 Z" fill="${P.ink}"/>
+            <path d="M75 75 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
         if (stage === 2) return petSvgWrap(`
             <path d="M54 50 L38 18 L70 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M106 50 L122 18 L90 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
             <path d="M59 44 L49 27 L68 37 Z" fill="${P.paper}" opacity=".75"/><path d="M101 44 L111 27 L92 37 Z" fill="${P.paper}" opacity=".75"/>
@@ -14120,8 +14182,8 @@
 
         const panelBtn = document.createElement('button');
         panelBtn.type = 'button';
-        panelBtn.className = 'layui-btn layui-btn-sm layui-btn-normal re-panel-btn';
-        panelBtn.textContent = '面板';
+        panelBtn.className = 're-panel-btn';
+        panelBtn.textContent = '视频面审';
         panelBtn.style.marginLeft = '4px';
         panelBtn.title = '打开系统管理面板';
 
@@ -14140,16 +14202,29 @@
     const panelBtnStyle = document.createElement('style');
     panelBtnStyle.textContent = `
         .re-panel-btn {
+            border: none;
+            background: #18181b;
+            color: #fafafa;
             font-size: 12px;
-            padding: 0 10px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            padding: 0 13px;
             height: 28px;
             line-height: 28px;
-            border-radius: 2px;
+            border-radius: 6px;
             cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+            vertical-align: middle;
         }
         .re-panel-btn:hover {
-            opacity: 0.85;
+            background: #27272a;
             transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
+        }
+        .re-panel-btn:active {
+            transform: translateY(0) scale(.97);
+            box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
         }
     `;
     document.head.appendChild(panelBtnStyle);
