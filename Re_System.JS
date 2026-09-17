@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.4.8
+// @version      6.5.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.4.8</span>
+                    <span class="re-panel-version">V6.5.0</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <div class="re-panel-header-right">
@@ -1167,11 +1167,11 @@
             font-size: 11px;
             font-weight: 600;
             padding: 3px 10px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            color: #ffffff;
+            border-radius: 999px;
+            background: rgba(24, 24, 27, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #d4d4d8;
             letter-spacing: 0.3px;
-            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
             white-space: nowrap;
         }
 
@@ -1282,14 +1282,16 @@
 
         .re-new-chain-link {
             display: inline-block;
-            background: #f97316;
-            color: #fff;
+            background: rgba(24, 24, 27, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #d4d4d8;
             font-size: 13px;
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: 2px 9px;
+            border-radius: 999px;
             margin-right: 6px;
             font-weight: 600;
             vertical-align: middle;
+            white-space: nowrap;
         }
 
         .re-repeat-customer {
@@ -9487,8 +9489,8 @@
     }
 
     function isRestrictAppStoreModel() {
-        // 16 Pro / 16 Pro Max + iPhone 17 全系（17 / 17 Pro / 17 Pro Max，不含 17e / 17 Air；新机 + 二手）
-        return /(16\s*pro|17(?!\s*(e|air)|\d))/i.test(cachedProductModel);
+        // 16 Pro / 16 Pro Max + iPhone 17 / 18 全系（17 / 17 Pro / 17 Pro Max / 18 / 18 Pro / 18 Pro Max，不含 17e / 17 Air / 18e / 18 Air；新机 + 二手）
+        return /(16\s*pro|1[78](?!\s*(e|air)|\d))/i.test(cachedProductModel);
     }
 
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
