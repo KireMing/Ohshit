@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.5.0
+// @version      6.6.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.5.0</span>
+                    <span class="re-panel-version">V6.6.0</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <div class="re-panel-header-right">
@@ -5939,6 +5939,54 @@
             0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
             100% { transform: translate(var(--re-cx), var(--re-cy)) rotate(var(--re-cr)) scale(.4); opacity: 0; }
         }
+        /* ===== V6.6.0 宠物动效系统（仅 transform/opacity，GPU 合成零重绘） ===== */
+        @keyframes re-pet-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes re-pet-blink { 0%, 91%, 100% { transform: scaleY(1); } 94%, 96% { transform: scaleY(.06); } }
+        @keyframes re-pet-egg-sway { 0%, 100% { transform: rotate(0deg); } 30% { transform: rotate(2.2deg); } 70% { transform: rotate(-2.2deg); } }
+        .re-pet-anim { animation: re-pet-breathe 3.2s ease-in-out infinite; overflow: visible; }
+        .re-pet-anim .re-pet-eyes { transform-box: fill-box; transform-origin: center; animation: re-pet-blink 4.6s infinite; }
+        .re-pet-anim.re-pet-stage0 { animation: re-pet-egg-sway 4s ease-in-out infinite; }
+        .re-pet-anim.re-pet-sad { animation-duration: 5.6s; } /* 心情低：呼吸放缓 */
+        /* 摸头：squish 弹性形变 + 爱心飘出 */
+        @keyframes re-pet-squish { 0% { transform: scale(1); } 35% { transform: scale(1.07, .9); } 65% { transform: scale(.95, 1.05); } 100% { transform: scale(1); } }
+        .re-pet-squishing .re-pet-anim { animation: re-pet-squish .55s ease; }
+        @keyframes re-pet-heart-pop {
+            0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+            30% { opacity: 1; }
+            100% { opacity: 0; transform: translate(18px, -34px) scale(1.2) rotate(14deg); }
+        }
+        .re-pet-heart {
+            position: absolute; top: 18%; right: 14%; font-size: 20px; color: #E86A6A;
+            pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 1px 0 rgba(91, 81, 66, .4);
+            animation: re-pet-heart-pop .85s ease forwards;
+        }
+        /* 业务动作库：不同喂养行为不同庆祝动作 */
+        @keyframes re-pet-act-nod { 0%, 100% { transform: translateY(0); } 22% { transform: translateY(-4px); } 38% { transform: translateY(0); } 58% { transform: translateY(-7px); } 78% { transform: translateY(0); } }
+        @keyframes re-pet-act-jump { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-14px) scale(1.04, .96); } 55% { transform: translateY(0) scale(.96, 1.04); } 75% { transform: translateY(-6px) scale(1); } }
+        @keyframes re-pet-act-wave { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-8deg); } 50% { transform: rotate(7deg); } 75% { transform: rotate(-5deg); } }
+        @keyframes re-pet-act-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(.92); } 100% { transform: rotate(360deg) scale(1); } }
+        @keyframes re-pet-act-shine { 0%, 100% { transform: scale(1); opacity: 1; } 30% { transform: scale(1.12); opacity: .92; } 60% { transform: scale(.97); opacity: 1; } }
+        .re-pet-act { animation: none !important; }
+        .re-pet-act-nod > svg, .re-pet-act-nod .re-pet-anim { animation: re-pet-act-nod .9s ease !important; }
+        .re-pet-act-jump > svg, .re-pet-act-jump .re-pet-anim { animation: re-pet-act-jump 1s ease !important; }
+        .re-pet-act-wave > svg, .re-pet-act-wave .re-pet-anim { animation: re-pet-act-wave .9s ease !important; }
+        .re-pet-act-spin > svg, .re-pet-act-spin .re-pet-anim { animation: re-pet-act-spin 1.1s cubic-bezier(.45,.05,.55,.95) !important; }
+        .re-pet-act-shine > svg, .re-pet-act-shine .re-pet-anim { animation: re-pet-act-shine 1.2s ease !important; }
+        /* 桌面浮层：走路步态 + 朝向翻转 + 悬停音符 */
+        @keyframes re-pet-walk-sway { 0%, 100% { transform: rotate(-3.5deg); } 50% { transform: rotate(3.5deg); } }
+        .re-pet-float-walking .re-pet-anim { animation: re-pet-walk-sway .5s ease-in-out infinite !important; }
+        .re-pet-float-flip .re-pet-float-inner { transform: scaleX(-1); }
+        @keyframes re-pet-note-float {
+            0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+            30% { opacity: .95; }
+            100% { opacity: 0; transform: translate(10px, -30px) rotate(16deg); }
+        }
+        #re-pet-float::after {
+            content: '♪'; position: absolute; top: -4px; right: -6px; font-size: 16px; color: #7FBFA8;
+            opacity: 0; pointer-events: none; font-weight: 700;
+        }
+        #re-pet-float:hover::after { animation: re-pet-note-float 2.2s ease-in-out infinite; }
+        #re-pet-float.re-pet-float-flip::after { right: auto; left: -6px; }
         @media (max-width: 1100px) {
             .re-pet-main { flex-direction: column; }
             .re-pet-stage-box { width: 100%; height: 190px; }
@@ -7036,8 +7084,7 @@
             /(\d+\s*Pro)/i,
             /(\d+\s*Plus)/i,
             /(\d+\s*mini)/i,
-            /(iPhone\s*(?:SE|XR|XS))/i,
-            /(iPhone\s*(?:11|12|13|14|15|16|17))/i
+            /(iPhone\s*(?:SE|XR|XS))/i
         ];
         for (const pattern of patterns) {
             const match = model.match(pattern);
@@ -12712,6 +12759,7 @@
             points: 0,          // 可用宠物点数（审核机型日结而来）
             pendingPoints: 0,   // 今日待结算点数（次日入账）
             doubleDate: '',     // 倍数丸生效日（当日有效）
+            credited: {},       // 订单级经验去重表：{ '行为:订单号': 时间戳 }，防狂点按钮刷经验（V6.5.2）
             log: []
         };
     }
@@ -12748,6 +12796,7 @@
                             def.points = typeof saved.points === 'number' ? saved.points : 0;
                             def.pendingPoints = typeof saved.pendingPoints === 'number' ? saved.pendingPoints : 0;
                             def.doubleDate = saved.doubleDate || '';
+                            def.credited = saved.credited || {};
                             def.log = Array.isArray(saved.log) ? saved.log : [];
                         }
                         resolve(def);
@@ -12813,8 +12862,8 @@
     function petFace(hx, hy, opts) {
         const P = PET_PAL;
         const eye = opts.smile
-            ? `<path d="M${hx-11} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><path d="M${hx+3} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>`
-            : `<circle cx="${hx-7}" cy="${hy}" r="2.6" fill="${P.ink}"/><circle cx="${hx+7}" cy="${hy}" r="2.6" fill="${P.ink}"/>`;
+            ? `<g class="re-pet-eyes"><path d="M${hx-11} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><path d="M${hx+3} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/></g>`
+            : `<g class="re-pet-eyes"><circle cx="${hx-7}" cy="${hy}" r="2.6" fill="${P.ink}"/><circle cx="${hx+7}" cy="${hy}" r="2.6" fill="${P.ink}"/></g>`;
         const mouth = opts.tongue
             ? `<path d="M${hx-3} ${hy+8} q3 4 6 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/><path d="M${hx-1} ${hy+10} q1 3 2 0 z" fill="${P.red}"/>`
             : `<path d="M${hx-3} ${hy+8} q3 3 6 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>`;
@@ -12853,7 +12902,7 @@
                 <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
                 <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
-            <circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/>
+            <g class="re-pet-eyes"><circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/></g>
             <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
             <ellipse cx="59" cy="71" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="101" cy="71" rx="4" ry="2.4" fill="${P.blush}"/>
             <path d="M75 71 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
@@ -12912,7 +12961,7 @@
                 <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
                 <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
-            <circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/>
+            <g class="re-pet-eyes"><circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/></g>
             <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
             <ellipse cx="58" cy="72" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="102" cy="72" rx="4" ry="2.4" fill="${P.blush}"/>
             <ellipse cx="80" cy="67" rx="4" ry="3" fill="${P.ink}"/><circle cx="81.5" cy="66" r="1" fill="${P.paper}"/>
@@ -12974,7 +13023,7 @@
                 <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
                 <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
-            <circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/>
+            <g class="re-pet-eyes"><circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/></g>
             <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
             <ellipse cx="58" cy="72" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="102" cy="72" rx="4" ry="2.4" fill="${P.blush}"/>
             <circle cx="75" cy="68" r="1.1" fill="${P.ink}"/><circle cx="85" cy="68" r="1.1" fill="${P.ink}"/>
@@ -13032,7 +13081,7 @@
             <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
             <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
             <rect x="63" y="52" width="34" height="23" rx="6" fill="${C}" opacity=".45" stroke="${P.ink}" stroke-width="1.6"/>
-            <circle cx="71" cy="61" r="3.6" fill="${P.ink}"/><circle cx="89" cy="61" r="3.6" fill="${P.ink}"/>
+            <g class="re-pet-eyes"><circle cx="71" cy="61" r="3.6" fill="${P.ink}"/><circle cx="89" cy="61" r="3.6" fill="${P.ink}"/></g>
             <circle cx="72.3" cy="59.7" r="1.2" fill="${P.paper}"/><circle cx="90.3" cy="59.7" r="1.2" fill="${P.paper}"/>
             <path d="M75 69 q5 3 10 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
             <ellipse cx="57" cy="71" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="103" cy="71" rx="3.6" ry="2.2" fill="${P.blush}"/>
@@ -13162,7 +13211,11 @@
         const pet = petStateCache ? petStateCache.pets[petIdx] : null;
         const stage = pet ? petStageOf(pet.level) : 0;
         const svg = PET_RENDERERS[PET_DEFS[petIdx].id](stage);
-        return mood < 30 ? svg.replace('<svg ', '<svg class="re-pet-sad" ') : svg;
+        // V6.6.0 动效类：re-pet-anim=呼吸+眨眼；蛋阶段用晃动替代眨眼；心情低保留灰态并放缓呼吸
+        const cls = ['re-pet-anim'];
+        if (stage === 0) cls.push('re-pet-stage0');
+        if (mood < 30) cls.push('re-pet-sad');
+        return svg.replace('<svg ', `<svg class="${cls.join(' ')}" `);
     }
 
     /* ---------- 宠物点数（V6.4.3）：按审核机型计点，每日结算入账 ---------- */
@@ -13272,6 +13325,18 @@
     }
 
     /* ---------- 经验系统 ---------- */
+    // 去重表瘦身：删 30 天前记录；总量超 4000 时按时间序裁到 3000，防无限膨胀
+    function prunePetCredited(st) {
+        const keys = Object.keys(st.credited);
+        if (keys.length < 4000) {
+            const cutoff = Date.now() - 30 * 86400000;
+            for (const k of keys) if (st.credited[k] < cutoff) delete st.credited[k];
+            return;
+        }
+        keys.sort((a, b) => st.credited[a] - st.credited[b]);
+        for (let i = 0; i < keys.length - 3000; i++) delete st.credited[keys[i]];
+    }
+
     function gainPetExp(ruleKey, label) {
         if (!petStateCache) return; // 状态未加载完成时不喂（面板打开必先走 petDailySign 加载）
         const st = petStateCache;
@@ -13285,6 +13350,18 @@
         const pet = st.pets[st.activePet];
         if (!pet || !pet.unlocked) return;
 
+        // V6.5.2 订单级去重：同一订单的同类行为只计一次经验，防狂点按钮刷经验
+        // （签到除外，其自身按日去重；拿不到有效订单号不计——正常成功路径必有订单号，占位时本就拦截提交）
+        if (ruleKey !== 'dailySign') {
+            const orderNo = getPanelOrderNo();
+            if (!orderNo) return;
+            if (!st.credited) st.credited = {};
+            const key = `${ruleKey}:${orderNo}`;
+            if (st.credited[key]) return; // 该单该行为已计过：安静拒绝，不给反馈信号
+            st.credited[key] = Date.now();
+            prunePetCredited(st);
+        }
+
         // 单日无上限：多劳多得（今日经验仅作统计展示）；倍数丸当日经验×2
         const doubled = st.doubleDate === today;
         const gain = doubled ? amount * 2 : amount;
@@ -13294,7 +13371,7 @@
         pet.feedCount += 1;
         pet.lastFeed = Date.now();
         petLog(`${label} +${gain}${doubled ? '（倍数丸×2）' : ''}`);
-        petFloatCelebrate(gain); // 桌面浮层蹦跳 + 经验气泡
+        petFloatCelebrate(gain, ruleKey); // 桌面浮层蹦跳 + 经验气泡 + V6.6.0 行为专属动作
 
         // 升级循环（一次可能连升多级，Toast 合并为一条）
         const def = PET_DEFS[st.activePet];
@@ -13480,6 +13557,7 @@
             });
         }
         refreshPetFloat();
+        schedulePetWalk(); // V6.6.0 桌面散步：浮层存在期间定时溜达
     }
 
     function refreshPetFloat() {
@@ -13496,6 +13574,7 @@
     }
 
     function unmountPetFloat() {
+        clearTimeout(petWalkTimer); // 收回即停散步
         const el = getPetFloatEl();
         if (el) el.remove();
     }
@@ -13509,7 +13588,47 @@
         if (isPetPageVisible()) renderPetPage();
     }
 
-    function petFloatCelebrate(gain) {
+    /* V6.6.0 业务动作库：按喂养行为分发庆祝动作（浮层 + 养成页大图同步播放） */
+    const PET_ACT_CLASS = {
+        assign: 're-pet-act-nod',      // 客服分配：点头两连
+        staffRemark: 're-pet-act-jump', // 客服备注：开心跳
+        riskRemark: 're-pet-act-wave',  // 风控备注：左右挥舞
+        autoBonus: 're-pet-act-spin',   // 自动处理：转圈
+        history: 're-pet-act-jump',     // 记录历史：开心跳
+        dailySign: 're-pet-act-nod',    // 每日签到：点头
+        levelUp: 're-pet-act-shine'     // 升级/进化：金光脉冲（petCelebrate 内也可复用）
+    };
+
+    function petPlayAction(kind) {
+        const act = PET_ACT_CLASS[kind] || 're-pet-act-jump';
+        const targets = [];
+        const floatEl = getPetFloatEl();
+        if (floatEl) targets.push(floatEl);
+        const box = document.getElementById('re-pet-stage-box');
+        if (box && isPetPageVisible()) targets.push(box);
+        targets.forEach(t => {
+            Object.values(PET_ACT_CLASS).forEach(c => t.classList.remove(c));
+            void t.offsetWidth; // 强制重排以重启动画
+            t.classList.add(act);
+            setTimeout(() => t.classList.remove(act), 1250);
+        });
+    }
+
+    /* 摸头：squish 弹性形变 + 爱心飘出（拖动/带出操作不触发） */
+    let petJustDragged = false;
+    function petPat(container) {
+        if (!container || petJustDragged) return;
+        container.classList.remove('re-pet-squishing');
+        void container.offsetWidth;
+        container.classList.add('re-pet-squishing');
+        const heart = document.createElement('span');
+        heart.className = 're-pet-heart';
+        heart.textContent = '♥';
+        container.appendChild(heart);
+        setTimeout(() => { heart.remove(); container.classList.remove('re-pet-squishing'); }, 900);
+    }
+
+    function petFloatCelebrate(gain, ruleKey) {
         const el = getPetFloatEl();
         if (!el) return;
         const bubble = el.querySelector('.re-pet-float-bubble');
@@ -13518,6 +13637,38 @@
         void el.offsetWidth; // 强制重排以重启动画
         el.classList.add('re-pet-float-hop');
         setTimeout(() => el.classList.remove('re-pet-float-hop'), 1200);
+        if (ruleKey) petPlayAction(ruleKey);
+    }
+
+    /* V6.6.0 桌面散步：每 30~60 秒随机溜达一小段（transform/transition，走路时步态摇摆 + 朝向翻转） */
+    let petWalkTimer = null;
+
+    function schedulePetWalk() {
+        clearTimeout(petWalkTimer);
+        petWalkTimer = setTimeout(petWalkStep, 30000 + Math.random() * 30000);
+    }
+
+    function petWalkStep() {
+        const el = getPetFloatEl();
+        if (el && petStateCache && petStateCache.float.active && !petFloatDragging && !el.classList.contains('re-pet-float-dragging')) {
+            const f = petStateCache.float;
+            const dx = (Math.random() - 0.5) * 170;
+            const dy = (Math.random() - 0.5) * 120;
+            const nx = Math.max(0, Math.min(Math.round(f.x + dx), window.innerWidth - 120));
+            const ny = Math.max(0, Math.min(Math.round(f.y + dy), window.innerHeight - 120));
+            el.classList.toggle('re-pet-float-flip', dx < 0);
+            el.classList.add('re-pet-float-walking');
+            el.style.transition = 'left 2.6s ease-in-out, top 2.6s ease-in-out';
+            el.style.left = `${nx}px`;
+            el.style.top = `${ny}px`;
+            setTimeout(() => {
+                el.classList.remove('re-pet-float-walking');
+                el.style.transition = '';
+                f.x = nx; f.y = ny;
+                savePetState();
+            }, 2650);
+        }
+        schedulePetWalk();
     }
 
     let petFloatDragging = false;
@@ -13528,15 +13679,18 @@
             e.preventDefault();
             e.stopPropagation();
             petFloatDragging = true;
+            el.style.transition = ''; // 拖动必须直跟手，清掉散步过渡
             el.classList.add('re-pet-float-dragging');
             const startX = e.clientX;
             const startY = e.clientY;
             const rect = el.getBoundingClientRect();
             const originX = rect.left;
             const originY = rect.top;
+            let moved = false;
 
             function onMove(ev) {
                 if (!petFloatDragging) return;
+                if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 5) moved = true;
                 const nx = Math.max(0, Math.min(originX + ev.clientX - startX, window.innerWidth - 120));
                 const ny = Math.max(0, Math.min(originY + ev.clientY - startY, window.innerHeight - 120));
                 el.style.left = `${nx}px`;
@@ -13547,6 +13701,10 @@
                 el.classList.remove('re-pet-float-dragging');
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup', onUp);
+                if (moved) { // 拖动后不触发摸头
+                    petJustDragged = true;
+                    setTimeout(() => { petJustDragged = false; }, 200);
+                }
                 if (petStateCache) {
                     petStateCache.float.x = parseFloat(el.style.left) || 24;
                     petStateCache.float.y = parseFloat(el.style.top) || 24;
@@ -13556,6 +13714,7 @@
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup', onUp);
         });
+        el.addEventListener('click', function() { petPat(el); }); // V6.6.0 摸头
     }
 
     /* 从养成页展示区拖出：按住宠物移动超过阈值即带出，松手落位为 body 浮层 */
@@ -13590,6 +13749,10 @@
                 document.removeEventListener('mouseup', onUp);
                 document.body.style.userSelect = '';
                 if (ghost) ghost.remove();
+                if (carrying) { // 带出动作不触发摸头
+                    petJustDragged = true;
+                    setTimeout(() => { petJustDragged = false; }, 200);
+                }
                 if (!carrying || !petStateCache) return;
                 // 拖出面板：落位为浮层（视口内 clamp）
                 petStateCache.float.active = true;
@@ -13604,6 +13767,7 @@
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup', onUp);
         });
+        box.addEventListener('click', function() { petPat(box); }); // V6.6.0 养成页摸头（拖出不触发）
     }
 
     function initPetPage() {
