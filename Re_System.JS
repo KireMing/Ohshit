@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.6.0
+// @version      6.7.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.6.0</span>
+                    <span class="re-panel-version">V6.7.0</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <div class="re-panel-header-right">
@@ -237,7 +237,7 @@
                             </div>
                             <div class="re-form-group">
                                 <div class="re-form-title">流水信息</div>
-                                <div class="re-flow-grid re-flow-grid-4 re-flow-section">
+                                <div class="re-flow-grid re-flow-grid-5 re-flow-section">
                                     <div class="re-flow-item">
                                         <label class="re-form-label">微信流水</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-flow" placeholder="请输入">
@@ -255,6 +255,10 @@
                                         <input type="text" class="re-input re-input-mini" id="re-huabei-status" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
+                                        <label class="re-form-label">支宝资产</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-alipay-assets" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
                                         <label class="re-form-label">微信分付</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-fenfu" placeholder="请输入">
                                     </div>
@@ -269,6 +273,10 @@
                                     <div class="re-flow-item">
                                         <label class="re-form-label">支付分</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-credit-score" placeholder="请输入">
+                                    </div>
+                                    <div class="re-flow-item">
+                                        <label class="re-form-label">微信余额</label>
+                                        <input type="text" class="re-input re-input-mini" id="re-wechat-balance" placeholder="请输入">
                                     </div>
                                     <div class="re-flow-item">
                                         <label class="re-form-label">手机成本</label>
@@ -2069,6 +2077,141 @@
             pointer-events: auto;
         }
 
+        /* ===== 风控预览详情 Lightbox（V6.7.0）：点击风控预览展开的分组浮窗 ===== */
+        .re-risk-detail-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.28);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s linear;
+            z-index: 2147483647;
+        }
+
+        .re-risk-detail-backdrop.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .re-risk-detail-card {
+            position: fixed;
+            width: min(600px, 92vw);
+            background: #ffffff;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.92);
+            transform-origin: left top;
+            transition: opacity 0.18s linear, transform 0.18s linear, box-shadow 0.18s linear, left 0.18s linear, top 0.18s linear;
+            z-index: 2147483647;
+            overflow: hidden;
+        }
+
+        .re-risk-detail-card.show {
+            opacity: 1;
+            pointer-events: auto;
+            user-select: text;
+            cursor: default;
+        }
+
+        /* 放大态：居中屏幕（inline 定位被 !important 覆盖，过渡产生从预览生长到中央的动画） */
+        .re-risk-detail-card.zoomed {
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center center;
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+        }
+
+        .re-risk-detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px 10px;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.14);
+        }
+
+        .re-risk-detail-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #18181b;
+        }
+
+        .re-risk-detail-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(107, 114, 128, 0.08);
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s linear, color 0.15s linear;
+        }
+
+        .re-risk-detail-close:hover {
+            background: rgba(107, 114, 128, 0.16);
+            color: #18181b;
+        }
+
+        .re-risk-detail-close svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .re-risk-detail-body {
+            padding: 12px 18px 16px;
+            overflow-y: auto;
+            max-height: calc(72vh - 62px);
+        }
+
+        .re-risk-detail-section {
+            margin-bottom: 14px;
+        }
+
+        .re-risk-detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .re-risk-detail-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.12);
+        }
+
+        .re-risk-detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 3px 0;
+            font-size: 13.5px;
+            line-height: 1.55;
+        }
+
+        .re-risk-detail-label {
+            flex-shrink: 0;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        .re-risk-detail-value {
+            flex: 1;
+            color: #18181b;
+            word-break: break-all;
+        }
+
+        .re-risk-detail-row-plain {
+            display: block;
+            color: #18181b;
+        }
+
         .re-history-hover-card {
             position: fixed;
             width: 300px;
@@ -3269,6 +3412,10 @@
 
         .re-flow-grid-4 {
             grid-template-columns: repeat(4, 1fr);
+        }
+
+        .re-flow-grid-5 {
+            grid-template-columns: repeat(5, 1fr);
         }
 
         .re-flow-grid-2 {
@@ -7403,6 +7550,123 @@
         }
     }
 
+    /* ---------- 风控预览详情 Lightbox（V6.7.0）：点击风控预览展开的分组浮窗 ---------- */
+    let riskDetailCardEl = null;
+    let riskDetailBackdropEl = null;
+    let riskDetailDocBound = false;
+    // updateRiskPreview 每次刷新时写入分组明细：[{title, items}]
+    let lastRiskPreviewGroups = [];
+
+    function getRiskDetailCard() {
+        if (riskDetailCardEl && document.body.contains(riskDetailCardEl)) return riskDetailCardEl;
+        riskDetailBackdropEl = document.createElement('div');
+        riskDetailBackdropEl.className = 're-risk-detail-backdrop';
+        document.body.appendChild(riskDetailBackdropEl);
+
+        riskDetailCardEl = document.createElement('div');
+        riskDetailCardEl.className = 're-risk-detail-card';
+        riskDetailCardEl.innerHTML = `
+            <div class="re-risk-detail-head">
+                <span class="re-risk-detail-title">风控预览详情</span>
+                <button class="re-risk-detail-close" type="button" title="收起 (Esc)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="re-risk-detail-body"></div>
+        `;
+        document.body.appendChild(riskDetailCardEl);
+        // 点击卡片本体不收起（允许框选文本复制）；✕ 单独处理
+        riskDetailCardEl.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (e.target.closest('.re-risk-detail-close')) {
+                hideRiskDetailCard();
+            }
+        });
+        // document 级监听只绑定一次（卡片重建不重复注册）
+        if (!riskDetailDocBound) {
+            riskDetailDocBound = true;
+            // 放大态按 Esc 收起
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && riskDetailCardEl && riskDetailCardEl.classList.contains('zoomed')) {
+                    hideRiskDetailCard();
+                }
+            });
+            // 放大态点击卡片外部（含遮罩、面板）收起；有文本选区（框选中）不收起；
+            // stopPropagation 防止该点击继续触发「面板外点关闭」（卡片挂 body 上，不在 panel 内）
+            document.addEventListener('click', function(e) {
+                if (riskDetailCardEl && riskDetailCardEl.classList.contains('zoomed') && !riskDetailCardEl.contains(e.target)) {
+                    if (window.getSelection && String(window.getSelection())) return;
+                    hideRiskDetailCard();
+                    e.stopPropagation();
+                }
+            }, true);
+        }
+        return riskDetailCardEl;
+    }
+
+    // 渲染分组明细：短前缀「标签：值」拆两栏对齐，无短标签的自由文本整行显示
+    function renderRiskDetailBody() {
+        const body = riskDetailCardEl.querySelector('.re-risk-detail-body');
+        body.innerHTML = '';
+        let rendered = 0;
+        lastRiskPreviewGroups.forEach(function(group) {
+            if (!group.items.length) return;
+            rendered++;
+            const sec = document.createElement('div');
+            sec.className = 're-risk-detail-section';
+            const title = document.createElement('div');
+            title.className = 're-risk-detail-section-title';
+            title.textContent = group.title;
+            sec.appendChild(title);
+            group.items.forEach(function(text) {
+                const row = document.createElement('div');
+                row.className = 're-risk-detail-row';
+                const sep = text.indexOf('：');
+                if (sep > 0 && sep <= 12) {
+                    const label = document.createElement('span');
+                    label.className = 're-risk-detail-label';
+                    label.textContent = text.slice(0, sep);
+                    const value = document.createElement('span');
+                    value.className = 're-risk-detail-value';
+                    value.textContent = text.slice(sep + 1);
+                    row.appendChild(label);
+                    row.appendChild(value);
+                } else {
+                    row.classList.add('re-risk-detail-row-plain');
+                    row.textContent = text;
+                }
+                sec.appendChild(row);
+            });
+            body.appendChild(sec);
+        });
+        if (!rendered) {
+            body.innerHTML = '<div style="color:#9ca3af;font-size:13px;">暂无数据</div>';
+        }
+    }
+
+    // 从预览锚点位置生长到屏幕中央（与历史浮卡同款 Lightbox 动画）
+    function openRiskDetailCard(anchorEl) {
+        const card = getRiskDetailCard();
+        renderRiskDetailBody();
+        card.classList.remove('zoomed');
+        card.classList.add('show');
+        const rect = anchorEl.getBoundingClientRect();
+        card.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 40)) + 'px';
+        card.style.top = Math.max(8, Math.min(rect.top, window.innerHeight - 40)) + 'px';
+        void card.offsetWidth; // 先在锚点旁定位，再放大，产生从预览生长到屏幕中央的动画
+        card.classList.add('zoomed');
+        if (riskDetailBackdropEl) riskDetailBackdropEl.classList.add('show');
+    }
+
+    function hideRiskDetailCard() {
+        if (riskDetailCardEl) {
+            riskDetailCardEl.classList.remove('show', 'zoomed');
+        }
+        if (riskDetailBackdropEl) {
+            riskDetailBackdropEl.classList.remove('show');
+        }
+    }
+
     function renderHistoryRecords(searchTerm = '') {
         const container = document.getElementById('re-history-container');
         const emptyEl = document.getElementById('re-history-empty');
@@ -7725,6 +7989,7 @@
                 // 悬停浮出完整信息卡（120ms 延迟防扫视闪烁），备注查看已由浮卡承担
                 item.addEventListener('mouseenter', function() {
                     if (histHoverCardEl && histHoverCardEl.classList.contains('zoomed')) return; // 模态态不响应悬停
+                    if (window.getSelection && String(window.getSelection())) return; // 有文本选区（框选中/已框选）不弹卡，避免遮挡选中内容
                     clearTimeout(histHoverHideTimer);
                     clearTimeout(histHoverShowTimer);
                     const el = this;
@@ -7737,8 +8002,26 @@
                     clearTimeout(histHoverShowTimer);
                     histHoverHideTimer = setTimeout(hideHistoryHoverCard, 200);
                 });
+                // 框选识别：按下记起点，按住拖动超阈值（4px）视为框选而非点击
+                let hDownX = 0, hDownY = 0, hDragging = false;
+                item.addEventListener('mousedown', function(e) {
+                    hDownX = e.clientX; hDownY = e.clientY; hDragging = false;
+                    // 按下即收起悬停浮卡并清定时器：用户可能要框选文本，浮卡不能挡住
+                    if (histHoverCardEl && !histHoverCardEl.classList.contains('zoomed')) {
+                        clearTimeout(histHoverShowTimer);
+                        clearTimeout(histHoverHideTimer);
+                        hideHistoryHoverCard();
+                    } else {
+                        clearTimeout(histHoverShowTimer);
+                    }
+                });
+                item.addEventListener('mousemove', function(e) {
+                    if (e.buttons && Math.hypot(e.clientX - hDownX, e.clientY - hDownY) > 4) hDragging = true;
+                });
                 // 点击记录行 → 浮卡放大为模态（Lightbox）；放大态下点击任意处的收起由全局捕获监听统一处理
                 item.addEventListener('click', function() {
+                    if (hDragging) return; // 按下后拖动过 → 框选文本，不打开浮卡
+                    if (window.getSelection && String(window.getSelection())) return; // 松开时有选中文本 → 框选，不打开浮卡
                     clearTimeout(histHoverShowTimer);
                     clearTimeout(histHoverHideTimer);
                     showHistoryHoverCard(this);
@@ -8860,6 +9143,13 @@
         return m ? parseFloat(m[0]) : null;
     }
 
+    // 解析「支宝资产/微信余额」输入值，取文本中第一个数字（兼容千分位逗号），未填返回 null
+    function getFlowNumberValue(id) {
+        const text = String(document.getElementById(id)?.value || '');
+        const m = text.match(/\d[\d,]*(?:\.\d+)?/);
+        return m ? parseFloat(m[0].replace(/,/g, '')) : null;
+    }
+
     // 搜索客户风控报告：GET /api/v1/admin/reports?q={姓名}&group=finished → 取 created_at 最新一条
     function searchZhimaReport(name, callback) {
         GM_xmlhttpRequest({
@@ -8884,8 +9174,14 @@
     }
 
     // 提交芝麻分：PATCH /api/v1/admin/reports/{report_id}（declared_income 原值带回，不覆盖运营手填值）
+    // 支宝资产/微信余额随同一请求提交（alipay_balance/wechat_balance），未填写时不带该字段、不覆盖远端已有值
     function submitZhimaScore(report, score, callback) {
         const declaredIncome = parseFloat(String(report.declared_income ?? '0')) || 0;
+        const payload = { declared_income: declaredIncome, zhima_score: score };
+        const alipayBalance = getFlowNumberValue('re-alipay-assets');
+        const wechatBalance = getFlowNumberValue('re-wechat-balance');
+        if (alipayBalance !== null) payload.alipay_balance = alipayBalance;
+        if (wechatBalance !== null) payload.wechat_balance = wechatBalance;
         GM_xmlhttpRequest({
             method: 'PATCH',
             url: 'https://riskanalysis.aixzu.com/api/v1/admin/reports/' + encodeURIComponent(report.report_id),
@@ -8893,7 +9189,7 @@
                 'accept': 'application/json, text/plain, */*',
                 'content-type': 'application/json'
             },
-            data: JSON.stringify({ declared_income: declaredIncome, zhima_score: score }),
+            data: JSON.stringify(payload),
             onload: function(response) {
                 try {
                     const ok = response.status >= 200 && response.status < 300;
@@ -8955,7 +9251,14 @@
                 if (isTest && testBtn) { testBtn.disabled = false; testBtn.textContent = btnLabel || '测试提交'; }
                 if (ok) {
                     if (!isTest) setWorkflowNode('zhima', 'done', '已芝麻分');
-                    showSuccessToast((isTest ? '测试成功！' : '') + '芝麻分已提交：' + score);
+                    // 同步反馈：随芝麻分一起 PATCH 的支宝资产/微信余额（未填不带字段、不显示）
+                    const extraParts = [];
+                    const alipayBalance = getFlowNumberValue('re-alipay-assets');
+                    const wechatBalance = getFlowNumberValue('re-wechat-balance');
+                    if (alipayBalance !== null) extraParts.push('支宝资产 ' + alipayBalance);
+                    if (wechatBalance !== null) extraParts.push('微信余额 ' + wechatBalance);
+                    const extraText = extraParts.length ? '，已同步' + extraParts.join('、') : '';
+                    showSuccessToast((isTest ? '测试成功！' : '') + '芝麻分已提交：' + score + extraText);
                 } else {
                     if (!isTest) setWorkflowNode('zhima', 'failed', '芝麻分失败');
                     showErrorToast('芝麻分提交失败' + (submitErr && submitErr.message ? '（' + submitErr.message + '）' : ''));
@@ -9621,9 +9924,8 @@
     }
 
     function isNoLockSatisfied() {
-        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        const huabei = parseFloat(String(flowInputs[3]?.value || '').replace(/[^\d.]/g, '')) || 0;
-        const fenfu = parseFloat(String(flowInputs[4]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const huabei = parseFloat(String(document.getElementById('re-huabei-status')?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const fenfu = parseFloat(String(document.getElementById('re-wechat-fenfu')?.value || '').replace(/[^\d.]/g, '')) || 0;
         const v4Risk = getV4RiskValue();
         const phoneCost = parseFloat(String(document.getElementById('re-phone-cost')?.value || '').replace(/[^\d.]/g, '')) || 0;
         if (phoneCost <= 0) return false;
@@ -9632,9 +9934,8 @@
 
     // 无锁最低（沿用旧面板口径：0.9×成本 − 花呗 − 分付；成本未知返回 null）
     function getNoLockNeededAmount() {
-        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        const huabei = parseFloat(String(flowInputs[3]?.value || '').replace(/[^\d.]/g, '')) || 0;
-        const fenfu = parseFloat(String(flowInputs[4]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const huabei = parseFloat(String(document.getElementById('re-huabei-status')?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const fenfu = parseFloat(String(document.getElementById('re-wechat-fenfu')?.value || '').replace(/[^\d.]/g, '')) || 0;
         const phoneCost = parseFloat(String(document.getElementById('re-phone-cost')?.value || '').replace(/[^\d.]/g, '')) || 0;
         if (phoneCost <= 0) return null;
         return Math.max(0, Math.round((0.9 * phoneCost - huabei - fenfu) * 100) / 100);
@@ -9652,9 +9953,8 @@
 
     // 无锁比例：(花呗 + 分付 + V4) / 手机成本，向下取整；成本未知返回 null
     function getNoLockRatioPercent() {
-        const flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        const huabei = parseFloat(String(flowInputs[3]?.value || '').replace(/[^\d.]/g, '')) || 0;
-        const fenfu = parseFloat(String(flowInputs[4]?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const huabei = parseFloat(String(document.getElementById('re-huabei-status')?.value || '').replace(/[^\d.]/g, '')) || 0;
+        const fenfu = parseFloat(String(document.getElementById('re-wechat-fenfu')?.value || '').replace(/[^\d.]/g, '')) || 0;
         const v4Risk = getV4RiskValue();
         const phoneCost = parseFloat(String(document.getElementById('re-phone-cost')?.value || '').replace(/[^\d.]/g, '')) || 0;
         if (phoneCost <= 0) return null;
@@ -11684,8 +11984,7 @@
         specialRemark: null,
         reduction: null,
         phoneCost: null,
-        v4Risk: null,
-        flowInputs: null
+        v4Risk: null
     };
 
     function getCachedElement(key, selector) {
@@ -11698,13 +11997,27 @@
     function updateRiskPreview() {
         const parts = [];
 
+        // 分组明细（V6.7.0 风控预览 Lightbox 浮窗渲染用）：0=基础情况 1=流水信息 2=方案备注 3=其他
+        const detailGroups = [
+            { title: '基础情况', items: [] },
+            { title: '流水信息', items: [] },
+            { title: '方案备注', items: [] },
+            { title: '其他', items: [] }
+        ];
+        // 双写：全文串（复制/历史/客服备注，顺序保持不变）+ 分组明细（浮窗展示）
+        function addPart(groupIdx, text) {
+            if (!text) return;
+            parts.push(text);
+            detailGroups[groupIdx].items.push(text);
+        }
+
         const oldDeviceChecked = getCachedElement('oldDevice', '#re-old-device')?.checked || false;
         const oldDeviceSelect = getCachedElement('oldDeviceSelect', '.re-old-device-select')?.value || '';
         const oldDeviceAmount = getCachedElement('oldDeviceAmount', '#re-old-device-amount')?.value || '';
         if (oldDeviceChecked) {
-            if (oldDeviceAmount) parts.push('旧机置换：' + oldDeviceAmount);
+            if (oldDeviceAmount) addPart(0, '旧机置换：' + oldDeviceAmount);
         } else {
-            if (oldDeviceSelect) parts.push('旧机选项：' + oldDeviceSelect);
+            if (oldDeviceSelect) addPart(0, '旧机选项：' + oldDeviceSelect);
         }
 
         const workOptionChecked = getCachedElement('workOption', '#re-work-option')?.checked || false;
@@ -11721,26 +12034,33 @@
             } else {
                 workText += (workText === '工作内容：' ? '' : '，') + '无任何工作材料证明此工作';
             }
-            parts.push(workText);
+            addPart(0, workText);
         } else {
-            parts.push('无任何工作记录');
+            addPart(0, '无任何工作记录');
         }
 
-        if (!cachedElements.flowInputs) {
-            cachedElements.flowInputs = panel.querySelectorAll('.re-flow-section .re-flow-item input');
-        }
-        const flowLabels = ['微信流水', '支宝流水', '芝麻信用', '花呗情况', '微信分付', '抖音月付', '美团月付', '支付分'];
-        cachedElements.flowInputs.forEach((input, index) => {
-            if (index < flowLabels.length && input.value.trim()) {
-                parts.push(flowLabels[index] + '：' + input.value.trim());
-            }
+        const flowFields = [
+            ['re-wechat-flow', '微信流水'],
+            ['re-alipay-flow', '支宝流水'],
+            ['re-zhima-credit', '芝麻信用'],
+            ['re-huabei-status', '花呗情况'],
+            ['re-alipay-assets', '支宝资产'],
+            ['re-wechat-fenfu', '微信分付'],
+            ['re-douyin-pay', '抖音月付'],
+            ['re-meituan-pay', '美团月付'],
+            ['re-wechat-credit-score', '支付分'],
+            ['re-wechat-balance', '微信余额']
+        ];
+        flowFields.forEach(function(field) {
+            const v = (document.getElementById(field[0])?.value || '').trim();
+            if (v) addPart(1, field[1] + '：' + v);
         });
 
         const shareRent = document.getElementById('re-share-rent')?.value?.trim() || '';
-        if (shareRent) parts.push('共租情况：' + shareRent);
+        if (shareRent) addPart(0, '共租情况：' + shareRent);
 
         const otherRemark = getCachedElement('otherRemark', '.re-other-remark-input')?.value || '';
-        if (otherRemark) parts.push('其他备注：' + otherRemark);
+        if (otherRemark) addPart(3, '其他备注：' + otherRemark);
 
         const auditPrice = getCachedElement('auditResult', '#re-audit-result')?.value || '';
         const auditResult = getCachedElement('orderResult', '#re-order-result')?.value || '';
@@ -11748,9 +12068,9 @@
         if (auditPrice && !noLockQualified) {
             if (noLockModeActive) {
                 // 无锁内上锁方式按机型命名：AppStore机型=禁止AppStore，其余=正常上锁
-                parts.push(getLockLabel() + '：' + auditPrice + '，' + auditResult);
+                addPart(2, getLockLabel() + '：' + auditPrice + '，' + auditResult);
             } else {
-                parts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+                addPart(2, (isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
             }
         }
 
@@ -11758,20 +12078,20 @@
         if (noLockModeActive) {
             // 无锁模式：无锁结果段不依赖拓展开关（不达标时与正常上锁段并存）
             const expandResult = getCachedElement('expandOrderResult', '#re-expand-order-result')?.value || '';
-            if (expandPriceVal) parts.push('无锁结果：' + expandPriceVal + '，' + expandResult);
+            if (expandPriceVal) addPart(2, '无锁结果：' + expandPriceVal + '，' + expandResult);
         } else {
             const expandChecked = getCachedElement('rentExpand', '#re-rent-expand')?.checked || false;
             if (expandChecked) {
                 const expandType = getCachedElement('expandType', '#re-expand-type')?.value || '';
                 const expandResult = getCachedElement('expandOrderResult', '#re-expand-order-result')?.value || '';
                 if (expandType && expandPriceVal) {
-                    parts.push(expandType.replace(/：$/, '') + '：' + expandPriceVal + ' ' + expandResult);
+                    addPart(2, expandType.replace(/：$/, '') + '：' + expandPriceVal + ' ' + expandResult);
                 }
             }
         }
 
         const specialRemark = getCachedElement('specialRemark', '#re-special-remark')?.value || '';
-        if (specialRemark) parts.push('客服备注：' + specialRemark);
+        if (specialRemark) addPart(3, '客服备注：' + specialRemark);
 
         let reductionText = '';
         const reductionEl = getCachedElement('reduction', '#re-risk-reduction');
@@ -11826,11 +12146,14 @@
             }
         }
 
-        if (reductionText) parts.push(reductionText);
-        if (expandReductionText) parts.push(expandReductionText);
+        if (reductionText) addPart(2, reductionText);
+        if (expandReductionText) addPart(2, expandReductionText);
 
         const handleMethod = getCachedElement('handleMethod', '#re-handle-method')?.value || '';
-        if (handleMethod) parts.push('办理方式：' + handleMethod);
+        if (handleMethod) addPart(2, '办理方式：' + handleMethod);
+
+        // 分组明细交给 Lightbox 浮窗渲染（声明在风控预览详情组件内）
+        lastRiskPreviewGroups = detailGroups;
 
         if (riskPreviewText) {
             if (parts.length > 0) {
@@ -11866,13 +12189,20 @@
         }
     }
 
+    // 点击风控预览 → 展开 Lightbox 分组详情浮窗（V6.7.0）；
+    // 框选识别（同历史行逻辑）：按下拖动过或有文本选区时不当作点击，方便框选复制预览文本
+    let riskPrevDownX = 0, riskPrevDownY = 0, riskPrevDragging = false;
+    riskPreviewText?.addEventListener('mousedown', function(e) {
+        riskPrevDownX = e.clientX; riskPrevDownY = e.clientY; riskPrevDragging = false;
+    });
+    riskPreviewText?.addEventListener('mousemove', function(e) {
+        if (e.buttons && Math.hypot(e.clientX - riskPrevDownX, e.clientY - riskPrevDownY) > 4) riskPrevDragging = true;
+    });
     riskPreviewText?.addEventListener('click', function() {
-        if (this.classList.contains('clickable')) {
-            const fullText = this.getAttribute('data-full-text');
-            if (fullText) {
-                showTooltip(fullText, window.innerWidth / 2, window.innerHeight / 2);
-            }
-        }
+        if (riskPrevDragging) return;
+        if (window.getSelection && String(window.getSelection())) return;
+        if (!this.getAttribute('data-full-text')) return; // 空态不响应
+        openRiskDetailCard(this);
     });
 
     const riskCopyBtn = document.getElementById('re-risk-copy-btn');
@@ -12341,7 +12671,7 @@
         });
     }
 
-    // 流水输入/手机成本变化时重判无锁条件（花呗情况=flowInputs[3]，微信分付=flowInputs[4]）
+    // 流水输入/手机成本变化时重判无锁条件（按 ID 取值：花呗情况、微信分付）
     ['re-huabei-status', 're-wechat-fenfu', 're-phone-cost'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', revalidateNoLock);
@@ -12603,6 +12933,12 @@
         if (otherRemark) {
             remarkParts.push(otherRemark);
         }
+
+        // 支宝资产/微信余额：拼接到其他备注之后（不单独提交指定字段）
+        const alipayAssets = (document.getElementById('re-alipay-assets')?.value || '').trim();
+        const wechatBalanceText = (document.getElementById('re-wechat-balance')?.value || '').trim();
+        if (alipayAssets) remarkParts.push('支宝资产：' + alipayAssets);
+        if (wechatBalanceText) remarkParts.push('微信余额：' + wechatBalanceText);
 
         // 添加审核结果
         const auditPrice = (document.getElementById('re-audit-result')?.value || '').trim();
