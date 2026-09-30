@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.7.0
+// @version      6.8.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.7.0</span>
+                    <span class="re-panel-version">V6.8.0</span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <div class="re-panel-header-right">
@@ -1326,78 +1326,6 @@
             vertical-align: middle;
         }
 
-        .re-restrict-appstore {
-            display: inline-block;
-            position: relative;
-            background: transparent;
-            color: #9ca3af;
-            border: 1px solid #d1d5db;
-            font-size: 13px;
-            padding: 1px 8px;
-            border-radius: 4px;
-            margin-left: 6px;
-            font-weight: 600;
-            vertical-align: middle;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .re-restrict-appstore:hover {
-            border-color: #dc2626;
-            color: #dc2626;
-        }
-
-        .re-restrict-appstore.active {
-            background: #dc2626;
-            border-color: #dc2626;
-            color: #fff;
-        }
-
-        .re-restrict-appstore.active:hover {
-            background: #b91c1c;
-            border-color: #b91c1c;
-        }
-
-        .re-restrict-tip {
-            position: absolute;
-            top: calc(100% + 10px);
-            left: 0;
-            width: 250px;
-            padding: 10px 12px;
-            background: #1f2937;
-            color: #f9fafb;
-            font-size: 12px;
-            font-weight: 400;
-            line-height: 1.7;
-            text-align: left;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-            z-index: 10001;
-            pointer-events: none;
-            visibility: hidden;
-            opacity: 0;
-            transform: translateY(4px);
-            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
-        }
-
-        .re-restrict-tip::before {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: 14px;
-            width: 8px;
-            height: 8px;
-            background: #1f2937;
-            transform: rotate(45deg);
-        }
-
-        .re-restrict-appstore:hover .re-restrict-tip {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         #re-expand-business-title {
             justify-content: flex-start;
             gap: 8px;
@@ -1410,8 +1338,7 @@
         }
 
         .re-expand-badges .re-overage-customer,
-        .re-expand-badges .re-repeat-customer,
-        .re-expand-badges .re-restrict-appstore {
+        .re-expand-badges .re-repeat-customer {
             margin-right: 0;
             margin-left: 0;
         }
@@ -1978,11 +1905,6 @@
         .re-history-tag-nolock {
             background: #dbeafe;
             color: #1d4ed8;
-        }
-
-        .re-history-tag-appstore {
-            background: #fef3c7;
-            color: #b45309;
         }
 
         .re-history-tag-repeat {
@@ -7449,11 +7371,6 @@
     function collectOrderTags() {
         const tags = [];
         if (typeof noLockModeActive !== 'undefined' && noLockModeActive) tags.push('无锁模式');
-        // 机型+胶囊开启即打标（与上锁命名口径一致）；无锁达标态不打（备注只有无锁结果，无上锁方案）
-        const restrictTagged = (typeof isRestrictAppStoreActive === 'function' && isRestrictAppStoreActive())
-            && !(typeof noLockModeActive !== 'undefined' && noLockModeActive
-                && typeof isNoLockQualified === 'function' && isNoLockQualified());
-        if (restrictTagged) tags.push('禁止AppStore');
         if (document.querySelector('#re-expand-restrict-badge .re-history-same-model')) tags.push('历史同机型');
         if (typeof isSameDeviceModel === 'function' && isSameDeviceModel()) tags.push('设备相同');
         try {
@@ -7469,7 +7386,6 @@
     // 历史标签 → 样式类映射
     function getHistoryTagClass(tag) {
         if (tag === '无锁模式') return 're-history-tag-nolock';
-        if (tag === '禁止AppStore') return 're-history-tag-appstore';
         if (tag === '复购客户') return 're-history-tag-repeat';
         return 're-history-tag-risk';
     }
@@ -7477,7 +7393,7 @@
     // 历史标签筛选状态（月份标题右侧下拉，全局生效）
     let historyTagFilter = '';
 
-    const HISTORY_TAG_OPTIONS = ['无锁模式', '禁止AppStore', '复购客户', '超龄客户', '设备相同', '历史同机型'];
+    const HISTORY_TAG_OPTIONS = ['无锁模式', '复购客户', '超龄客户', '设备相同', '历史同机型'];
 
     // 筛选下拉的选项 HTML（月份标题与空态操作栏共用）
     function buildTagFilterOptionsHtml() {
@@ -9838,11 +9754,6 @@
         }
     }
 
-    function isRestrictAppStoreModel() {
-        // 16 Pro / 16 Pro Max + iPhone 17 / 18 全系（17 / 17 Pro / 17 Pro Max / 18 / 18 Pro / 18 Pro Max，不含 17e / 17 Air / 18e / 18 Air；新机 + 二手）
-        return /(16\s*pro|1[78](?!\s*(e|air)|\d))/i.test(cachedProductModel);
-    }
-
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
     function extractModelToken(s) {
         const n = (s || '').toLowerCase().replace(/\s+/g, '').replace(/（[^）]*）|\([^)]*\)/g, '');
@@ -9860,57 +9771,13 @@
         return !!(userToken && orderToken && userToken === orderToken);
     }
 
-    // 禁止AppStore手动开关（全局记住）：关闭=方案一/方案二，开启=禁止AppStore/禁止AppStore+限制ID
-    let restrictAppStoreEnabled = GM_getValue('re-restrict-appstore-enabled', false);
-    let lastRestrictToastKey = '';
-
-    function isRestrictAppStoreActive() {
-        return isRestrictAppStoreModel() && restrictAppStoreEnabled;
-    }
-
-    // 上锁字段名三态：非无锁「审核价格」；无锁内看机型+胶囊开关——AppStore机型且胶囊亮「禁止AppStore」，其余「正常上锁」
-    // （无锁内点胶囊可实时切换上锁命名；非AppStore机型胶囊不渲染，恒为正常上锁）
+    // 上锁字段名两态：非无锁「审核价格」；无锁内恒为「正常上锁」
     function getLockLabel() {
         if (!noLockModeActive) return '审核价格';
-        return isRestrictAppStoreActive() ? '禁止AppStore' : '正常上锁';
+        return '正常上锁';
     }
 
-    function setRestrictAppStoreEnabled(enabled) {
-        restrictAppStoreEnabled = enabled;
-        GM_setValue('re-restrict-appstore-enabled', enabled);
-
-        // 刷新胶囊开关状态
-        const badge = document.querySelector('#re-expand-restrict-badge .re-restrict-appstore');
-        if (badge) badge.classList.toggle('active', enabled);
-
-        // 无锁模式内切换胶囊时，同步刷新上锁字段命名（亮=禁止AppStore，灭=正常上锁）
-        if (typeof noLockModeActive !== 'undefined' && noLockModeActive) {
-            refreshNoLockUI();
-        }
-
-        // 刷新主预览与风控预览标签
-        if (typeof updatePreview === 'function') updatePreview();
-        if (typeof updateRiskPreview === 'function') updateRiskPreview();
-
-        // 拓展开关已开启且当前为默认类型时，同步切换默认拓展类型
-        const expandSwitch = document.getElementById('re-rent-expand');
-        const expandSelect = expandSwitch?.closest('.re-data-form-inline')?.querySelector('.re-rent-expand-select');
-        if (expandSwitch?.checked && expandSelect) {
-            const cur = expandSelect.value;
-            if (cur === '方案二：' || cur === '禁止AppStore+限制ID：') {
-                const newDefault = enabled ? '禁止AppStore+限制ID：' : '方案二：';
-                if (!Array.from(expandSelect.options).some(o => o.value === newDefault)) {
-                    const opt = document.createElement('option');
-                    opt.textContent = newDefault;
-                    expandSelect.appendChild(opt);
-                }
-                expandSelect.value = newDefault;
-                expandSelect.dispatchEvent(new Event('change'));
-            }
-        }
-    }
-
-    // ==================== 无锁模式（每单重置，不持久化；与禁止AppStore互斥） ====================
+    // ==================== 无锁模式（每单重置，不持久化） ====================
     let noLockModeActive = false;
     let noLockOrderSnapshot = '';      // 进入无锁模式时的订单号，用于切单重置
     let noLockExpandSnapshot = null;   // 进入无锁模式时拓展开关的状态快照，退出时恢复
@@ -9999,7 +9866,7 @@
         if (btn) btn.classList.toggle('re-no-lock-btn-active', noLockModeActive);
         panel.classList.toggle('re-no-lock-mode', noLockModeActive);
 
-        // 审核价格 → 上锁方式命名（无锁内AppStore机型=禁止AppStore，其余=正常上锁）
+        // 审核价格 → 上锁方式命名（无锁内恒为正常上锁）
         if (auditLabel) auditLabel.textContent = getLockLabel();
 
         // 达标时隐藏正常上锁行（正常上锁输入框 + 审核结果下拉整行消失，只留无锁结果）
@@ -10777,12 +10644,9 @@
                 cachedDiscount = null;
             }
             if (expandTitleTextEl) expandTitleTextEl.textContent = newTitle;
-            // 标题右侧胶囊：禁止AppStore / 超龄客户 / 复购客户（复购可点击查询历史订单）
+            // 标题右侧胶囊：超龄客户 / 复购客户（复购可点击查询历史订单）
             if (expandBadgeEl) {
                 let badges = '';
-                // 话术中的机型系列按本单实际机型生成（16系/17系）
-                const restrictModelLabel = /16\s*pro/i.test(cachedProductModel) ? '16pro、16promax' : '17、17pro、17promax';
-                if (isRestrictAppStoreModel()) badges += '<span class="re-restrict-appstore' + (restrictAppStoreEnabled ? ' active' : '') + '">禁止AppStore<span class="re-restrict-tip">对客户：您好，您现在办理的订单是禁止苹果商店+限制ID的方案，在还款期间您无法切换 id，并且只能用我们的应用商店下载软件，请问是否接受？ 【对商家：您现在办理的是' + restrictModelLabel + '新机，全新机拆封后退单是需要支付折损费的，您这边需要跟客户沟通好是否能接受限制，若接受限制再办理，若不接受请勿拆封！】</span></span>';
                 if (isSameDeviceModel()) badges += '<span class="re-same-model-badge" title="用户机型与本单机型相同，客户疑似办理相同设备">设备相同</span>';
                 // 超龄/复购直接按阈值计算（header 胶囊已移除，不再从 headerText 判断）
                 const headerText = panel.querySelector('.re-header-data')?.textContent || '';
@@ -10799,23 +10663,11 @@
                 expandBadgeEl.onclick = function(e) {
                     if (e.target.classList.contains('re-repeat-customer')) {
                         queryRepeatOrders();
-                    } else if (e.target.classList.contains('re-restrict-appstore')) {
-                        setRestrictAppStoreEnabled(!restrictAppStoreEnabled);
-                        showSuccessToast(restrictAppStoreEnabled ? '禁止AppStore备注：已开启' : '禁止AppStore备注：已关闭');
                     }
                 };
 
                 // 胶囊区 innerHTML 重建会清掉无锁胶囊；模式仍激活时补回并同步行显隐
                 if (noLockModeActive) refreshNoLockUI();
-
-                // 检测到禁止AppStore机型且开关为关闭态时提醒（同一客户同机型只提醒一次）
-                if (isRestrictAppStoreModel() && !restrictAppStoreEnabled) {
-                    const toastKey = (cachedName || '') + '|' + (cachedProductModel || '');
-                    if (toastKey !== lastRestrictToastKey) {
-                        lastRestrictToastKey = toastKey;
-                        showErrorToast('此订单检测为 Appstore 机型，请注意点击胶囊开启相关备注');
-                    }
-                }
             }
 
             updatePricePlaceholder();
@@ -11788,8 +11640,8 @@
             if (this.checked) {
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
-                // 默认写入并选中拓展类型（16Pro/16ProMax/17Pro/17ProMax 机型特殊处理）
-                const defaultExpandType = isRestrictAppStoreActive() ? '禁止AppStore+限制ID：' : '方案二：';
+                // 默认写入并选中拓展类型
+                const defaultExpandType = '方案二：';
                 if (!Array.from(rentExpandSelect.options).some(o => o.value === defaultExpandType)) {
                     const opt = document.createElement('option');
                     opt.textContent = defaultExpandType;
@@ -11841,7 +11693,7 @@
         const previewBox = document.querySelector('.re-preview-box');
 
         if (staffRemarkBtn) {
-            if (!previewContent || previewContent === '请先填 审核价格' || previewContent === '请先填 正常上锁' || previewContent === '请先填 禁止AppStore' || previewContent === '请先填 无锁结果' || previewContent === '订单取消') {
+            if (!previewContent || previewContent === '请先填 审核价格' || previewContent === '请先填 正常上锁' || previewContent === '请先填 无锁结果' || previewContent === '订单取消') {
                 staffRemarkBtn.classList.add('disabled');
                 staffRemarkBtn.setAttribute('disabled', 'true');
             } else {
@@ -11869,12 +11721,12 @@
             } else if (auditText.trim() === '') {
                 previewMain.innerHTML = '<span class="re-preview-placeholder">请先填 ' + getLockLabel() + '</span>';
             } else if (noLockModeActive) {
-                // 无锁模式话术：客户姓名 | 上锁方式（AppStore机型=禁止AppStore，其余=正常上锁）：价格，审核结果
+                // 无锁模式话术：客户姓名 | 上锁方式（正常上锁）：价格，审核结果
                 let previewText = (cachedName ? cachedName : '') + ' | ' + getLockLabel() + '：' + auditText + '，' + orderResult;
                 previewMain.textContent = previewText;
             } else {
                 let previewText = '';
-                const mainLabel = isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：';
+                const mainLabel = '方案一：';
                 if (cachedName) {
                     previewText = cachedName + '：' + mainLabel + auditText + ' ' + orderResult;
                 } else {
@@ -11916,7 +11768,7 @@
 
         const finalContent = previewContentEl ? previewContentEl.textContent.trim() : '';
         if (previewBox) {
-            if (!finalContent || finalContent === '请先填 审核价格' || finalContent === '请先填 正常上锁' || finalContent === '请先填 禁止AppStore' || finalContent === '请先填 无锁结果') {
+            if (!finalContent || finalContent === '请先填 审核价格' || finalContent === '请先填 正常上锁' || finalContent === '请先填 无锁结果') {
                 previewBox.classList.add('empty');
             } else {
                 previewBox.classList.remove('empty');
@@ -12067,10 +11919,10 @@
         const noLockQualified = isNoLockQualified();
         if (auditPrice && !noLockQualified) {
             if (noLockModeActive) {
-                // 无锁内上锁方式按机型命名：AppStore机型=禁止AppStore，其余=正常上锁
+                // 无锁内上锁方式恒为正常上锁
                 addPart(2, getLockLabel() + '：' + auditPrice + '，' + auditResult);
             } else {
-                addPart(2, (isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+                addPart(2, '方案一：' + auditPrice + ' ' + auditResult);
             }
         }
 
@@ -12640,7 +12492,7 @@
         });
     }
 
-    // 无锁模式按钮：点击进入/退出；进入前校验综合风险T1/T2、V4刷新（与禁止AppStore已不互斥，上锁命名按机型自动判定）
+    // 无锁模式按钮：点击进入/退出；进入前校验综合风险T1/T2、V4刷新（上锁命名恒为正常上锁）
     const noLockModeBtn = document.getElementById('re-btn-no-lock');
     if (noLockModeBtn) {
         noLockModeBtn.addEventListener('click', function() {
@@ -12946,10 +12798,10 @@
         const noLockQualified = isNoLockQualified();
         if (auditPrice && auditResult && !noLockQualified) {
             if (noLockModeActive) {
-                // 无锁内上锁方式按机型命名：AppStore机型=禁止AppStore，其余=正常上锁
+                // 无锁内上锁方式恒为正常上锁
                 remarkParts.push(getLockLabel() + '：' + auditPrice + '，' + auditResult);
             } else {
-                remarkParts.push((isRestrictAppStoreActive() ? '禁止AppStore：' : '方案一：') + auditPrice + ' ' + auditResult);
+                remarkParts.push('方案一：' + auditPrice + ' ' + auditResult);
             }
         }
 
