@@ -6215,6 +6215,7 @@
         .re-review-tag-resubmit { background: #fef9c3; color: #a16207; }
         .re-review-tag-rejected { background: #fee2e2; color: #dc2626; }
         .re-review-tag-buyout { background: #fef3c7; color: #b45309; }
+        .re-review-tag-nolock { background: #e0e7ff; color: #4f46e5; }
         .re-review-tag-gray { background: #f3f4f6; color: #4b5563; }
         .re-review-tag-failed { background: #fee2e2; color: #dc2626; }
         .re-review-tag-querying { background: #dbeafe; color: #2563eb; }
@@ -6226,6 +6227,7 @@
         .re-history-tag.re-review-tag-resubmit { background: #fef9c3; color: #a16207; }
         .re-history-tag.re-review-tag-rejected { background: #fee2e2; color: #dc2626; }
         .re-history-tag.re-review-tag-buyout { background: #fef3c7; color: #b45309; }
+        .re-history-tag.re-review-tag-nolock { background: #e0e7ff; color: #4f46e5; }
         .re-history-tag.re-review-tag-gray { background: #f3f4f6; color: #4b5563; }
 
         /* 「他人已通过」二选一确认弹窗内件 */
@@ -6645,7 +6647,8 @@
                     total: c.count,
                     reviewed: rec.reviewed,
                     passed: rec.passed,
-                    rate: rec.reviewed > 0 && c.count > 0 ? (rec.passed / c.count) : null
+                    // clamp 防越界：手动修正总量小于已通过数时，比率封顶 100%，避免点画到图表顶边外
+                    rate: rec.reviewed > 0 && c.count > 0 ? Math.min(rec.passed / c.count, 1) : null
                 };
             });
 
@@ -7379,8 +7382,8 @@
             if (found) {
                 const pct = Math.floor(found.rate * 100);
                 const extra = found.isZero
-                    ? '<br/><span style="color:#ef4444;">[全部未通过]</span>'
-                    : '<br/><span style="color:#9ca3af;font-size:11px;">已审查 ' + found.reviewed + ' / 共 ' + found.total + ' 单</span>';
+                    ? '<br/><span style="color:#ef4444;">已通过 0 / 共 ' + found.total + ' 单 [全部未通过]</span>'
+                    : '<br/><span style="color:#9ca3af;font-size:11px;">已通过 ' + found.passed + ' / 共 ' + found.total + ' 单（已审查 ' + found.reviewed + '）</span>';
                 tooltip.innerHTML = `<strong>${found.date}</strong><br/>通过率：${pct}%${extra}`;
                 tooltip.style.display = 'block';
                 tooltip.style.left = found.x + 'px';
@@ -8481,8 +8484,8 @@
         return orders;
     }
 
-    // 五分支判定：只看搜索结果第一个订单
-    function judgeReviewOrder(rows, staffName) {
+    // 五分支判定：只看搜索结果第一个订单；hasNoLockTag 用于豁免「无锁不满足跳过分配」的单
+    function judgeReviewOrder(rows, staffName, hasNoLockTag) {
         if (!rows || !rows.length) return { type: 'notfound', text: '未查到' };
         const first = rows[0];
         const staff = (first.videoStaff || '').trim();
@@ -8497,6 +8500,12 @@
         if (staff && staff === staffName && state === '待审核') return { type: 'reviewing', text: '审核中' };
         // ④ 客服=自己 + 已退单 → 已退单
         if (staff && staff === staffName && state === '已退单') return { type: 'rejected', text: '已退单' };
+        // 豁免分支：无锁不满足的单自动处理跳过客服分配（后台客服为空）——
+        // 该客户历史记录带「无锁模式」tag 且客服为空 + 待归还，判定为自己跳过分配的单，不再走⑤误报「疑似重新下单」
+        // （无锁达标的单正常分配，客服非空，不会命中此分支）
+        if (!staff && state === '待归还' && hasNoLockTag) {
+            return { type: 'nolockskip', text: '无锁·跳过分配' };
+        }
         // ⑤ 客服=空 + 待归还 → ⑤.1 比对同身份证尾号且客服备注含面板客服名的订单
         if (!staff && state === '待归还') {
             const matched = rows.find(r => r.idTail && idTail && r.idTail === idTail && (r.remark || '').includes(staffName));
@@ -8507,26 +8516,27 @@
         return { type: 'raw', text: state || '未知状态', rawState: state, rawStaff: staff };
     }
 
-    // 条目 → 胶囊展示（text + 配色类）
+    // 条目 → 胶囊展示（text + 配色类 + 悬浮解释）
     function getReviewStatusMeta(item) {
-        if (item.status === 'pending') return { text: '待查询', cls: 're-review-tag-gray' };
-        if (item.status === 'querying') return { text: '查询中…', cls: 're-review-tag-querying' };
-        if (item.status === 'failed') return { text: '查询失败', cls: 're-review-tag-failed', err: item.errorMsg || '' };
+        if (item.status === 'pending') return { text: '待查询', cls: 're-review-tag-gray', tip: '尚未查询，点【开始查询】批量处理' };
+        if (item.status === 'querying') return { text: '查询中…', cls: 're-review-tag-querying', tip: '正在请求后台查询该客户订单' };
+        if (item.status === 'failed') return { text: '查询失败', cls: 're-review-tag-failed', err: item.errorMsg || '', tip: '请求异常：' + (item.errorMsg || '网络错误') + '，点【更新】重试' };
         const r = item.result || {};
         switch (r.type) {
-            case 'pass': return { text: '已通过', cls: 're-review-tag-pass' };
-            case 'otherpass': return { text: (r.otherStaff || '他人') + ' 已通过 · 待确认', cls: 're-review-tag-other' };
-            case 'reviewing': return { text: '审核中', cls: 're-review-tag-reviewing' };
-            case 'resubmit': return { text: '疑似重新下单', cls: 're-review-tag-resubmit' };
-            case 'rejected': return { text: '已退单', cls: 're-review-tag-rejected' };
-            case 'manual': return { text: '待人工判断', cls: 're-review-tag-gray' };
-            case 'notfound': return { text: '未查到', cls: 're-review-tag-gray' };
+            case 'pass': return { text: '已通过', cls: 're-review-tag-pass', tip: '后台第一单：视频面审客服=你，状态=待归还' };
+            case 'otherpass': return { text: (r.otherStaff || '他人') + ' 已通过 · 待确认', cls: 're-review-tag-other', tip: '后台第一单：视频面审客服=' + (r.otherStaff || '他人') + '，状态=待归还；写回前需逐条二选一确认' };
+            case 'reviewing': return { text: '审核中', cls: 're-review-tag-reviewing', tip: '后台第一单：视频面审客服=你，状态=待审核' };
+            case 'resubmit': return { text: '疑似重新下单', cls: 're-review-tag-resubmit', tip: '后台第一单：客服为空、状态=待归还，且找到同身份证尾号+客服备注含你名的订单' };
+            case 'rejected': return { text: '已退单', cls: 're-review-tag-rejected', tip: '后台第一单：视频面审客服=你，状态=已退单' };
+            case 'nolockskip': return { text: '无锁·跳过分配', cls: 're-review-tag-nolock', tip: '无锁不满足的单自动处理跳过客服分配（后台客服为空），已豁免审查' };
+            case 'manual': return { text: '待人工判断', cls: 're-review-tag-gray', tip: '后台第一单：客服为空、状态=待归还，未找到关联订单，请人工确认' };
+            case 'notfound': return { text: '未查到', cls: 're-review-tag-gray', tip: '按姓名搜索后台无订单记录' };
             case 'raw':
                 // 后台原文状态分色：已买断=金、待审核=橙、其余=灰
-                if (r.rawState === '已买断') return { text: '已买断', cls: 're-review-tag-buyout' };
-                if (r.rawState === '待审核') return { text: '待审核', cls: 're-review-tag-reviewing' };
-                return { text: r.text || '未知', cls: 're-review-tag-gray' };
-            default: return { text: r.text || '未知', cls: 're-review-tag-gray' };
+                if (r.rawState === '已买断') return { text: '已买断', cls: 're-review-tag-buyout', tip: '后台状态=已买断（未命中判定规则组合），显示原文' };
+                if (r.rawState === '待审核') return { text: '待审核', cls: 're-review-tag-reviewing', tip: '后台状态=待审核，客服非你（空或他人），显示原文' };
+                return { text: r.text || '未知', cls: 're-review-tag-gray', tip: '后台原文状态：' + (r.rawState || '未知') + '（未命中判定规则组合）' };
+            default: return { text: r.text || '未知', cls: 're-review-tag-gray', tip: '' };
         }
     }
 
@@ -8596,7 +8606,7 @@
                 <div class="re-review-item${isQuerying ? ' querying' : ''}" data-review-name="${encodeURIComponent(it.name || '')}" title="${errPart}${refPart}${models ? models + ' ｜ ' : ''}点击在新标签页打开该客户的后台订单">
                     <span class="re-review-item-idx">${idx + 1}</span>
                     <span class="re-review-item-name">${it.name || '未知'}</span>
-                    <span class="re-review-tag ${meta.cls}">${meta.text}</span>
+                    <span class="re-review-tag ${meta.cls}"${meta.tip ? ' title="' + meta.tip + '"' : ''}>${meta.text}</span>
                     <button class="re-review-update" data-name="${encodeURIComponent(it.name || '')}"${(isQuerying || completed || reviewRunning) ? ' disabled' : ''}>更新</button>
                 </div>`;
         }).join('');
@@ -8673,14 +8683,17 @@
             const byName = {};
             dayRecords.forEach(r => {
                 const key = r.name || '未知';
-                if (!byName[key]) byName[key] = { name: key, models: [], recordIds: [] };
+                if (!byName[key]) byName[key] = { name: key, models: [], recordIds: [], hasNoLockTag: false };
                 if (r.model && !byName[key].models.includes(r.model)) byName[key].models.push(r.model);
+                // 无锁 tag：判定「无锁·跳过分配」用（无锁不满足时自动处理跳过客服分配，后台客服为空）
+                if (Array.isArray(r.tags) && r.tags.includes('无锁模式')) byName[key].hasNoLockTag = true;
                 byName[key].recordIds.push(r.id);
             });
             const items = Object.values(byName).map(it => ({
                 name: it.name,
                 models: it.models,
                 recordIds: it.recordIds,
+                hasNoLockTag: it.hasNoLockTag,
                 status: 'pending',
                 result: null
             }));
@@ -8730,7 +8743,7 @@
                     if (reviewAbortFlag) {
                         item.status = 'pending'; // 停止时不浪费结果位：退回待查询
                     } else {
-                        item.result = judgeReviewOrder(rows, reviewStaffName);
+                        item.result = judgeReviewOrder(rows, reviewStaffName, item.hasNoLockTag);
                         item.status = 'done';
                     }
                 } catch (err) {
@@ -8779,7 +8792,7 @@
         await sleepReview(600 + Math.random() * 400);
         try {
             const rows = await queryReviewOrderByName(item.name);
-            item.result = judgeReviewOrder(rows, reviewStaffName);
+            item.result = judgeReviewOrder(rows, reviewStaffName, item.hasNoLockTag);
             item.status = 'done';
             showSuccessToast('已更新：' + item.name + ' → ' + (item.result.text || ''));
         } catch (e) {
@@ -8804,6 +8817,7 @@
             reviewing: ['审核中', 're-review-tag-reviewing'],
             resubmit: ['疑似重新下单', 're-review-tag-resubmit'],
             rejected: ['已退单', 're-review-tag-rejected'],
+            nolockskip: ['无锁·跳过分配', 're-review-tag-nolock'],
             manual: ['待人工判断', 're-review-tag-gray'],
             notfound: ['未查到', 're-review-tag-gray']
         };
@@ -10498,6 +10512,13 @@
             savePanelPosition();
             panel.classList.remove('re-dragging');
             justFinishedInteraction = true;
+            // 面板尺寸变化后按新宽度重绘 canvas 图表（通过率波动/订单趋势），否则图不随面板伸缩
+            if (isResizing && lazyInit.analysis) {
+                const analysisPage = document.getElementById('re-page-analysis');
+                if (analysisPage && analysisPage.style.display !== 'none') {
+                    renderAnalysisData();
+                }
+            }
         }
         isDragging = false;
         isResizing = false;
