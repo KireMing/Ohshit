@@ -8564,8 +8564,8 @@
         const state = (first.state || '').trim();
         const idTail = (first.idTail || '').trim();
 
-        // ① 客服=自己 + 待归还 → 已通过
-        if (staff && staff === staffName && state === '待归还') return { type: 'pass', text: '已通过' };
+        // ① 客服=自己 + 待归还/已发货 → 已通过（已发货在待归还之后，面审已通过且机器已寄出，同通过道理）
+        if (staff && staff === staffName && (state === '待归还' || state === '已发货')) return { type: 'pass', text: '已通过' };
         // ② 客服=他人 + 待归还 → 他人已通过（写回前需人工二选一）
         if (staff && staff !== staffName && state === '待归还') return { type: 'otherpass', text: staff + ' 已通过', otherStaff: staff };
         // ③ 客服=自己 + 待审核 → 审核中
@@ -8596,7 +8596,7 @@
         if (item.status === 'failed') return { text: '查询失败', cls: 're-review-tag-failed', err: item.errorMsg || '', tip: '请求异常：' + (item.errorMsg || '网络错误') + '，点【更新】重试' };
         const r = item.result || {};
         switch (r.type) {
-            case 'pass': return { text: '已通过', cls: 're-review-tag-pass', tip: '后台第一单：视频面审客服=你，状态=待归还' };
+            case 'pass': return { text: '已通过', cls: 're-review-tag-pass', tip: '后台第一单：视频面审客服=你，状态=待归还/已发货' };
             case 'otherpass': return { text: (r.otherStaff || '他人') + ' 已通过 · 待确认', cls: 're-review-tag-other', tip: '后台第一单：视频面审客服=' + (r.otherStaff || '他人') + '，状态=待归还；写回前需逐条二选一确认' };
             case 'reviewing': return { text: '审核中', cls: 're-review-tag-reviewing', tip: '后台第一单：视频面审客服=你，状态=待审核' };
             case 'resubmit': return { text: '疑似重新下单', cls: 're-review-tag-resubmit', tip: '后台第一单：客服为空、状态=待归还，且找到同身份证尾号+客服备注含你名的订单' };
@@ -8668,6 +8668,12 @@
         } else {
             statusTip = '<span class="re-review-status-tip" style="color:#6b7280;">待查询 ' + pendingCount + ' 条</span>';
         }
+        // 重新分配次数：队列内【更新/分配】重查后由其他状态变为「已通过」的累计变化基数（同历史订单日期卡片「+x」），
+        // >0 才显示保持干净数据；各状态分支右侧常驻，不随查询状态消失
+        const plusCount = items.reduce((s, it) => s + (it.plus || 0), 0);
+        const plusTipHtml = plusCount
+            ? ' <span class="re-review-status-tip" style="color:#4f46e5;" title="该日【更新】重查后由其他状态变为「已通过」的新增单数（计入通过率分母，写回历史后即为日期卡片上的 +x）">重新分配 +' + plusCount + '</span>'
+            : '';
 
         // 状态筛选：按队列实际存在的状态动态生成选项；筛选值失效（状态已不存在）时自动回落「全部」
         const filterTexts = [];
@@ -8705,7 +8711,7 @@
                 <div class="re-review-toolbar-info">
                     <span class="re-review-date">${dateStr}</span>
                     <span class="re-review-meta">共 ${total} 单 · 已完成 ${doneCount}/${total}</span>
-                    ${statusTip}
+                    ${statusTip}${plusTipHtml}
                 </div>
                 <div class="re-review-btns">
                     <select class="re-review-filter" id="re-review-filter" title="按状态筛选：未选中状态的条目淡化显示">${filterOptionsHtml}</select>
