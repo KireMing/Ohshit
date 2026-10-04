@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      6.8.0
+// @version      7.0.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,11 +138,11 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V6.8.0</span>
+                    <span class="re-panel-version">V7.0.0</span>
+                    <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
                 <div class="re-panel-header-right">
-                    <span class="re-panel-points" id="re-panel-points" title="宠物点数（审核机型每日结算）"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="8" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="17" cy="8" r="2"/><path d="M12 11c-3 0-5.5 2.2-5.5 4.4 0 1.5 1.2 2.6 2.8 2.6 1 0 1.7-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1.1 2.8-2.6C17.5 13.2 15 11 12 11z"/></svg><span id="re-panel-points-num">0.0</span></span>
                     <span class="re-panel-staff" id="re-staff-name"></span>
                 </div>
             </div>
@@ -167,8 +167,8 @@
                             <li class="re-nav-item" data-page="analysis" title="分析">
                                 <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                             </li>
-                            <li class="re-nav-item" data-page="pet" title="养成">
-                                <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="16" rx="4.2" ry="3.6"/><circle cx="6.5" cy="10.5" r="1.7"/><circle cx="12" cy="8" r="1.7"/><circle cx="17.5" cy="10.5" r="1.7"/></svg>
+                            <li class="re-nav-item" data-page="review" title="审查中心">
+                                <svg class="re-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
                             </li>
                         </ul>
                     </div>
@@ -730,8 +730,26 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="re-form-section" id="re-page-review" style="display: none;">
+                            <div class="re-review-container" id="re-review-container">
+                                <div class="re-review-empty">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
+                                    <div class="re-review-empty-text">审查中心暂无待审查数据</div>
+                                    <div class="re-review-empty-tip">请到【历史订单】点击日期卡片上的【审查此列】按钮<br>将该日客户移入审查中心进行批量审查</div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="re-form-section" id="re-page-analysis" style="display: none;">
                             <div class="re-analysis-container">
+                                <div class="re-analysis-topbar">
+                                    <span class="re-analysis-pagetitle">数据分析</span>
+                                    <div class="re-range-tabs" id="re-analysis-range">
+                                        <button type="button" class="re-rtab" data-range="7d">近7天</button>
+                                        <button type="button" class="re-rtab" data-range="14d">近14天</button>
+                                        <button type="button" class="re-rtab on" data-range="month">本月</button>
+                                        <button type="button" class="re-rtab" data-range="lastmonth">上月</button>
+                                    </div>
+                                </div>
                                 <div class="re-analysis-overview">
                                     <div class="re-ov-card">
                                         <div class="re-ov-value" id="re-stat-total">0</div>
@@ -742,6 +760,11 @@
                                         <div class="re-ov-value" id="re-stat-daily-avg">0</div>
                                         <div class="re-ov-label" id="re-avg-label">工作日日均</div>
                                         <div class="re-ov-delta" id="re-ov-avg-delta" style="display:none;"></div>
+                                    </div>
+                                    <div class="re-ov-card re-stat-rate">
+                                        <div class="re-ov-value re-ov-rate" id="re-stat-pass-rate">--</div>
+                                        <div class="re-ov-label" id="re-rate-label">本月通过率</div>
+                                        <div class="re-ov-delta" id="re-rate-delta" style="display:none;"></div>
                                     </div>
                                     <div class="re-ov-card re-stat-high">
                                         <div class="re-ov-value" id="re-stat-max-orders">0</div>
@@ -754,96 +777,39 @@
                                 </div>
                                 <div class="re-analysis-section">
                                     <div class="re-analysis-header">
-                                        <span class="re-analysis-title">订单趋势分析</span>
-                                        <div class="re-range-tabs" id="re-analysis-range">
-                                            <button type="button" class="re-rtab" data-range="7d">近7天</button>
-                                            <button type="button" class="re-rtab" data-range="14d">近14天</button>
-                                            <button type="button" class="re-rtab on" data-range="month">本月</button>
-                                            <button type="button" class="re-rtab" data-range="lastmonth">上月</button>
+                                        <span class="re-analysis-title">每日通过率波动</span>
+                                        <div class="re-rate-legend">
+                                            <span class="re-rate-lg"><i class="re-rate-dot g"></i>已审查日</span>
+                                            <span class="re-rate-lg"><i class="re-rate-dot r"></i>0% 全未通过</span>
+                                            <span class="re-rate-lg"><i class="re-rate-dot h"></i>断点=当日未审查</span>
                                         </div>
                                     </div>
                                     <div class="re-chart-card">
-                                        <canvas id="re-order-chart"></canvas>
-                                        <div id="re-chart-tooltip" class="re-chart-tooltip" style="display: none;"></div>
+                                        <canvas id="re-rate-chart"></canvas>
+                                        <div id="re-rate-tooltip" class="re-chart-tooltip" style="display: none;"></div>
                                     </div>
                                 </div>
                                 <div class="re-analysis-divider"></div>
-                                <div class="re-analysis-section">
-                                    <div class="re-analysis-header">
-                                        <span class="re-analysis-title">机型审核量分析</span>
-                                        <div class="re-range-tabs" id="re-model-range">
-                                            <button type="button" class="re-rtab on" data-top="5">Top 5</button>
-                                            <button type="button" class="re-rtab" data-top="10">Top 10</button>
+                                <div class="re-analysis-two">
+                                    <div class="re-analysis-section">
+                                        <div class="re-analysis-header">
+                                            <span class="re-analysis-title">订单趋势分析</span>
+                                        </div>
+                                        <div class="re-chart-card">
+                                            <canvas id="re-order-chart"></canvas>
+                                            <div id="re-chart-tooltip" class="re-chart-tooltip" style="display: none;"></div>
                                         </div>
                                     </div>
-                                    <div id="re-model-chart-wrap" class="re-model-chart-wrap"></div>
-                                    <div class="re-model-legend" id="re-model-legend"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- 养成页：五只纸绘伙伴，养满一只解锁下一只，已解锁可自由切换主养 -->
-                        <div class="re-form-section" id="re-page-pet" style="display: none;">
-                            <div class="re-pet-wrap">
-                                <div class="re-pet-tabs" id="re-pet-tabs"></div>
-                                <div class="re-pet-main">
-                                    <div class="re-pet-stage-box" id="re-pet-stage-box">
-                                        <div class="re-pet-stage" id="re-pet-stage"></div>
-                                    </div>
-                                    <div class="re-pet-info">
-                                        <div class="re-pet-name-row">
-                                            <span class="re-pet-name" id="re-pet-name">小猫</span>
-                                            <span class="re-pet-line" id="re-pet-line">招财线</span>
-                                        </div>
-                                        <div class="re-pet-stage-name" id="re-pet-stage-name">纸蛋</div>
-                                        <div class="re-pet-level-row">
-                                            <span class="re-pet-level" id="re-pet-level">Lv 1</span>
-                                            <span class="re-pet-mood" id="re-pet-mood"></span>
-                                        </div>
-                                        <div class="re-pet-exp-bar">
-                                            <div class="re-pet-exp-fill" id="re-pet-exp-fill"></div>
-                                            <span class="re-pet-exp-text" id="re-pet-exp-text">0 / 50</span>
-                                        </div>
-                                        <div class="re-pet-stats">
-                                            <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-today-exp">0</span><label class="re-pet-stat-l">今日经验</label></div>
-                                            <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-total-exp">0</span><label class="re-pet-stat-l">累计经验</label></div>
-                                            <div class="re-pet-stat"><span class="re-pet-stat-v" id="re-pet-feed-count">0</span><label class="re-pet-stat-l">喂养次数</label></div>
-                                        </div>
-                                        <div class="re-pet-hint" id="re-pet-hint">办单即喂养：分配+2 · 客服备注+3 · 风控备注+3 · 自动处理+5 · 历史+2 · 一单全自动共+15 · 单日无上限</div>
-                                    </div>
-                                </div>
-                                <div class="re-pet-bottom">
-                                    <div class="re-pet-log-col">
-                                        <div class="re-pet-log-title">喂养日志</div>
-                                        <div class="re-pet-log" id="re-pet-log"></div>
-                                    </div>
-                                    <div class="re-pet-shop-col">
-                                        <div class="re-pet-shop-head">
-                                            <span class="re-pet-shop-title">宠物道具</span>
-                                            <span class="re-pet-points" id="re-pet-points">点数 0.0</span>
-                                        </div>
-                                        <div class="re-pet-shop" id="re-pet-shop">
-                                            <div class="re-pet-item">
-                                                <div class="re-pet-item-name-row">
-                                                    <span class="re-pet-item-name">倍数丸</span>
-                                                    <span class="re-pet-item-tag" id="re-pet-double-tag" style="display:none;">生效中</span>
-                                                </div>
-                                                <div class="re-pet-item-desc">当日获得经验 ×2</div>
-                                                <div class="re-pet-item-foot">
-                                                    <span class="re-pet-item-price">40 点</span>
-                                                    <button class="re-pet-item-btn" data-item="doublePill" id="re-pet-double-btn">购买</button>
-                                                </div>
-                                            </div>
-                                            <div class="re-pet-item">
-                                                <div class="re-pet-item-name-row">
-                                                    <span class="re-pet-item-name">直升丸</span>
-                                                </div>
-                                                <div class="re-pet-item-desc">直接升 1 级</div>
-                                                <div class="re-pet-item-foot">
-                                                    <span class="re-pet-item-price">500 点</span>
-                                                    <button class="re-pet-item-btn" data-item="levelPill" id="re-pet-level-btn">购买</button>
-                                                </div>
+                                    <div class="re-analysis-section">
+                                        <div class="re-analysis-header">
+                                            <span class="re-analysis-title">机型审核量分析</span>
+                                            <div class="re-range-tabs" id="re-model-range">
+                                                <button type="button" class="re-rtab on" data-top="5">Top 5</button>
+                                                <button type="button" class="re-rtab" data-top="10">Top 10</button>
                                             </div>
                                         </div>
+                                        <div id="re-model-chart-wrap" class="re-model-chart-wrap"></div>
+                                        <div class="re-model-legend" id="re-model-legend"></div>
                                     </div>
                                 </div>
                             </div>
@@ -1186,24 +1152,8 @@
         .re-panel-header-right {
             display: flex;
             align-items: center;
-            margin-left: auto; /* 右组整体贴右，点数徽章紧贴客服名左侧 */
+            margin-left: auto; /* 右组整体贴右 */
         }
-        /* 宠物点数徽章：深灰主题（V6.4.4） */
-        .re-panel-points {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: rgba(24, 24, 27, 0.82);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            color: #d4d4d8;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            letter-spacing: 0.2px;
-        }
-        .re-panel-points svg { flex-shrink: 0; opacity: 0.85; }
 
         .re-panel-staff {
             font-size: 12px;
@@ -1576,6 +1526,18 @@
             border-radius: 6px;
         }
 
+        /* 月通过率胶囊（审查结果绿标占比，与「已通过」审查胶囊同绿色系） */
+        .re-history-month-rate {
+            font-size: 12px;
+            font-weight: 600;
+            color: #16a34a;
+            background: #dcfce7;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
         .re-history-month-export {
             width: 28px;
             height: 28px;
@@ -1691,6 +1653,18 @@
             background: rgba(107, 114, 128, 0.1);
             padding: 2px 6px;
             border-radius: 4px;
+        }
+
+        /* 当日通过率胶囊（审查结果绿标占比，与「已通过」审查胶囊同绿色系） */
+        .re-history-day-rate {
+            font-size: 11px;
+            font-weight: 600;
+            color: #16a34a;
+            background: #dcfce7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .re-history-day-actions {
@@ -2441,6 +2415,68 @@
         .re-ov-delta.up { color: #10b981; }
         .re-ov-delta.down { color: #ef4444; }
         .re-ov-delta.flat { color: #9ca3af; font-weight: 400; }
+
+        /* 分析页顶部全局范围栏（范围选择器联动所有图表与 KPI） */
+        .re-analysis-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(96, 165, 250, 0.05) 100%);
+            border: 1px solid rgba(107, 114, 128, 0.15);
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-bottom: 16px;
+        }
+
+        .re-analysis-pagetitle {
+            font-size: 15px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* 订单趋势 + 机型审核量 双列并排（面板宽度不足时自动退化为单列） */
+        .re-analysis-two {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 12px;
+        }
+
+        /* 通过率 KPI 卡（绿边绿字） */
+        .re-ov-card.re-stat-rate {
+            border-left: 3px solid #16a34a;
+        }
+
+        .re-ov-value.re-ov-rate {
+            color: #16a34a;
+        }
+
+        /* 通过率波动图图例 */
+        .re-rate-legend {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .re-rate-lg {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .re-rate-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .re-rate-dot.g { background: #16a34a; }
+        .re-rate-dot.r { background: #dc2626; }
+        .re-rate-dot.h { background: none; border: 1px dashed #9ca3af; }
 
         /* 范围分段标签 */
         .re-range-tabs {
@@ -5772,392 +5808,6 @@
             color: #1d4ed8;
         }
 
-        /* ===== 养成模块（V6.4.0）===== */
-        /* 养成页撑满中列高度，让日志区吃掉剩余空间（页面显示时为 display:flex） */
-        #re-page-pet { min-height: 100%; }
-        .re-pet-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            flex: 1 0 auto;
-            min-height: 0;
-        }
-        .re-pet-tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .re-pet-tab {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(107, 114, 128, 0.25);
-            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
-            font-size: 12px;
-            color: #4b5563;
-            cursor: pointer;
-            transition: border-color .15s, color .15s, transform .15s;
-        }
-        .re-pet-tab:hover { transform: translateY(-1px); border-color: rgba(59, 130, 246, 0.5); }
-        .re-pet-tab.active {
-            border-color: #3b82f6;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-        .re-pet-tab .re-pet-tab-lock { font-size: 11px; color: #9ca3af; }
-        .re-pet-tab .re-pet-tab-lv { font-size: 11px; color: #9ca3af; }
-        .re-pet-tab.active .re-pet-tab-lv { color: #3b82f6; }
-        .re-pet-main {
-            display: flex;
-            gap: 20px;
-            align-items: stretch;
-        }
-        .re-pet-stage-box {
-            flex-shrink: 0;
-            width: 220px;
-            height: 205px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            border: 1px solid rgba(107, 114, 128, 0.15);
-            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
-            overflow: hidden;
-            position: relative;
-        }
-        .re-pet-stage-box svg { width: 190px; height: auto; }
-        .re-pet-stage-box svg.re-pet-sad { filter: grayscale(0.65); }
-        .re-pet-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            min-width: 0;
-        }
-        .re-pet-name-row { display: flex; align-items: center; gap: 10px; }
-        .re-pet-name { font-size: 18px; font-weight: 700; color: #1f2937; }
-        .re-pet-line {
-            font-size: 11px;
-            padding: 2px 10px;
-            border-radius: 999px;
-            background: rgba(59, 130, 246, 0.1);
-            color: #2563eb;
-        }
-        .re-pet-stage-name { font-size: 13px; color: #6b7280; }
-        .re-pet-level-row { display: flex; align-items: center; gap: 12px; }
-        .re-pet-level { font-size: 14px; font-weight: 700; color: #d97706; }
-        .re-pet-mood { font-size: 12px; color: #6b7280; }
-        .re-pet-exp-bar {
-            position: relative;
-            height: 18px;
-            border-radius: 999px;
-            background: rgba(107, 114, 128, 0.15);
-            overflow: hidden;
-        }
-        .re-pet-exp-fill {
-            height: 100%;
-            width: 0%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #f59e0b, #fbbf24);
-            transition: width .5s ease;
-        }
-        .re-pet-exp-fill.re-pet-exp-flash { animation: re-pet-flash .6s ease 2; }
-        @keyframes re-pet-flash {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.8); }
-        }
-        .re-pet-exp-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            color: #374151;
-            text-shadow: 0 0 3px rgba(255,255,255,.8);
-        }
-        .re-pet-stats { display: flex; gap: 10px; }
-        .re-pet-stat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 8px 4px;
-            border-radius: 8px;
-            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
-            border: 1px solid rgba(107, 114, 128, 0.15);
-        }
-        .re-pet-stat-v { font-size: 15px; font-weight: 700; color: #1f2937; }
-        .re-pet-stat-l { font-size: 11px; color: #9ca3af; }
-        .re-pet-hint { font-size: 11px; color: #9ca3af; line-height: 1.5; }
-        .re-pet-log-title { font-size: 12px; font-weight: 600; color: #6b7280; }
-        .re-pet-log {
-            flex: 1 1 auto;    /* 吃掉页面剩余高度 */
-            min-height: 150px; /* 再小也保底可见 5 条左右 */
-            max-height: 420px; /* 防超长面板下日志喧宾夺主 */
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding-right: 4px;
-        }
-        .re-pet-log-item {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: 12px;
-            padding: 5px 10px;
-            border-radius: 6px;
-            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
-            border: 1px solid rgba(107, 114, 128, 0.1);
-        }
-        .re-pet-log-item .re-pet-log-text { color: #4b5563; }
-        .re-pet-log-item .re-pet-log-time { color: #9ca3af; flex-shrink: 0; font-size: 11px; }
-        /* 喂养日志（左）+ 宠物道具（右）左右结构（V6.4.5） */
-        .re-pet-bottom {
-            flex: 1 1 auto;
-            display: flex;
-            gap: 12px;
-            align-items: stretch;
-            min-height: 0;
-        }
-        .re-pet-log-col {
-            flex: 1 1 58%;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .re-pet-shop-col {
-            flex: 1 1 42%;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        /* 宠物道具区（V6.4.3：点数商店；V6.4.5 两道具一行横排） */
-        .re-pet-shop-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .re-pet-shop-title { font-size: 12px; font-weight: 600; color: #6b7280; }
-        .re-pet-points { font-size: 12px; font-weight: 700; color: #d97706; }
-        .re-pet-shop {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .re-pet-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
-            border: 1px solid rgba(107, 114, 128, 0.15);
-        }
-        .re-pet-item-name-row { display: flex; align-items: center; justify-content: space-between; }
-        .re-pet-item-name { font-size: 13px; font-weight: 700; color: #1f2937; }
-        .re-pet-item-tag {
-            font-size: 10px;
-            padding: 1px 8px;
-            border-radius: 999px;
-            background: rgba(233, 188, 79, 0.25);
-            color: #b45309;
-            border: 1px solid rgba(185, 143, 46, 0.4);
-        }
-        .re-pet-item-desc { font-size: 11px; color: #9ca3af; line-height: 1.5; }
-        .re-pet-item-foot {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 2px;
-        }
-        .re-pet-item-price { font-size: 12px; font-weight: 600; color: #d97706; }
-        .re-pet-item-btn {
-            padding: 3px 14px;
-            border-radius: 6px;
-            border: 1px solid rgba(59, 130, 246, 0.5);
-            background: rgba(59, 130, 246, 0.1);
-            color: #2563eb;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background .15s;
-        }
-        .re-pet-item-btn:hover { background: rgba(59, 130, 246, 0.2); }
-        .re-pet-item-btn:disabled {
-            cursor: not-allowed;
-            border-color: rgba(107, 114, 128, 0.25);
-            background: rgba(107, 114, 128, 0.08);
-            color: #9ca3af;
-        }
-        /* 升级彩带粒子：仅动画 transform/opacity（GPU 合成，零重绘） */
-        .re-pet-confetti {
-            position: absolute;
-            top: 45%;
-            left: 50%;
-            width: 7px;
-            height: 7px;
-            border-radius: 2px;
-            pointer-events: none;
-            animation: re-pet-confetti-fly .9s ease-out forwards;
-        }
-        @keyframes re-pet-confetti-fly {
-            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
-            100% { transform: translate(var(--re-cx), var(--re-cy)) rotate(var(--re-cr)) scale(.4); opacity: 0; }
-        }
-        /* ===== V6.6.0 宠物动效系统（仅 transform/opacity，GPU 合成零重绘） ===== */
-        @keyframes re-pet-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        @keyframes re-pet-blink { 0%, 91%, 100% { transform: scaleY(1); } 94%, 96% { transform: scaleY(.06); } }
-        @keyframes re-pet-egg-sway { 0%, 100% { transform: rotate(0deg); } 30% { transform: rotate(2.2deg); } 70% { transform: rotate(-2.2deg); } }
-        .re-pet-anim { animation: re-pet-breathe 3.2s ease-in-out infinite; overflow: visible; }
-        .re-pet-anim .re-pet-eyes { transform-box: fill-box; transform-origin: center; animation: re-pet-blink 4.6s infinite; }
-        .re-pet-anim.re-pet-stage0 { animation: re-pet-egg-sway 4s ease-in-out infinite; }
-        .re-pet-anim.re-pet-sad { animation-duration: 5.6s; } /* 心情低：呼吸放缓 */
-        /* 摸头：squish 弹性形变 + 爱心飘出 */
-        @keyframes re-pet-squish { 0% { transform: scale(1); } 35% { transform: scale(1.07, .9); } 65% { transform: scale(.95, 1.05); } 100% { transform: scale(1); } }
-        .re-pet-squishing .re-pet-anim { animation: re-pet-squish .55s ease; }
-        @keyframes re-pet-heart-pop {
-            0% { opacity: 0; transform: translate(0, 0) scale(.3); }
-            30% { opacity: 1; }
-            100% { opacity: 0; transform: translate(18px, -34px) scale(1.2) rotate(14deg); }
-        }
-        .re-pet-heart {
-            position: absolute; top: 18%; right: 14%; font-size: 20px; color: #E86A6A;
-            pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 1px 0 rgba(91, 81, 66, .4);
-            animation: re-pet-heart-pop .85s ease forwards;
-        }
-        /* 业务动作库：不同喂养行为不同庆祝动作 */
-        @keyframes re-pet-act-nod { 0%, 100% { transform: translateY(0); } 22% { transform: translateY(-4px); } 38% { transform: translateY(0); } 58% { transform: translateY(-7px); } 78% { transform: translateY(0); } }
-        @keyframes re-pet-act-jump { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-14px) scale(1.04, .96); } 55% { transform: translateY(0) scale(.96, 1.04); } 75% { transform: translateY(-6px) scale(1); } }
-        @keyframes re-pet-act-wave { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-8deg); } 50% { transform: rotate(7deg); } 75% { transform: rotate(-5deg); } }
-        @keyframes re-pet-act-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(.92); } 100% { transform: rotate(360deg) scale(1); } }
-        @keyframes re-pet-act-shine { 0%, 100% { transform: scale(1); opacity: 1; } 30% { transform: scale(1.12); opacity: .92; } 60% { transform: scale(.97); opacity: 1; } }
-        .re-pet-act { animation: none !important; }
-        .re-pet-act-nod > svg, .re-pet-act-nod .re-pet-anim { animation: re-pet-act-nod .9s ease !important; }
-        .re-pet-act-jump > svg, .re-pet-act-jump .re-pet-anim { animation: re-pet-act-jump 1s ease !important; }
-        .re-pet-act-wave > svg, .re-pet-act-wave .re-pet-anim { animation: re-pet-act-wave .9s ease !important; }
-        .re-pet-act-spin > svg, .re-pet-act-spin .re-pet-anim { animation: re-pet-act-spin 1.1s cubic-bezier(.45,.05,.55,.95) !important; }
-        .re-pet-act-shine > svg, .re-pet-act-shine .re-pet-anim { animation: re-pet-act-shine 1.2s ease !important; }
-        /* 桌面浮层：走路步态 + 朝向翻转 + 悬停音符 */
-        @keyframes re-pet-walk-sway { 0%, 100% { transform: rotate(-3.5deg); } 50% { transform: rotate(3.5deg); } }
-        .re-pet-float-walking .re-pet-anim { animation: re-pet-walk-sway .5s ease-in-out infinite !important; }
-        .re-pet-float-flip .re-pet-float-inner { transform: scaleX(-1); }
-        @keyframes re-pet-note-float {
-            0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
-            30% { opacity: .95; }
-            100% { opacity: 0; transform: translate(10px, -30px) rotate(16deg); }
-        }
-        #re-pet-float::after {
-            content: '♪'; position: absolute; top: -4px; right: -6px; font-size: 16px; color: #7FBFA8;
-            opacity: 0; pointer-events: none; font-weight: 700;
-        }
-        #re-pet-float:hover::after { animation: re-pet-note-float 2.2s ease-in-out infinite; }
-        #re-pet-float.re-pet-float-flip::after { right: auto; left: -6px; }
-        @media (max-width: 1100px) {
-            .re-pet-main { flex-direction: column; }
-            .re-pet-stage-box { width: 100%; height: 190px; }
-            .re-pet-bottom { flex-direction: column; }
-            .re-pet-log { max-height: 220px; flex: none; }
-        }
-        /* 浮层宠物（拖出面板后挂在 body 上，z-index 低于主面板一档可被面板覆盖） */
-        #re-pet-float {
-            position: fixed;
-            z-index: 2147483646;
-            width: 120px;
-            height: 120px;
-            cursor: grab;
-            user-select: none;
-            touch-action: none;
-        }
-        #re-pet-float.re-pet-float-dragging { cursor: grabbing; }
-        #re-pet-float .re-pet-float-inner {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #re-pet-float .re-pet-float-inner svg { width: 108px; height: auto; pointer-events: none; }
-        #re-pet-float.re-pet-float-sad .re-pet-float-inner svg { filter: grayscale(0.65); }
-        /* 喂养蹦跳：仅动画 transform/opacity（GPU 合成） */
-        #re-pet-float.re-pet-float-hop .re-pet-float-inner { animation: re-pet-hop .55s ease; }
-        @keyframes re-pet-hop {
-            0% { transform: translateY(0) scale(1); }
-            30% { transform: translateY(-14px) scale(1.06); }
-            55% { transform: translateY(0) scale(1); }
-            75% { transform: translateY(-6px) scale(1.02); }
-            100% { transform: translateY(0) scale(1); }
-        }
-        /* 经验气泡 */
-        #re-pet-float .re-pet-float-bubble {
-            position: absolute;
-            top: -6px;
-            right: -4px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #b45309;
-            background: rgba(233, 188, 79, 0.95);
-            border: 1px solid #b98f2e;
-            border-radius: 999px;
-            padding: 1px 8px;
-            opacity: 0;
-            pointer-events: none;
-            white-space: nowrap;
-        }
-        #re-pet-float.re-pet-float-hop .re-pet-float-bubble { animation: re-pet-bubble 1.1s ease forwards; }
-        @keyframes re-pet-bubble {
-            0% { opacity: 0; transform: translateY(4px); }
-            25% { opacity: 1; transform: translateY(-6px); }
-            80% { opacity: 1; transform: translateY(-14px); }
-            100% { opacity: 0; transform: translateY(-20px); }
-        }
-        /* hover 信息提示 */
-        #re-pet-float .re-pet-float-tip {
-            position: absolute;
-            bottom: calc(100% + 6px);
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            color: #4b5563;
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(107, 114, 128, 0.25);
-            border-radius: 8px;
-            padding: 4px 10px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .15s;
-        }
-        #re-pet-float:hover .re-pet-float-tip { opacity: 1; }
-        /* 拖出时的跟手预览 */
-        #re-pet-carry {
-            position: fixed;
-            z-index: 2147483650;
-            width: 96px;
-            height: 96px;
-            pointer-events: none;
-            opacity: 0.9;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,.18));
-        }
-        #re-pet-carry svg { width: 100%; height: 100%; }
-        /* 展示区「外出中」空窝状态 */
-        .re-pet-stage-box.re-pet-away {
-            border-style: dashed;
-            background: transparent;
-        }
-        .re-pet-away-hint {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            color: #9ca3af;
-            font-size: 12px;
-        }
-        .re-pet-away-hint svg { width: 54px; height: auto; opacity: .55; }
-
         /* ===== 外观扩展（V6.1.0）===== */
         /* 开关激活色：由设置里的取色器控制（默认蓝 #3b82f6），JS 写入 --re-switch-on-1/2 渐变变量 */
         .re-switch input:checked + .re-switch-slider {
@@ -6264,6 +5914,371 @@
             font-size: 11px;
             color: #9ca3af;
             margin-left: 6px;
+        }
+
+        /* ==================== 审查中心 ==================== */
+        /* 标题栏能量条（版本徽章右侧，zinc 深灰系：查询中绿色填充+呼吸点，停止/暂停灰色） */
+        .re-review-energy {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        .re-review-energy-bar {
+            position: relative;
+            width: 96px;
+            height: 16px;
+            border-radius: 999px;
+            background: rgba(24, 24, 27, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .re-review-energy-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: #71717a;
+            border-radius: 999px;
+            transition: width .3s ease, background .3s ease;
+        }
+        .re-review-energy.running .re-review-energy-fill {
+            background: #10b981;
+        }
+        .re-review-energy-pct {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #d4d4d8;
+            letter-spacing: .3px;
+        }
+        .re-review-energy-count {
+            font-size: 11px;
+            font-weight: 600;
+            color: #d4d4d8;
+            font-variant-numeric: tabular-nums;
+        }
+        .re-review-energy.running .re-review-energy-count::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #10b981;
+            margin-right: 5px;
+            vertical-align: 1px;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .re-review-energy.running .re-review-energy-count::before {
+                animation: re-review-dot-blink 1.2s ease-in-out infinite;
+            }
+        }
+        @keyframes re-review-dot-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .35; }
+        }
+
+        /* 日期卡片【审查此列】按钮（与导出/删除同款 24px 图标按钮，绿色系） */
+        .re-history-day-review {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .re-history-day-review:hover {
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .re-history-day-review svg {
+            width: 14px;
+            height: 14px;
+        }
+        .re-history-day-review.done {
+            opacity: .4;
+            cursor: pointer;
+        }
+        .re-history-day-review.done:hover {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        /* 审查中心页面 */
+        .re-review-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 120px;
+        }
+        .re-review-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 40px 12px;
+            color: #6b7280;
+        }
+        .re-review-empty svg {
+            width: 36px;
+            height: 36px;
+            color: #d1d5db;
+        }
+        .re-review-empty-text {
+            font-size: 13px;
+        }
+        .re-review-empty-tip {
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .re-review-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+        .re-review-toolbar-info {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+        .re-review-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: #18181b;
+        }
+        .re-review-meta {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        .re-review-status-tip {
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .re-review-btns {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        /* 【开始查询】主按钮：墨色方碑风格（与【视频面审】按钮同款） */
+        .re-review-btn {
+            border: none;
+            background: #18181b;
+            color: #fafafa;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            padding: 0 13px;
+            height: 28px;
+            line-height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+            transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+            white-space: nowrap;
+        }
+        .re-review-btn:hover {
+            background: #27272a;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
+        }
+        .re-review-btn:active {
+            transform: translateY(0) scale(.97);
+            box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        .re-review-btn.secondary {
+            background: #fff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            box-shadow: none;
+        }
+        .re-review-btn.secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        .re-review-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .re-review-btn:disabled:hover {
+            background: #18181b;
+        }
+        .re-review-btn.secondary:disabled:hover {
+            background: #fff;
+        }
+
+        /* 审查条目列表（三列网格，对齐历史记录行风格） */
+        .re-review-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+        .re-review-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(249, 250, 251, 0.8);
+            border-radius: 8px;
+            padding: 5px 8px;
+            border: 1px solid transparent;
+            transition: background-color .15s ease;
+        }
+        .re-review-item.querying {
+            background: rgba(219, 234, 254, 0.35);
+        }
+        .re-review-item-idx {
+            font-size: 10px;
+            color: #9ca3af;
+            font-variant-numeric: tabular-nums;
+            width: 18px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .re-review-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #18181b;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .re-review-update {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 2px 9px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: color .12s ease, border-color .12s ease, background .12s ease;
+        }
+        .re-review-update:hover {
+            color: #3b82f6;
+            border-color: #93c5fd;
+            background: rgba(59, 130, 246, 0.06);
+        }
+        .re-review-update:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+        /* 条目整行可点击：新标签页打开该客户后台订单 */
+        .re-review-item[data-review-name] {
+            cursor: pointer;
+        }
+        .re-review-item[data-review-name]:hover {
+            background: rgba(59, 130, 246, 0.06);
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        /* 审查结果胶囊（审查中心列表内） */
+        .re-review-tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1.5;
+            margin-left: auto;
+        }
+        .re-review-tag-pass { background: #dcfce7; color: #16a34a; }
+        .re-review-tag-other { background: #dbeafe; color: #1d4ed8; }
+        .re-review-tag-reviewing { background: #ffedd5; color: #c2410c; }
+        .re-review-tag-resubmit { background: #fef9c3; color: #a16207; }
+        .re-review-tag-rejected { background: #fee2e2; color: #dc2626; }
+        .re-review-tag-buyout { background: #fef3c7; color: #b45309; }
+        .re-review-tag-gray { background: #f3f4f6; color: #4b5563; }
+        .re-review-tag-failed { background: #fee2e2; color: #dc2626; }
+        .re-review-tag-querying { background: #dbeafe; color: #2563eb; }
+
+        /* 写回历史记录的审查结果胶囊（叠加在 re-history-tag 基础样式上） */
+        .re-history-tag.re-review-tag-pass { background: #dcfce7; color: #16a34a; }
+        .re-history-tag.re-review-tag-other { background: #dbeafe; color: #1d4ed8; }
+        .re-history-tag.re-review-tag-reviewing { background: #ffedd5; color: #c2410c; }
+        .re-history-tag.re-review-tag-resubmit { background: #fef9c3; color: #a16207; }
+        .re-history-tag.re-review-tag-rejected { background: #fee2e2; color: #dc2626; }
+        .re-history-tag.re-review-tag-buyout { background: #fef3c7; color: #b45309; }
+        .re-history-tag.re-review-tag-gray { background: #f3f4f6; color: #4b5563; }
+
+        /* 「他人已通过」二选一确认弹窗内件 */
+        .re-review-confirm-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .re-review-confirm-who {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .re-review-confirm-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #18181b;
+        }
+        .re-review-confirm-sub {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        .re-review-confirm-opts {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .re-review-opt {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 999px;
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: color .12s ease, border-color .12s ease, background .12s ease;
+        }
+        .re-review-opt.sel-pass {
+            color: #16a34a;
+            border-color: #16a34a;
+            background: #dcfce7;
+        }
+        .re-review-opt.sel-fail {
+            color: #374151;
+            border-color: #6b7280;
+            background: #f3f4f6;
         }
     `;
 
@@ -6615,10 +6630,30 @@
                 };
             });
 
+            // 每日通过率统计：分子=审查结果「已通过」记录数，分母=当日总量（含手动修正，与趋势图同口径）
+            const recsByDate = {};
+            records.forEach(r => {
+                if (!r.date) return;
+                if (!recsByDate[r.date]) recsByDate[r.date] = { reviewed: 0, passed: 0 };
+                if (r.reviewStatus) recsByDate[r.date].reviewed++;
+                if (r.reviewStatus === '已通过') recsByDate[r.date].passed++;
+            });
+            const rateData = chartData.map(c => {
+                const rec = recsByDate[c.date] || { reviewed: 0, passed: 0 };
+                return {
+                    date: c.date,
+                    total: c.count,
+                    reviewed: rec.reviewed,
+                    passed: rec.passed,
+                    rate: rec.reviewed > 0 && c.count > 0 ? (rec.passed / c.count) : null
+                };
+            });
+
             // 静默重绘：数据指纹没变时不播动画（drawOrderChart 读 canvas.dataset.fingerprint）
             const fingerprint = JSON.stringify(chartData) + '|' + restDays.join(',');
             drawOrderChart(chartData, fingerprint);
-            updateAnalysisStats(chartData, records, dateWindow);
+            drawRateChart(rateData, JSON.stringify(rateData));
+            updateAnalysisStats(chartData, records, dateWindow, rateData);
         });
     }
 
@@ -7026,7 +7061,7 @@
         modal.classList.add('re-modal-visible');
     }
 
-    function updateAnalysisStats(data, records, dateWindow) {
+    function updateAnalysisStats(data, records, dateWindow, rateData) {
         const totalEl = document.getElementById('re-stat-total');
         const avgEl = document.getElementById('re-stat-daily-avg');
         const avgLabel = document.getElementById('re-avg-label');
@@ -7036,6 +7071,40 @@
         const minDateEl = document.getElementById('re-stat-min-date');
         const totalDeltaEl = document.getElementById('re-ov-total-delta');
         const avgDeltaEl = document.getElementById('re-ov-avg-delta');
+        const rateEl = document.getElementById('re-stat-pass-rate');
+        const rateLabelEl = document.getElementById('re-rate-label');
+        const rateDeltaEl = document.getElementById('re-rate-delta');
+
+        // 通过率 KPI 卡：跟随全局范围，Σ已通过 / Σ总量；环比为上一周期百分点差（pt）
+        const rateLabels = { '7d': '近7天通过率', '14d': '近14天通过率', 'month': '本月通过率', 'lastmonth': '上月通过率' };
+        if (rateLabelEl) rateLabelEl.textContent = rateLabels[analysisRange] || '通过率';
+        if (rateEl && Array.isArray(rateData) && rateData.length) {
+            const curReviewed = rateData.reduce((s, d) => s + d.reviewed, 0);
+            const curTotal = rateData.reduce((s, d) => s + d.total, 0);
+            if (curReviewed > 0 && curTotal > 0) {
+                const curPass = rateData.reduce((s, d) => s + d.passed, 0);
+                const curRate = curPass / curTotal;
+                rateEl.innerHTML = Math.floor(curRate * 100) + '<span class="re-ov-unit">%</span>';
+                if (rateDeltaEl && records && dateWindow) {
+                    const prevRate = calcRateDelta(records, dateWindow);
+                    if (prevRate === null) {
+                        rateDeltaEl.style.display = 'none';
+                    } else {
+                        const diffPt = (curRate - prevRate) * 100;
+                        const sign = diffPt >= 0 ? '▲' : '▼';
+                        rateDeltaEl.textContent = `${sign} ${Math.abs(diffPt).toFixed(1)}pt vs 上期`;
+                        rateDeltaEl.className = 're-ov-delta ' + (diffPt > 0 ? 'up' : diffPt < 0 ? 'down' : 'flat');
+                        rateDeltaEl.style.display = '';
+                    }
+                }
+            } else {
+                rateEl.textContent = '--';
+                if (rateDeltaEl) rateDeltaEl.style.display = 'none';
+            }
+        } else if (rateEl) {
+            rateEl.textContent = '--';
+            if (rateDeltaEl) rateDeltaEl.style.display = 'none';
+        }
 
         if (data.length === 0) {
             if (totalEl) totalEl.textContent = '0';
@@ -7112,6 +7181,220 @@
             counts.push(edited !== undefined ? edited : records.filter(r => r.date === ds).length);
         }
         return counts;
+    }
+
+    // 上一周期通过率：Σ已通过 / Σ总量（总量口径含手动修正，与 KPI 当前通过率同口径）
+    function calcRateDelta(records, dateWindow) {
+        const n = dateWindow.length;
+        if (!n) return null;
+        const winStart = new Date(dateWindow[0]);
+        const winEnd = new Date(dateWindow[n - 1]);
+        const spanDays = Math.round((winEnd - winStart) / 86400000) + 1;
+        const prevEnd = new Date(winStart);
+        prevEnd.setDate(prevEnd.getDate() - 1);
+        const prevStart = new Date(prevEnd);
+        prevStart.setDate(prevStart.getDate() - (spanDays - 1));
+
+        const editedDays = getEditedDays();
+        let prevPass = 0, prevTotal = 0;
+        for (let d = new Date(prevStart); d <= prevEnd; d.setDate(d.getDate() + 1)) {
+            const ds = formatDateForAnalysis(d);
+            const edited = editedDays[ds];
+            const dayRecs = records.filter(r => r.date === ds);
+            prevTotal += edited !== undefined ? edited : dayRecs.length;
+            prevPass += dayRecs.filter(r => r.reviewStatus === '已通过').length;
+        }
+        if (prevTotal <= 0) return null;
+        return prevPass / prevTotal;
+    }
+
+    // 每日通过率波动折线图：绿色折线，y 轴固定 0–100%；未审查日断点，0% 全未通过日画红点
+    function drawRateChart(data, fingerprint) {
+        const canvas = document.getElementById('re-rate-chart');
+        const tooltip = document.getElementById('re-rate-tooltip');
+        if (!canvas) return;
+
+        // 静默重绘：指纹相同则直接画最终帧，不播动画
+        const skipAnim = fingerprint && canvas.dataset.fingerprint === fingerprint;
+        if (fingerprint) canvas.dataset.fingerprint = fingerprint;
+
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const canvasW = rect.width - 32;
+        const canvasH = 220;
+
+        canvas.width = canvasW * dpr;
+        canvas.height = canvasH * dpr;
+        canvas.style.width = canvasW + 'px';
+        canvas.style.height = canvasH + 'px';
+        ctx.scale(dpr, dpr);
+
+        const padding = { top: 20, right: 16, bottom: 36, left: 40 };
+        const chartW = canvasW - padding.left - padding.right;
+        const chartH = canvasH - padding.top - padding.bottom;
+
+        const hasAny = data.some(d => d.rate !== null);
+        if (!data.length || !hasAny) {
+            ctx.clearRect(0, 0, canvasW, canvasH);
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('该时段暂无审查数据（先用审查中心写回结果）', canvasW / 2, canvasH / 2);
+            canvas.ratePoints = [];
+            return;
+        }
+
+        const xStep = chartW / (data.length - 1 || 1);
+        const yOf = (rate) => padding.top + chartH - rate * chartH;
+        const restDays = getRestDays();
+        const chartPoints = [];
+
+        const animDuration = skipAnim ? 0 : 800;
+        const animStart = performance.now();
+
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(107, 114, 128, 0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(canvasW - padding.right, y);
+                ctx.stroke();
+                const value = 100 - 25 * i;
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(value + '%', padding.left - 6, y);
+            }
+        }
+
+        function drawXLabels() {
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            const step = Math.max(1, Math.ceil(data.length / 8));
+            data.forEach((d, i) => {
+                if (i % step === 0 || i === data.length - 1) {
+                    const x = padding.left + i * xStep;
+                    const parts = d.date.split('-');
+                    ctx.fillStyle = restDays.includes(d.date) ? '#f97316' : '#9ca3af';
+                    ctx.fillText(`${parts[1]}-${parts[2]}`, x, canvasH - padding.bottom + 8);
+                }
+            });
+        }
+
+        function animate(now) {
+            const elapsed = now - animStart;
+            const progress = Math.min(elapsed / animDuration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const drawCount = Math.ceil(data.length * eased);
+
+            ctx.clearRect(0, 0, canvasW, canvasH);
+            drawGrid();
+
+            // 折线分段绘制：rate===null（当日未审查）处断开
+            const segments = [];
+            let curSeg = null;
+            for (let i = 0; i < drawCount; i++) {
+                const d = data[i];
+                if (d.rate === null) {
+                    if (curSeg) { segments.push(curSeg); curSeg = null; }
+                    continue;
+                }
+                const x = padding.left + i * xStep;
+                const y = yOf(d.rate);
+                if (!curSeg) curSeg = [{ x, y }];
+                else curSeg.push({ x, y });
+            }
+            if (curSeg) segments.push(curSeg);
+
+            ctx.strokeStyle = '#16a34a';
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            segments.forEach(seg => {
+                ctx.beginPath();
+                seg.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                });
+                ctx.stroke();
+            });
+
+            // 数据点：0% 全未通过 = 红点，其余绿描边
+            chartPoints.length = 0;
+            for (let i = 0; i < drawCount; i++) {
+                const d = data[i];
+                if (d.rate === null) continue;
+                const x = padding.left + i * xStep;
+                const y = yOf(d.rate);
+                const isZero = d.passed === 0 && d.reviewed > 0;
+                chartPoints.push({ x, y, date: d.date, rate: d.rate, passed: d.passed, total: d.total, reviewed: d.reviewed, isZero });
+
+                ctx.beginPath();
+                ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.strokeStyle = isZero ? '#dc2626' : '#16a34a';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                if (isZero) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fill();
+                }
+            }
+
+            drawXLabels();
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                canvas.ratePoints = chartPoints;
+                bindRateChartEvents(canvas, tooltip, chartPoints);
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    // 通过率图交互：hover 显示明细 tooltip（点击不开放编辑，编辑在订单趋势图）
+    function bindRateChartEvents(canvas, tooltip, chartPoints) {
+        if (!tooltip) return;
+
+        canvas.onmousemove = function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            let found = null;
+            for (const p of chartPoints) {
+                if (Math.hypot(mouseX - p.x, mouseY - p.y) <= 12) {
+                    found = p;
+                    break;
+                }
+            }
+            if (found) {
+                const pct = Math.floor(found.rate * 100);
+                const extra = found.isZero
+                    ? '<br/><span style="color:#ef4444;">[全部未通过]</span>'
+                    : '<br/><span style="color:#9ca3af;font-size:11px;">已审查 ' + found.reviewed + ' / 共 ' + found.total + ' 单</span>';
+                tooltip.innerHTML = `<strong>${found.date}</strong><br/>通过率：${pct}%${extra}`;
+                tooltip.style.display = 'block';
+                tooltip.style.left = found.x + 'px';
+                tooltip.style.top = (found.y - 40) + 'px';
+            } else {
+                tooltip.style.display = 'none';
+            }
+        };
+
+        canvas.onmouseleave = function() {
+            tooltip.style.display = 'none';
+        };
+
+        canvas.onclick = null;
     }
 
     // 机型图当前展示数量（Top 5 / Top 10）
@@ -7673,6 +7956,13 @@
                 const monthStr = `${monthObj.getFullYear()}年${monthObj.getMonth() + 1}月`;
                 const monthData = groupedByMonth[month];
                 const monthTotalCount = Object.values(monthData).reduce((sum, arr) => sum + arr.length, 0);
+                // 月通过率：该月审查结果为「已通过」（绿标）的订单 / 该月总订单；无审查记录则不显示
+                const monthAllRecords = Object.values(monthData).reduce((all, arr) => all.concat(arr), []);
+                const monthReviewed = monthAllRecords.filter(it => it.reviewStatus).length;
+                const monthPass = monthAllRecords.filter(it => it.reviewStatus === '已通过').length;
+                const monthRateHtml = monthReviewed > 0
+                    ? `<span class="re-history-month-rate" title="已通过 ${monthPass} / 共 ${monthTotalCount} 单（已审查 ${monthReviewed} 单）">月通过率 ${Math.floor(monthPass / monthTotalCount * 100)}%</span>`
+                    : '';
                 const isCurrentMonth = month === currentMonth;
 
                 // 生成该月份下的所有日期卡片
@@ -7688,13 +7978,23 @@
                 const totalCount = items.length;
                 const displayCount = 4;
                 const hasMore = totalCount > displayCount;
+                // 当日通过率：审查结果为「已通过」（绿标）的订单 / 当日总订单；无审查记录则不显示
+                const dayReviewed = items.filter(it => it.reviewStatus).length;
+                const dayPass = items.filter(it => it.reviewStatus === '已通过').length;
+                const dayRateHtml = dayReviewed > 0
+                    ? `<span class="re-history-day-rate" title="已通过 ${dayPass} / 共 ${totalCount} 单（已审查 ${dayReviewed} 单）">通过率 ${Math.floor(dayPass / totalCount * 100)}%</span>`
+                    : '';
 
                 let itemsHtml = '';
                 items.forEach((item, index) => {
                     const isHidden = index >= displayCount;
                     const timeStr = (item.time || '').substring(0, 5);
                     const itemTags = Array.isArray(item.tags) ? item.tags : [];
-                    const tagsHtml = itemTags.map(t =>
+                    // 审查中心写回的审查结果胶囊（排在最前，与既有标签同排展示）
+                    const reviewTagHtml = item.reviewStatus
+                        ? `<span class="re-history-tag ${item.reviewStatusCls || 're-review-tag-gray'}" title="审查中心审查结果">${item.reviewStatus}</span>`
+                        : '';
+                    const tagsHtml = reviewTagHtml + itemTags.map(t =>
                         `<span class="re-history-tag ${getHistoryTagClass(t)}">${t}</span>`
                     ).join('');
                     itemsHtml += `
@@ -7725,7 +8025,9 @@
                         <div class="re-history-day-header">
                             <span class="re-history-day-title">${dateStr} <span style="font-weight:400;color:#6b7280;">${weekStr}</span></span>
                             <span class="re-history-day-count">共 ${totalCount} 条</span>
+                            ${dayRateHtml}
                             <div class="re-history-day-actions">
+                                ${buildReviewThisColumnBtn(date)}
                                 <button class="re-history-day-export" data-date="${date}" title="导出Excel">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -7764,6 +8066,7 @@
                             </button>
                             <span class="re-history-month-title">${monthStr}</span>
                             <span class="re-history-month-count">共 ${monthTotalCount} 条</span>
+                            ${monthRateHtml}
                             <select class="re-history-tag-filter" data-month="${month}" title="按标签筛选历史记录">
                                 ${buildTagFilterOptionsHtml()}
                             </select>
@@ -7965,6 +8268,13 @@
                 });
             });
 
+            container.querySelectorAll('.re-history-day-review').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    loadDateIntoReview(this.getAttribute('data-date'));
+                });
+            });
+
             container.querySelectorAll('.re-history-day-export').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -8011,6 +8321,601 @@
                 renderHistoryRecords(term);
             }, CONFIG.TIME.debounceDelay);
         });
+    }
+
+    // ==================== 审查中心 ====================
+    const REVIEW_QUEUE_KEY = 're_review_queue_v1';
+    let reviewQueue = null;
+    let reviewRunning = false;
+    let reviewAbortFlag = false;
+    let reviewStaffName = '';
+
+    function saveReviewQueue() {
+        try { GM_setValue(REVIEW_QUEUE_KEY, JSON.stringify(reviewQueue)); } catch (e) {}
+    }
+
+    function loadReviewQueue() {
+        try {
+            const raw = GM_getValue(REVIEW_QUEUE_KEY, null);
+            reviewQueue = raw ? JSON.parse(raw) : null;
+        } catch (e) { reviewQueue = null; }
+        if (reviewQueue && Array.isArray(reviewQueue.items)) {
+            // 页面刷新恢复：中断在「查询中」的条目退回待查询，运行标志复位（等同停止态）
+            reviewQueue.items.forEach(it => { if (it.status === 'querying') it.status = 'pending'; });
+            reviewQueue.running = false;
+        } else {
+            reviewQueue = null;
+        }
+    }
+    loadReviewQueue();
+
+    function sleepReview(ms) {
+        return new Promise(r => setTimeout(r, ms));
+    }
+
+    function getLocalTodayStr() {
+        const now = new Date();
+        return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    }
+
+    // 按 id 增量更新历史记录字段（不走 saveHistoryRecord 的 name+shop 全局去重，避免误更新其他日期记录）
+    function updateHistoryRecordFields(id, fields) {
+        return new Promise((resolve, reject) => {
+            openHistoryDB().then(db => {
+                const tx = db.transaction(HISTORY_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(HISTORY_STORE_NAME);
+                const getReq = store.get(id);
+                getReq.onsuccess = () => {
+                    const rec = getReq.result;
+                    if (!rec) { resolve(false); return; }
+                    Object.assign(rec, fields);
+                    const putReq = store.put(rec);
+                    putReq.onsuccess = () => resolve(true);
+                    putReq.onerror = () => reject(putReq.error);
+                };
+                getReq.onerror = () => reject(getReq.error);
+            }).catch(reject);
+        });
+    }
+
+    async function ensureReviewStaffName() {
+        if (reviewStaffName) return reviewStaffName;
+        try { reviewStaffName = (await getStaffName()) || ''; } catch (e) { reviewStaffName = ''; }
+        if (!reviewStaffName) {
+            const el = document.getElementById('re-staff-name');
+            if (el) reviewStaffName = (el.textContent || '').trim();
+        }
+        if (!reviewStaffName) reviewStaffName = cachedStaffName || '';
+        return reviewStaffName;
+    }
+
+    // 日期卡片【审查此列】按钮（当日除外；已审查完毕的日期置灰）
+    function buildReviewThisColumnBtn(date) {
+        if (date === getLocalTodayStr()) return '';
+        const isDone = reviewQueue && reviewQueue.completed && reviewQueue.date === date;
+        return `
+            <button class="re-history-day-review${isDone ? ' done' : ''}" data-date="${date}" title="${isDone ? '该日已审查完毕，点击可重新审查' : '审查此列：将该日客户移入审查中心批量审查'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </button>`;
+    }
+
+    // 后台订单状态词表（判定与提取双用）
+    const REVIEW_STATE_WORDS = ['待归还', '待审核', '已退单', '已买断', '已发货', '待发货', '已完结', '待支付', '已取消'];
+    const REVIEW_STATE_RE = REVIEW_STATE_WORDS.join('|');
+
+    // 从单元格提取「字段：值」：优先 DOM 定位独立字段元素（后台每字段一个标签），
+    // 避免紧凑模板相邻字段在 textContent 粘连导致正则吞字（如「状态：待归还」后紧跟「风控结果：」被读成「待归还风控结果」）
+    function extractReviewField(cell, label) {
+        if (!cell) return '';
+        const els = cell.querySelectorAll('p, div, span');
+        let exact = null;
+        els.forEach(el => {
+            const t = (el.textContent || '').trim();
+            if (t.indexOf(label) === 0 && (!exact || exact.contains(el))) exact = el;
+        });
+        if (exact) return exact.textContent.trim().replace(new RegExp('^' + label + '[：:]\\s*'), '').trim();
+        return '';
+    }
+
+    // 按姓名查询预授权订单（全状态视图 state=-2，按授权时间排序），解析每行的客服/状态/身份证尾号/客服备注
+    async function queryReviewOrderByName(name) {
+        const url = 'https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name='
+            + encodeURIComponent(name) + '&out_order_no=';
+        const resp = await fetch(url, { credentials: 'include' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const html = await resp.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const rows = doc.querySelectorAll('#table tbody tr');
+        const orders = [];
+        rows.forEach(tr => {
+            const orderCell = tr.querySelector('td:nth-child(4)');
+            const orderText = orderCell ? (orderCell.textContent || '') : '';
+            const orderNoMatch = orderText.match(/订单号[：:]\s*(\d+)/);
+            if (!orderCell || !orderNoMatch) return; // 跳过非订单数据行
+
+            // 状态：DOM 提取优先。模板存在破损标签（</p 缺 ">"），浏览器会把「状态：XXX」和下一字段
+            // （如「风控结果：」）合并进同一元素，提取值可能粘连——白名单截取 + 字段切断双保险
+            let state = extractReviewField(orderCell, '状态');
+            if (state && !REVIEW_STATE_WORDS.includes(state)) {
+                const innerMatch = state.match(new RegExp('(' + REVIEW_STATE_RE + ')'));
+                if (innerMatch) {
+                    state = innerMatch[1];
+                } else {
+                    // 白名单外的未知新状态：按下一个字段标签切断粘连
+                    state = state.split(/风控结果|客服机编号|创建时间|二级商户名称|是否旧机抵首付|增值服务/)[0].trim();
+                }
+            }
+            if (!state) {
+                const stateMatch = orderText.match(new RegExp('状态[：:]\\s*(' + REVIEW_STATE_RE + ')'));
+                state = stateMatch ? stateMatch[1] : '';
+            }
+
+            // td2 客服信息：视频面审客服（可能为空；DOM 优先，正则 fallback）
+            const staffCell = tr.querySelector('td:nth-child(2)');
+            let videoStaff = extractReviewField(staffCell, '视频面审客服');
+            if (!videoStaff && staffCell) {
+                const m = (staffCell.textContent || '').match(/视频面审客服[：:]\s*([\u4e00-\u9fa5A-Za-z0-9·]{0,12})/);
+                if (m) videoStaff = m[1].trim();
+            }
+
+            // td3 客户信息：身份证号取后4位（兼容掩码与字母格式）
+            let idTail = '';
+            const custCell = tr.querySelector('td:nth-child(3)');
+            if (custCell) {
+                const idMatch = (custCell.textContent || '').match(/身份证号[：:]\s*([A-Za-z0-9*]+)/);
+                if (idMatch) idTail = idMatch[1].slice(-4);
+            }
+
+            // td8 客服备注（⑤.1 比对用）
+            const remarkCell = tr.querySelector('td:nth-child(8)');
+            const remark = remarkCell ? (remarkCell.textContent || '').trim() : '';
+
+            orders.push({
+                orderNo: orderNoMatch[1],
+                state: state,
+                videoStaff: videoStaff,
+                idTail: idTail,
+                remark: remark
+            });
+        });
+        return orders;
+    }
+
+    // 五分支判定：只看搜索结果第一个订单
+    function judgeReviewOrder(rows, staffName) {
+        if (!rows || !rows.length) return { type: 'notfound', text: '未查到' };
+        const first = rows[0];
+        const staff = (first.videoStaff || '').trim();
+        const state = (first.state || '').trim();
+        const idTail = (first.idTail || '').trim();
+
+        // ① 客服=自己 + 待归还 → 已通过
+        if (staff && staff === staffName && state === '待归还') return { type: 'pass', text: '已通过' };
+        // ② 客服=他人 + 待归还 → 他人已通过（写回前需人工二选一）
+        if (staff && staff !== staffName && state === '待归还') return { type: 'otherpass', text: staff + ' 已通过', otherStaff: staff };
+        // ③ 客服=自己 + 待审核 → 审核中
+        if (staff && staff === staffName && state === '待审核') return { type: 'reviewing', text: '审核中' };
+        // ④ 客服=自己 + 已退单 → 已退单
+        if (staff && staff === staffName && state === '已退单') return { type: 'rejected', text: '已退单' };
+        // ⑤ 客服=空 + 待归还 → ⑤.1 比对同身份证尾号且客服备注含面板客服名的订单
+        if (!staff && state === '待归还') {
+            const matched = rows.find(r => r.idTail && idTail && r.idTail === idTail && (r.remark || '').includes(staffName));
+            if (matched) return { type: 'resubmit', text: '疑似重新下单', refOrder: matched.orderNo };
+            return { type: 'manual', text: '待人工判断' };
+        }
+        // 未覆盖情况：直接显示后台原文状态（已买断、客服空+其他状态、客服他人+待审核等）
+        return { type: 'raw', text: state || '未知状态', rawState: state, rawStaff: staff };
+    }
+
+    // 条目 → 胶囊展示（text + 配色类）
+    function getReviewStatusMeta(item) {
+        if (item.status === 'pending') return { text: '待查询', cls: 're-review-tag-gray' };
+        if (item.status === 'querying') return { text: '查询中…', cls: 're-review-tag-querying' };
+        if (item.status === 'failed') return { text: '查询失败', cls: 're-review-tag-failed', err: item.errorMsg || '' };
+        const r = item.result || {};
+        switch (r.type) {
+            case 'pass': return { text: '已通过', cls: 're-review-tag-pass' };
+            case 'otherpass': return { text: (r.otherStaff || '他人') + ' 已通过 · 待确认', cls: 're-review-tag-other' };
+            case 'reviewing': return { text: '审核中', cls: 're-review-tag-reviewing' };
+            case 'resubmit': return { text: '疑似重新下单', cls: 're-review-tag-resubmit' };
+            case 'rejected': return { text: '已退单', cls: 're-review-tag-rejected' };
+            case 'manual': return { text: '待人工判断', cls: 're-review-tag-gray' };
+            case 'notfound': return { text: '未查到', cls: 're-review-tag-gray' };
+            case 'raw':
+                // 后台原文状态分色：已买断=金、待审核=橙、其余=灰
+                if (r.rawState === '已买断') return { text: '已买断', cls: 're-review-tag-buyout' };
+                if (r.rawState === '待审核') return { text: '待审核', cls: 're-review-tag-reviewing' };
+                return { text: r.text || '未知', cls: 're-review-tag-gray' };
+            default: return { text: r.text || '未知', cls: 're-review-tag-gray' };
+        }
+    }
+
+    // 标题栏能量条：查询中绿色+呼吸点，停止/暂停灰色；completed 后隐藏
+    function updateReviewEnergyBar() {
+        const el = document.getElementById('re-review-energy');
+        if (!el) return;
+        if (!reviewQueue || reviewQueue.completed) { el.style.display = 'none'; return; }
+        const total = reviewQueue.items.length;
+        const done = reviewQueue.items.filter(it => it.status === 'done').length;
+        const pct = total ? Math.floor(done / total * 100) : 0;
+        el.style.display = 'inline-flex';
+        el.classList.toggle('running', reviewRunning);
+        const fill = el.querySelector('.re-review-energy-fill');
+        const pctEl = el.querySelector('.re-review-energy-pct');
+        const cntEl = el.querySelector('.re-review-energy-count');
+        if (fill) fill.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (cntEl) cntEl.textContent = done + '/' + total;
+    }
+
+    // 渲染审查中心页面
+    function renderReviewCenter() {
+        const container = document.getElementById('re-review-container');
+        if (!container) return;
+
+        if (!reviewQueue) {
+            container.innerHTML = `
+                <div class="re-review-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
+                    <div class="re-review-empty-text">审查中心暂无待审查数据</div>
+                    <div class="re-review-empty-tip">请到【历史订单】点击日期卡片上的【审查此列】按钮<br>将该日客户移入审查中心进行批量审查</div>
+                </div>`;
+            updateReviewEnergyBar();
+            return;
+        }
+
+        const items = reviewQueue.items;
+        const total = items.length;
+        const doneCount = items.filter(it => it.status === 'done').length;
+        const pendingCount = items.filter(it => it.status === 'pending').length;
+        const failedCount = items.filter(it => it.status === 'failed').length;
+        const allDone = doneCount === total;
+        const completed = !!reviewQueue.completed;
+
+        const d = new Date(reviewQueue.date + 'T00:00:00');
+        const dateStr = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+
+        let statusTip;
+        if (completed) {
+            statusTip = '<span class="re-review-status-tip" style="color:#16a34a;">该日审查完毕，结果已写回历史订单</span>';
+        } else if (reviewRunning) {
+            statusTip = '<span class="re-review-status-tip" style="color:#2563eb;">查询进行中，并发 2 · 随机延迟 800–1500ms</span>';
+        } else if (failedCount) {
+            statusTip = '<span class="re-review-status-tip" style="color:#dc2626;">有 ' + failedCount + ' 条查询失败，点该条【更新】重试</span>';
+        } else {
+            statusTip = '<span class="re-review-status-tip" style="color:#6b7280;">待查询 ' + pendingCount + ' 条</span>';
+        }
+
+        const listHtml = items.map((it, idx) => {
+            const meta = getReviewStatusMeta(it);
+            const models = (it.models || []).join('、');
+            const isQuerying = it.status === 'querying';
+            const refPart = it.result && it.result.refOrder ? '关联订单：' + it.result.refOrder + ' ｜ ' : '';
+            const errPart = meta.err ? '失败原因：' + meta.err + ' ｜ ' : '';
+            return `
+                <div class="re-review-item${isQuerying ? ' querying' : ''}" data-review-name="${encodeURIComponent(it.name || '')}" title="${errPart}${refPart}${models ? models + ' ｜ ' : ''}点击在新标签页打开该客户的后台订单">
+                    <span class="re-review-item-idx">${idx + 1}</span>
+                    <span class="re-review-item-name">${it.name || '未知'}</span>
+                    <span class="re-review-tag ${meta.cls}">${meta.text}</span>
+                    <button class="re-review-update" data-name="${encodeURIComponent(it.name || '')}"${(isQuerying || completed || reviewRunning) ? ' disabled' : ''}>更新</button>
+                </div>`;
+        }).join('');
+
+        const dis = (cond) => cond ? ' disabled' : '';
+        container.innerHTML = `
+            <div class="re-review-toolbar">
+                <div class="re-review-toolbar-info">
+                    <span class="re-review-date">${dateStr}</span>
+                    <span class="re-review-meta">共 ${total} 单 · 已完成 ${doneCount}/${total}</span>
+                    ${statusTip}
+                </div>
+                <div class="re-review-btns">
+                    <button class="re-review-btn" id="re-review-start-btn"${dis(completed || reviewRunning || pendingCount === 0)}>开始查询</button>
+                    <button class="re-review-btn secondary" id="re-review-stop-btn"${dis(!reviewRunning)}>停止查询</button>
+                    <button class="re-review-btn secondary" id="re-review-finish-btn"${dis(completed || reviewRunning || !allDone)}>处理完毕</button>
+                </div>
+            </div>
+            <div class="re-review-list">${listHtml}</div>`;
+
+        // 点击条目整行：新标签页打开该客户的后台订单页（与判定查询同一姓名搜索视图）
+        // 注意：所有交互必须 stopPropagation——同步 innerHTML 重渲染会让被点节点游离于 panel，
+        // 冒泡到 document 时被外点监听误判为「点击面板外」导致面板自动关闭
+        container.querySelectorAll('.re-review-item[data-review-name]').forEach(row => {
+            row.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (e.target.closest('.re-review-update')) return; // 更新按钮不触发跳转
+                const rname = decodeURIComponent(this.getAttribute('data-review-name') || '');
+                if (!rname) return;
+                window.open('https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name='
+                    + encodeURIComponent(rname) + '&out_order_no=', '_blank');
+            });
+        });
+        container.querySelectorAll('.re-review-update').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                updateReviewItemByName(decodeURIComponent(this.getAttribute('data-name')));
+            });
+        });
+        const startBtn = document.getElementById('re-review-start-btn');
+        if (startBtn) startBtn.addEventListener('click', function(e) { e.stopPropagation(); startReviewQuery(); });
+        const stopBtn = document.getElementById('re-review-stop-btn');
+        if (stopBtn) stopBtn.addEventListener('click', function(e) { e.stopPropagation(); stopReviewQuery(); });
+        const finishBtn = document.getElementById('re-review-finish-btn');
+        if (finishBtn) finishBtn.addEventListener('click', function(e) { e.stopPropagation(); finishReviewProcess(); });
+
+        updateReviewEnergyBar();
+    }
+
+    // 【审查此列】：将该日客户按姓名去重载入审查中心并跳转
+    function loadDateIntoReview(date) {
+        if (!date) return;
+        if (date === getLocalTodayStr()) { showErrorToast('当日记录不支持审查'); return; }
+
+        if (reviewQueue && !reviewQueue.completed) {
+            if (reviewQueue.date !== date) {
+                showErrorToast('当前队列（' + reviewQueue.date + '）未完成，先处理完再调用新的一天');
+                return;
+            }
+            const navItem = panel.querySelector('.re-nav-item[data-page="review"]');
+            if (navItem) navItem.click();
+            showSuccessToast('该日队列已在审查中心');
+            return;
+        }
+        if (reviewQueue && reviewQueue.completed && reviewQueue.date === date) {
+            if (!confirm('该日已审查完毕。重新审查将重建队列并重新写回（覆盖旧结果），确定继续？')) return;
+            // 确认后走下方载入流程，覆盖旧队列
+        }
+
+        getAllHistoryRecords().then(records => {
+            const dayRecords = records.filter(r => r.date === date);
+            if (!dayRecords.length) { showErrorToast('该日无历史记录'); return; }
+            // 同名客户只查一次，写回时覆盖该日全部同名记录
+            const byName = {};
+            dayRecords.forEach(r => {
+                const key = r.name || '未知';
+                if (!byName[key]) byName[key] = { name: key, models: [], recordIds: [] };
+                if (r.model && !byName[key].models.includes(r.model)) byName[key].models.push(r.model);
+                byName[key].recordIds.push(r.id);
+            });
+            const items = Object.values(byName).map(it => ({
+                name: it.name,
+                models: it.models,
+                recordIds: it.recordIds,
+                status: 'pending',
+                result: null
+            }));
+            reviewQueue = { date: date, items: items, completed: false, running: false };
+            saveReviewQueue();
+            const navItem = panel.querySelector('.re-nav-item[data-page="review"]');
+            if (navItem) navItem.click();
+            else renderReviewCenter();
+            showSuccessToast('已载入 ' + date + ' 共 ' + items.length + ' 位客户');
+        }).catch(() => {
+            showErrorToast('载入历史记录失败');
+        });
+    }
+
+    // 【开始查询】：并发 2 + 每条前随机延迟 800–1500ms，从上到下推进
+    async function startReviewQuery() {
+        if (reviewRunning || !reviewQueue || reviewQueue.completed) return;
+        if (!reviewQueue.items.some(it => it.status === 'pending')) {
+            showErrorToast('没有待查询的条目');
+            return;
+        }
+        // 同步置位防双击竞态：await 客服名期间二次点击不得再进入（否则会起 4 个 worker 超并发）
+        reviewRunning = true;
+        reviewAbortFlag = false;
+        const staff = await ensureReviewStaffName();
+        if (!staff) {
+            reviewRunning = false;
+            showErrorToast('未获取到客服姓名，无法判定审查结果');
+            renderReviewCenter();
+            return;
+        }
+        reviewQueue.running = true;
+        saveReviewQueue();
+        renderReviewCenter();
+
+        const worker = async () => {
+            while (!reviewAbortFlag && reviewQueue) {
+                const item = reviewQueue.items.find(it => it.status === 'pending');
+                if (!item) break;
+                item.status = 'querying';
+                saveReviewQueue();
+                renderReviewCenter();
+                await sleepReview(800 + Math.random() * 700);
+                if (reviewAbortFlag) { item.status = 'pending'; saveReviewQueue(); break; }
+                try {
+                    const rows = await queryReviewOrderByName(item.name);
+                    if (reviewAbortFlag) {
+                        item.status = 'pending'; // 停止时不浪费结果位：退回待查询
+                    } else {
+                        item.result = judgeReviewOrder(rows, reviewStaffName);
+                        item.status = 'done';
+                    }
+                } catch (err) {
+                    item.status = reviewAbortFlag ? 'pending' : 'failed';
+                    item.errorMsg = (err && err.message) ? err.message : '网络错误';
+                }
+                saveReviewQueue();
+                renderReviewCenter();
+            }
+        };
+        await Promise.all([worker(), worker()]);
+        reviewRunning = false;
+        if (reviewQueue) {
+            reviewQueue.running = false;
+            saveReviewQueue();
+        }
+        renderReviewCenter();
+        if (!reviewAbortFlag && reviewQueue && !reviewQueue.completed && reviewQueue.items.every(it => it.status === 'done')) {
+            showSuccessToast('该日全部查询完成，可点击【处理完毕】写回结果');
+        }
+    }
+
+    // 【停止查询】：停止批量推进，进度持久化，下次从断点继续
+    function stopReviewQuery() {
+        if (!reviewRunning) return;
+        reviewAbortFlag = true;
+        showSuccessToast('已停止查询，进度已记忆，下次【开始查询】从断点继续');
+    }
+
+    // 【更新】：单条重新查询判定（查询进行中禁用）
+    async function updateReviewItemByName(name) {
+        if (!reviewQueue || reviewQueue.completed || reviewRunning) return;
+        const item = reviewQueue.items.find(it => it.name === name);
+        if (!item || item.status === 'querying') return;
+        item.status = 'querying';
+        saveReviewQueue();
+        renderReviewCenter();
+        const staff = await ensureReviewStaffName();
+        if (!staff) {
+            item.status = 'failed';
+            saveReviewQueue();
+            renderReviewCenter();
+            showErrorToast('未获取到客服姓名，无法判定审查结果');
+            return;
+        }
+        await sleepReview(600 + Math.random() * 400);
+        try {
+            const rows = await queryReviewOrderByName(item.name);
+            item.result = judgeReviewOrder(rows, reviewStaffName);
+            item.status = 'done';
+            showSuccessToast('已更新：' + item.name + ' → ' + (item.result.text || ''));
+        } catch (e) {
+            item.status = 'failed';
+            item.errorMsg = (e && e.message) ? e.message : '网络错误';
+            showErrorToast('更新失败：' + item.name + '（' + item.errorMsg + '）');
+        }
+        saveReviewQueue();
+        renderReviewCenter();
+    }
+
+    // 「他人已通过」写回文案 → 配色
+    function getReviewWriteBackInfo(item, confirmedMap) {
+        const r = item.result || {};
+        if (r.type === 'otherpass') {
+            return confirmedMap[item.name] === '已通过'
+                ? { text: '已通过', cls: 're-review-tag-pass' }
+                : { text: '已退单', cls: 're-review-tag-rejected' };
+        }
+        const map = {
+            pass: ['已通过', 're-review-tag-pass'],
+            reviewing: ['审核中', 're-review-tag-reviewing'],
+            resubmit: ['疑似重新下单', 're-review-tag-resubmit'],
+            rejected: ['已退单', 're-review-tag-rejected'],
+            manual: ['待人工判断', 're-review-tag-gray'],
+            notfound: ['未查到', 're-review-tag-gray']
+        };
+        if (map[r.type]) return { text: map[r.type][0], cls: map[r.type][1] };
+        if (r.type === 'raw') {
+            if (r.rawState === '已买断') return { text: '已买断', cls: 're-review-tag-buyout' };
+            if (r.rawState === '待审核') return { text: '待审核', cls: 're-review-tag-reviewing' };
+        }
+        return { text: r.text || '未知', cls: 're-review-tag-gray' };
+    }
+
+    // 「他人已通过」二选一确认弹窗（复用 re-modal 体系，挂 body）
+    function showReviewConfirmModal(others, confirmedMap) {
+        return new Promise(resolve => {
+            let modal = document.getElementById('re-review-confirm-modal');
+            if (modal) modal.remove();
+            modal = document.createElement('div');
+            modal.id = 're-review-confirm-modal';
+            modal.className = 're-modal-overlay';
+            const rowsHtml = others.map(it => `
+                <div class="re-review-confirm-row">
+                    <div class="re-review-confirm-who">
+                        <span class="re-review-confirm-name">${it.name || '未知'}</span>
+                        <span class="re-review-confirm-sub">后台视频面审客服：${(it.result && it.result.otherStaff) || '未知'}</span>
+                    </div>
+                    <div class="re-review-confirm-opts" data-name="${encodeURIComponent(it.name || '')}">
+                        <button class="re-review-opt" data-choice="已通过">已通过</button>
+                        <button class="re-review-opt" data-choice="已退单">已退单</button>
+                    </div>
+                </div>`).join('');
+            modal.innerHTML = `
+                <div class="re-modal" style="width: 360px;">
+                    <div class="re-modal-header">
+                        <span class="re-modal-title">确认最终状态</span>
+                    </div>
+                    <div class="re-modal-body" style="padding: 16px 20px;">
+                        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;line-height:1.6;">检测到 ${others.length} 条「他人已通过」订单，写回历史前请逐条确认最终状态：</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">${rowsHtml}</div>
+                        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+                            <button class="re-contact-btn" id="re-review-confirm-cancel">取消</button>
+                            <button class="re-contact-btn" id="re-review-confirm-ok" style="background:#3b82f6;color:#fff;border-color:#3b82f6;" disabled>确认写回</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.classList.add('re-modal-visible');
+
+            const closeModal = (result) => {
+                modal.classList.remove('re-modal-visible');
+                modal.remove();
+                resolve(result);
+            };
+            const okBtn = modal.querySelector('#re-review-confirm-ok');
+            const refreshOk = () => {
+                const allSel = others.every(it => confirmedMap[it.name]);
+                okBtn.disabled = !allSel;
+            };
+            modal.querySelectorAll('.re-review-confirm-opts').forEach(opts => {
+                opts.querySelectorAll('.re-review-opt').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const cname = decodeURIComponent(opts.getAttribute('data-name'));
+                        confirmedMap[cname] = this.getAttribute('data-choice');
+                        opts.querySelectorAll('.re-review-opt').forEach(b => b.classList.remove('sel-pass', 'sel-fail'));
+                        this.classList.add(this.getAttribute('data-choice') === '已通过' ? 'sel-pass' : 'sel-fail');
+                        refreshOk();
+                    });
+                });
+            });
+            // 弹窗按钮同样 stopPropagation：closeModal 会 remove 弹窗节点，外点白名单随之失效
+            modal.querySelector('#re-review-confirm-cancel').addEventListener('click', (e) => { e.stopPropagation(); closeModal(false); });
+            okBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!okBtn.disabled) closeModal(true); });
+        });
+    }
+
+    // 【处理完毕】：全部出结果后，把最终状态写回该日历史记录对应客户（他人通过先二选一）
+    let reviewFinishing = false;
+    async function finishReviewProcess() {
+        if (!reviewQueue || reviewQueue.completed || reviewRunning || reviewFinishing) return;
+        const unfinished = reviewQueue.items.filter(it => it.status !== 'done');
+        if (unfinished.length) {
+            showErrorToast('还有 ' + unfinished.length + ' 条未处理完毕，全部出结果后才能写回');
+            return;
+        }
+        const others = reviewQueue.items.filter(it => it.result && it.result.type === 'otherpass');
+        const confirmedMap = {};
+        if (others.length) {
+            const ok = await showReviewConfirmModal(others, confirmedMap);
+            if (!ok) return;
+        }
+        // 写回循环为 async 挂起段：同步置位防二次点击重复写回
+        reviewFinishing = true;
+        let writeCount = 0;
+        try {
+            for (const item of reviewQueue.items) {
+                const info = getReviewWriteBackInfo(item, confirmedMap);
+                for (const rid of (item.recordIds || [])) {
+                    try {
+                        await updateHistoryRecordFields(rid, { reviewStatus: info.text, reviewStatusCls: info.cls });
+                        writeCount++;
+                    } catch (e) {}
+                }
+            }
+        } finally {
+            reviewFinishing = false;
+        }
+        reviewQueue.completed = true;
+        reviewQueue.running = false;
+        saveReviewQueue();
+        renderReviewCenter();
+        const searchInput = document.getElementById('re-history-search');
+        renderHistoryRecords(searchInput ? searchInput.value.trim() : '');
+        showSuccessToast('已写回 ' + writeCount + ' 条审查结果到历史订单');
     }
 
     const SELECT_OPTIONS_DB_NAME = 'ReSystemSelectOptionsDB';
@@ -8906,8 +9811,7 @@
         appearance: false,
         history: false,
         analysis: false,
-        analysisEvents: false,
-        pet: false
+        analysisEvents: false
     };
 
     function loadAutoAgeSetting() {
@@ -9373,7 +10277,6 @@
         restorePanelPosition();
         initStaffName();
         initEditableSelects();
-        petDailySign();
         fetchPageData();
         fetchProductData();
         fetchOrderData();
@@ -9512,14 +10415,14 @@
         const isClickOnDayEditModal = dayEditModal && dayEditModal.contains(e.target);
         const repeatOrdersModal = document.getElementById('re-repeat-orders-modal');
         const isClickOnRepeatOrdersModal = repeatOrdersModal && repeatOrdersModal.contains(e.target);
+        const reviewConfirmModal = document.getElementById('re-review-confirm-modal');
+        const isClickOnReviewConfirmModal = reviewConfirmModal && reviewConfirmModal.contains(e.target);
         // 宽下拉面板与历史悬停浮卡挂在 body 上（fixed 定位避开面板 transform 祖先），需排除
         const isClickOnMultiSelectDrop = e.target.closest && e.target.closest('.re-multi-select-dropdown');
         const isClickOnHistHoverCard = e.target.closest && e.target.closest('.re-history-hover-card');
         const isClickOnLayuiLayer = e.target.closest && (e.target.closest('.layui-layer') || e.target.closest('.layui-layer-shade'));
-        // 浮层宠物挂在 body 上，点击/拖动它不应触发面板外点关闭
-        const isClickOnPetFloat = e.target.closest && e.target.closest('#re-pet-float');
 
-        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer && !isClickOnPetFloat) {
+        if (isPanelVisible() && !panel.contains(e.target) && !isDragging && !isResizing && !justFinishedInteraction && !isClickOnConfirmModal && !isClickOnManageModal && !isClickOnMultiSelectManageModal && !isClickOnGenericIframeModal && !isClickOnModelOrdersModal && !isClickOnOrderDetailModal && !isClickOnDayEditModal && !isClickOnRepeatOrdersModal && !isClickOnReviewConfirmModal && !isClickOnMultiSelectDrop && !isClickOnHistHoverCard && !isClickOnLayuiLayer) {
             togglePanel(false);
         }
         if (justFinishedInteraction) {
@@ -9637,7 +10540,7 @@
             navItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
 
-            const pages = ['re-page-data', 're-page-settings', 're-page-history', 're-page-analysis', 're-page-pet'];
+            const pages = ['re-page-data', 're-page-settings', 're-page-history', 're-page-analysis', 're-page-review'];
             const rightColumn = document.getElementById('re-right-column');
             const pageType = this.getAttribute('data-page') || 'data';
 
@@ -9662,6 +10565,11 @@
                 renderHistoryRecords();
             }
 
+            if (pageType === 'review') {
+                renderReviewCenter();
+                updateReviewEnergyBar();
+            }
+
             if (pageType === 'analysis') {
                 if (!lazyInit.analysisEvents) {
                     lazyInit.analysisEvents = true;
@@ -9675,13 +10583,6 @@
                 // 数据不变时静默重绘（drawOrderChart 内部指纹比对跳过动画）
             }
 
-            if (pageType === 'pet') {
-                if (!lazyInit.pet) {
-                    lazyInit.pet = true;
-                    initPetPage();
-                }
-                renderPetPage();
-            }
         });
     });
 
@@ -12259,7 +13160,6 @@
             if (completed) return;
             completed = true;
             cleanup();
-            if (success) gainPetExp('assign', '客服分配');
             callback(success, message);
         }
 
@@ -12616,7 +13516,6 @@
 
                                 const doneMsg = skipAssign ? '自动处理完成！已跳过客服分配（无锁不满足）' : '自动处理完成！';
                                 showSuccessToast(doneMsg + (copyOk ? '，即时预览已复制' : '，预览复制失败'));
-                                gainPetExp('autoBonus', '自动处理完成');
 
                                 const now = new Date();
                                 const record = {
@@ -12630,8 +13529,6 @@
                                 };
 
                                 saveHistoryRecord(record).then(() => {
-                                    gainPetExp('history', '记录历史');
-                                    addPetModelPoints(record.model); // 宠物点数：按审核机型计点，次日结算
                                     setWorkflowNode('history', 'done', '已记录');
                                     renderHistoryRecords();
                                 }).catch(err => {
@@ -12724,13 +13621,11 @@
                     const result = JSON.parse(response.responseText);
                     // 成功判定兜底：status 真值 / code 宽松等于0（兼容字符串"0"）/ success 字段
                     const ok = !!result.status || result.code == 0 || result.success == true;
-                    if (ok) gainPetExp('staffRemark', '客服备注');
                     callback(ok, ok ? '' : ('服务端返回: ' + String(response.responseText).slice(0, 100)));
                 } catch (e) {
                     // 非 JSON 响应：2xx/3xx 均视为成功
                     // 后端为 PRG 模式：POST 提交成功返回 302 重定向（实测已确认），仅 4xx/5xx 为真失败
                     const ok = response.status >= 200 && response.status < 400;
-                    if (ok) gainPetExp('staffRemark', '客服备注');
                     callback(ok, ok ? '' : ('HTTP ' + response.status));
                 }
             },
@@ -12902,1091 +13797,17 @@
                     const result = JSON.parse(response.responseText);
                     // 成功判定兜底：status 真值 / code 宽松等于0（兼容字符串"0"）/ success 字段
                     const ok = !!result.status || result.code == 0 || result.success == true;
-                    if (ok) gainPetExp('riskRemark', '风控备注');
                     callback(ok, ok ? '' : ('服务端返回: ' + String(response.responseText).slice(0, 100)));
                 } catch (e) {
                     // 非 JSON 响应：2xx/3xx 均视为成功
                     // 后端为 PRG 模式：POST 提交成功返回 302 重定向（实测已确认），仅 4xx/5xx 为真失败
                     const ok = response.status >= 200 && response.status < 400;
-                    if (ok) gainPetExp('riskRemark', '风控备注');
                     callback(ok, ok ? '' : ('HTTP ' + response.status));
                 }
             },
             onerror: function() { callback(false, '网络错误'); },
             ontimeout: function() { callback(false, '请求超时'); }
         });
-    }
-
-    /* ===================== 养成模块（V6.4.0）=====================
-       五只纸绘伙伴（猫/狗/龙/机器人/狐狸）；养满一只（Lv50）解锁下一只，
-       已解锁可自由切换主养；经验只挂真实成功节点，单日无上限多劳多得，
-       一单全自动处理合计 +15（分配2+客服备注3+风控备注3+完成奖励5+历史2）。
-       性能约束：升级彩带仅动画 transform/opacity（GPU 合成），不碰 box-shadow。 */
-    const PET_DB_NAME = 'VideoReviewPetDB';
-    const PET_STORE_NAME = 'petState';
-    const PET_MAX_LEVEL = 50;
-
-    const PET_DEFS = [
-        { id: 'cat',    name: '小猫',     line: '招财线', stages: ['纸蛋', '破壳崽', '小学徒', '打工猫', '招财完全体'] },
-        { id: 'dog',    name: '小狗',     line: '旺财线', stages: ['纸蛋', '奶狗崽', '小跟班', '巡逻犬', '旺财完全体'] },
-        { id: 'dragon', name: '小龙',     line: '进宝线', stages: ['纸蛋', '龙崽', '小蛟', '行云龙', '金龙完全体'] },
-        { id: 'robot',  name: '小机器人', line: '效率线', stages: ['纸蛋', '零件盒', '拼装体', '智能体', '超算完全体'] },
-        { id: 'fox',    name: '小狐狸',   line: '慧眼线', stages: ['纸蛋', '小狐狸', '机灵狐', '掌柜狐', '九尾完全体'] }
-    ];
-
-    const PET_EXP_RULES = { assign: 2, staffRemark: 3, riskRemark: 3, autoBonus: 5, history: 2, dailySign: 1 };
-
-    let petStateCache = null;
-
-    function petDefaultState() {
-        return {
-            activePet: 0,
-            pets: PET_DEFS.map((_, i) => ({ level: 1, exp: 0, unlocked: i === 0, lastFeed: 0, totalExp: 0, feedCount: 0 })),
-            daily: { date: '', exp: 0, signed: false },
-            float: { active: false, x: 24, y: 24 },
-            points: 0,          // 可用宠物点数（审核机型日结而来）
-            pendingPoints: 0,   // 今日待结算点数（次日入账）
-            doubleDate: '',     // 倍数丸生效日（当日有效）
-            credited: {},       // 订单级经验去重表：{ '行为:订单号': 时间戳 }，防狂点按钮刷经验（V6.5.2）
-            log: []
-        };
-    }
-
-    function openPetDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(PET_DB_NAME, 1);
-            request.onupgradeneeded = function(e) {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(PET_STORE_NAME)) {
-                    db.createObjectStore(PET_STORE_NAME, { keyPath: 'id' });
-                }
-            };
-            request.onsuccess = function() { resolve(request.result); };
-            request.onerror = function() { reject(request.error); };
-        });
-    }
-
-    function loadPetState() {
-        return new Promise((resolve) => {
-            openPetDB().then(db => {
-                try {
-                    const req = db.transaction(PET_STORE_NAME, 'readonly').objectStore(PET_STORE_NAME).get('main');
-                    req.onsuccess = function() {
-                        const def = petDefaultState();
-                        const saved = req.result;
-                        if (saved) {
-                            def.activePet = saved.activePet || 0;
-                            if (def.activePet >= PET_DEFS.length) def.activePet = 0;
-                            const savedPets = saved.pets || [];
-                            PET_DEFS.forEach((_, i) => { Object.assign(def.pets[i], savedPets[i] || {}); });
-                            def.daily = Object.assign(def.daily, saved.daily || {});
-                            def.float = Object.assign(def.float, saved.float || {});
-                            def.points = typeof saved.points === 'number' ? saved.points : 0;
-                            def.pendingPoints = typeof saved.pendingPoints === 'number' ? saved.pendingPoints : 0;
-                            def.doubleDate = saved.doubleDate || '';
-                            def.credited = saved.credited || {};
-                            def.log = Array.isArray(saved.log) ? saved.log : [];
-                        }
-                        resolve(def);
-                    };
-                    req.onerror = function() { resolve(petDefaultState()); };
-                } catch (e) { resolve(petDefaultState()); }
-            }).catch(() => resolve(petDefaultState()));
-        });
-    }
-
-    function savePetState() {
-        if (!petStateCache) return;
-        openPetDB().then(db => {
-            try {
-                db.transaction(PET_STORE_NAME, 'readwrite').objectStore(PET_STORE_NAME).put(Object.assign({ id: 'main' }, petStateCache));
-            } catch (e) {}
-        }).catch(() => {});
-    }
-
-    function petExpNeeded(level) { return Math.floor(50 * Math.pow(level, 1.5)); }
-
-    function petStageOf(level) { return level >= PET_MAX_LEVEL ? 4 : Math.floor(level / 10); }
-
-    function petMoodOf(pet) {
-        if (!pet.lastFeed) return 50;
-        const days = Math.floor((Date.now() - pet.lastFeed) / 86400000);
-        return Math.max(10, 100 - Math.min(90, days * 25));
-    }
-
-    function petMoodText(mood) {
-        if (mood >= 80) return '心情超好';
-        if (mood >= 60) return '心情不错';
-        if (mood >= 30) return '有点想你';
-        return '蔫了，快办单喂它';
-    }
-
-    function petLog(text) {
-        if (!petStateCache) return;
-        petStateCache.log.unshift({ t: Date.now(), text: text });
-        if (petStateCache.log.length > 30) petStateCache.log.length = 30;
-    }
-
-    function isPetPageVisible() {
-        const el = document.getElementById('re-page-pet');
-        return !!el && el.style.display !== 'none';
-    }
-
-    /* ---------- 纸绘 SVG 纸娃娃系统（纸绘风：暖铅笔描边 + 纸底 + 低饱和填色） ---------- */
-    const PET_PAL = {
-        ink: '#5B5142', paper: '#FBF5E6', paper2: '#F8F0DC', blush: '#EDC7BC', gold: '#E9BC4F',
-        cat: '#E8B478', dog: '#C89B6E', dragon: '#7FBFA8', robot: '#9DB4C9', fox: '#E8946A', red: '#D97B6C'
-    };
-
-    function petSvgWrap(inner, cls) {
-        return `<svg viewBox="0 0 160 150" ${cls ? `class="${cls}"` : ''} role="img">${petGround()}${inner}</svg>`;
-    }
-
-    function petGround() {
-        return `<path d="M34 140 q46 5 92 0" fill="none" stroke="#B9AA8C" stroke-width="1.6" stroke-linecap="round"/>`;
-    }
-
-    // 通用小脸：圆眼(幼年)/笑眼(成长) + 腮红 + w嘴
-    function petFace(hx, hy, opts) {
-        const P = PET_PAL;
-        const eye = opts.smile
-            ? `<g class="re-pet-eyes"><path d="M${hx-11} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><path d="M${hx+3} ${hy} q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/></g>`
-            : `<g class="re-pet-eyes"><circle cx="${hx-7}" cy="${hy}" r="2.6" fill="${P.ink}"/><circle cx="${hx+7}" cy="${hy}" r="2.6" fill="${P.ink}"/></g>`;
-        const mouth = opts.tongue
-            ? `<path d="M${hx-3} ${hy+8} q3 4 6 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/><path d="M${hx-1} ${hy+10} q1 3 2 0 z" fill="${P.red}"/>`
-            : `<path d="M${hx-3} ${hy+8} q3 3 6 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>`;
-        return `${eye}<ellipse cx="${hx-15}" cy="${hy+6}" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="${hx+15}" cy="${hy+6}" rx="3.6" ry="2.2" fill="${P.blush}"/>${mouth}`;
-    }
-
-    // 蛋阶段：五只共享蛋形 + 各自花纹
-    function petEggSVG(petId) {
-        const P = PET_PAL;
-        let deco = '';
-        if (petId === 'cat') deco = `<g fill="#D9C49A"><circle cx="72" cy="66" r="2.4"/><circle cx="90" cy="74" r="2.8"/><circle cx="74" cy="86" r="2"/><circle cx="92" cy="94" r="2.4"/><circle cx="68" cy="98" r="2.2"/></g>`;
-        else if (petId === 'dog') deco = `<g fill="${P.dog}" opacity=".5"><circle cx="74" cy="66" r="2"/><circle cx="80" cy="66" r="2"/><circle cx="77" cy="70" r="2"/><ellipse cx="77" cy="78" rx="4" ry="3"/></g>`;
-        else if (petId === 'dragon') deco = `<g fill="${P.dragon}" opacity=".6"><path d="M72 62 l4 6 -4 6 -4 -6 Z"/><path d="M90 76 l4 6 -4 6 -4 -6 Z"/><path d="M72 92 l4 6 -4 6 -4 -6 Z"/></g>`;
-        else if (petId === 'robot') deco = `<g stroke="${P.robot}" stroke-width="1.6" fill="none"><path d="M70 60 h10 v10 h10"/><path d="M70 88 h8 v-8 h8"/><circle cx="92" cy="94" r="1.6" fill="${P.robot}" stroke="none"/></g>`;
-        else deco = `<g stroke="${P.fox}" stroke-width="2" stroke-linecap="round" fill="none"><path d="M68 58 q8 12 0 24"/><path d="M86 66 q8 12 0 24"/></g>`;
-        return petSvgWrap(`<path d="M80 44 C 96 44 107 66 107 82 C 107 97 94 107 80 107 C 66 107 53 97 53 82 C 53 66 64 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M72 50 l4 5 -3 4 5 4" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${deco}
-            <g stroke="${P.ink}" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M114 48 h6 l-6 5 h6"/><path d="M122 36 h5 l-5 4 h5"/></g>`);
-    }
-
-    // 小猫 · 招财线
-    function petCatSVG(stage) {
-        const P = PET_PAL, C = P.cat;
-        if (stage === 0) return petEggSVG('cat');
-        if (stage === 1) return petSvgWrap(`
-            <path d="M102 116 q17 -6 12 -23" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
-            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
-            <path d="M56 54 L44 34 L70 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M104 54 L116 34 L90 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M58 50 L52 39 L66 45 Z" fill="${C}"/><path d="M102 50 L108 39 L94 45 Z" fill="${C}"/>
-            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <g transform="rotate(-5 80 38)">
-                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <g class="re-pet-eyes"><circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/></g>
-            <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
-            <ellipse cx="59" cy="71" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="101" cy="71" rx="4" ry="2.4" fill="${P.blush}"/>
-            <path d="M75 71 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M78 73.5 q2 2.5 4 0 z" fill="${P.red}"/>
-            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        if (stage === 2) return petSvgWrap(`
-            <path d="M52 60 L40 32 L66 46 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M108 60 L120 32 L94 46 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M55 55 L48 38 L62 47 Z" fill="${C}"/><path d="M105 55 L112 38 L98 47 Z" fill="${C}"/>
-            <path d="M80 44 C 94 44 104 54 104 66 C 104 77 93 84 80 84 C 67 84 56 77 56 66 C 56 54 66 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 64, {})}
-            <path d="M60 84 C 72 80 88 80 100 84 L 102 102 C 88 108 72 108 58 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M56 86 q12 7 24 0 l3 10 q-15 9 -30 0 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M100 92 q15 -2 12 -16" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/>
-            <path d="M80 22 l2 4 4.5 .6 -3.2 3.2 .8 4.5 -4.1 -2.1 -4.1 2.1 .8 -4.5 -3.2 -3.2 4.5 -.6 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        if (stage === 3) return petSvgWrap(`
-            <path d="M54 58 L42 30 L68 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M106 58 L118 30 L92 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M58 53 L51 36 L64 45 Z" fill="${C}"/><path d="M102 53 L109 36 L96 45 Z" fill="${C}"/>
-            <path d="M80 40 C 96 40 106 51 106 64 C 106 76 94 83 80 83 C 66 83 54 76 54 64 C 54 51 64 40 80 40 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 60, { smile: true })}
-            <path d="M58 82 C 72 78 88 78 102 82 L 104 106 C 88 112 72 112 56 106 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M66 88 q14 8 28 0" fill="none" stroke="${P.red}" stroke-width="4"/>
-            <circle cx="80" cy="96" r="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.6"/>
-            <rect x="92" y="88" width="14" height="10" rx="2" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.6"/><path d="M95 92 h8 M95 94.5 h5" stroke="#B9AA8C" stroke-width="1.2"/>
-            <path d="M104 96 q-10 8 -22 6" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/>
-            <g stroke="${P.ink}" stroke-width="1.4" stroke-linecap="round"><path d="M52 62 l-8 -2 M52 66 l-8 2 M108 62 l8 -2 M108 66 l8 2"/></g>`);
-        return petSvgWrap(`
-            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 12 v-7"/><path d="M58 16 l-4 -6"/><path d="M102 16 l4 -6"/><path d="M42 28 l-6 -5"/><path d="M118 28 l6 -5"/><path d="M32 48 l-7 1"/><path d="M128 48 l7 1"/></g>
-            <path d="M80 72 C 100 72 112 90 112 110 C 112 124 98 130 80 130 C 62 130 48 124 48 110 C 48 90 60 72 80 72 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M66 92 q14 9 28 0 l4 14 q-18 11 -36 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <g transform="rotate(-8 80 110)"><rect x="68" y="94" width="24" height="32" rx="5" fill="${P.gold}" stroke="${P.ink}" stroke-width="2"/><circle cx="80" cy="110" r="7" fill="none" stroke="#B98F2E" stroke-width="1.4"/><path d="M80 106 v8 M76 110 h8" stroke="${P.ink}" stroke-width="1.6"/></g>
-            <path d="M52 84 C 42 78 34 66 34 54" fill="none" stroke="${P.ink}" stroke-width="8" stroke-linecap="round"/><path d="M52 84 C 42 78 34 66 34 54" fill="none" stroke="${P.paper}" stroke-width="4.4" stroke-linecap="round"/><circle cx="34" cy="52" r="5.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="34" cy="52" r="2.2" fill="${P.blush}"/>
-            <circle cx="80" cy="74" r="4.5" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/><path d="M77 74 h6 M80 71 v6" stroke="${P.ink}" stroke-width="1.2"/>
-            <path d="M80 18 C 98 18 110 30 110 44 C 110 58 96 66 80 66 C 64 66 50 58 50 44 C 50 30 62 18 80 18 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M56 30 L46 8 L72 20 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/><path d="M104 30 L114 8 L88 20 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M59 26 L54 13 L68 19 Z" fill="${P.red}"/><path d="M101 26 L106 13 L92 19 Z" fill="${P.red}"/>
-            ${petFace(80, 44, { smile: true })}
-            <g stroke="${P.ink}" stroke-width="1.5" stroke-linecap="round"><path d="M50 46 l-8 -2 M50 51 l-8 2 M110 46 l8 -2 M110 51 l8 2"/></g>`);
-    }
-
-    // 小狗 · 旺财线
-    function petDogSVG(stage) {
-        const P = PET_PAL, C = P.dog;
-        if (stage === 0) return petEggSVG('dog');
-        if (stage === 1) return petSvgWrap(`
-            <path d="M102 114 q16 -4 13 -22" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>
-            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
-            <circle cx="99" cy="110" r="4.2" fill="${C}" opacity=".55"/>
-            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
-            <ellipse cx="53" cy="62" rx="9" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(16 53 62)"/><ellipse cx="107" cy="62" rx="9" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-16 107 62)"/>
-            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <g transform="rotate(-5 80 38)">
-                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <g class="re-pet-eyes"><circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/></g>
-            <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
-            <ellipse cx="58" cy="72" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="102" cy="72" rx="4" ry="2.4" fill="${P.blush}"/>
-            <ellipse cx="80" cy="67" rx="4" ry="3" fill="${P.ink}"/><circle cx="81.5" cy="66" r="1" fill="${P.paper}"/>
-            <path d="M76 72 q4 4 8 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M78 74 q2 3 4 0 z" fill="${P.red}"/>
-            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        if (stage === 2) return petSvgWrap(`
-            <ellipse cx="56" cy="56" rx="11" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(16 56 56)"/><ellipse cx="104" cy="56" rx="11" ry="15" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-16 104 56)"/>
-            <path d="M80 44 C 94 44 104 54 104 66 C 104 78 93 85 80 85 C 67 85 56 78 56 66 C 56 54 66 44 80 44 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 64, {})}
-            <ellipse cx="80" cy="59" rx="7" ry="5" fill="${P.blush}" opacity=".7"/>
-            <path d="M58 84 C 72 80 88 80 102 84 L 104 104 C 88 110 72 110 56 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M70 92 h20 l-4 6 h-12 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/><circle cx="80" cy="96" r="1.6" fill="${P.ink}"/>
-            <path d="M104 94 q12 2 9 -14" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
-        if (stage === 3) return petSvgWrap(`
-            <path d="M56 58 L44 34 L70 46 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M104 58 L116 34 L90 46 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M59 55 L51 40 L66 48 Z" fill="${P.paper}" opacity=".65"/><path d="M101 55 L109 40 L94 48 Z" fill="${P.paper}" opacity=".65"/>
-            <path d="M80 42 C 96 42 106 52 106 65 C 106 77 94 84 80 84 C 66 84 54 77 54 65 C 54 52 64 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 62, { smile: true })}
-            <ellipse cx="80" cy="56" rx="8" ry="5.5" fill="${P.blush}" opacity=".7"/><circle cx="77" cy="55" r="1.8" fill="${P.ink}"/><circle cx="83" cy="55" r="1.8" fill="${P.ink}"/>
-            <path d="M58 82 C 72 78 88 78 102 82 L 104 106 C 88 112 72 112 56 106 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M72 90 q8 -4 16 0 q-4 8 -8 8 q-4 0 -8 -8 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
-            <rect x="90" y="90" width="14" height="10" rx="2" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.6"/><path d="M93 94 h8 M93 96.5 h5" stroke="#B9AA8C" stroke-width="1.2"/>
-            <path d="M104 96 q-12 8 -24 5" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
-        return petSvgWrap(`
-            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 12 v-7"/><path d="M60 16 l-3 -6"/><path d="M100 16 l3 -6"/></g>
-            <path d="M80 70 C 102 70 114 90 114 108 C 114 122 100 128 80 128 C 60 128 46 122 46 108 C 46 90 58 70 80 70 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M68 100 q12 8 24 0 l3 12 q-15 9 -30 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M74 118 l4 -8 4 8 -4 3 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M64 106 l6 -4 1 5 -5 3 Z M96 106 l-6 -4 -1 5 5 3 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M78 82 q6 5 12 0 l2 6 q-8 5 -16 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M58 86 C 46 82 38 70 38 58 C 44 64 46 70 54 72 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M80 20 C 98 20 110 32 110 46 C 110 60 96 68 80 68 C 64 68 50 60 50 46 C 50 32 62 20 80 20 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <ellipse cx="58" cy="30" rx="10" ry="14" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(14 58 30)"/><ellipse cx="102" cy="30" rx="10" ry="14" fill="${C}" stroke="${P.ink}" stroke-width="2.2" transform="rotate(-14 102 30)"/>
-            <ellipse cx="80" cy="40" rx="9" ry="6" fill="${P.blush}" opacity=".7"/><circle cx="76.5" cy="39" r="1.9" fill="${P.ink}"/><circle cx="83.5" cy="39" r="1.9" fill="${P.ink}"/>
-            <path d="M66 52 q4 -5 8 0 M86 52 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M76 57 q4 4 8 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/><path d="M78 59 q2 3 4 0 z" fill="${P.red}"/>
-            <path d="M114 100 q10 2 8 -12" fill="none" stroke="${P.ink}" stroke-width="3.4" stroke-linecap="round"/>`);
-    }
-
-    // 小龙 · 进宝线
-    function petDragonSVG(stage) {
-        const P = PET_PAL, C = P.dragon;
-        if (stage === 0) return petEggSVG('dragon');
-        if (stage === 1) return petSvgWrap(`
-            <path d="M102 116 q17 -6 12 -23" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M108 79 l3.5 -5 3.5 5 -3.5 2.5 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>
-            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
-            <path d="M71 116 h18 M73 122 h14" stroke="${C}" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>
-            <path d="M104 96 l8 -2 -3.5 6.5 Z M107 109 l8 -1 -4.5 6.5 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.2" stroke-linejoin="round"/>
-            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
-            <path d="M64 48 l-9 -13 13 4 Z M96 48 l9 -13 -13 4 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <g transform="rotate(-5 80 38)">
-                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <g class="re-pet-eyes"><circle cx="68" cy="63" r="4" fill="${P.ink}"/><circle cx="92" cy="63" r="4" fill="${P.ink}"/></g>
-            <circle cx="69.5" cy="61.5" r="1.3" fill="${P.paper}"/><circle cx="93.5" cy="61.5" r="1.3" fill="${P.paper}"/>
-            <ellipse cx="58" cy="72" rx="4" ry="2.4" fill="${P.blush}"/><ellipse cx="102" cy="72" rx="4" ry="2.4" fill="${P.blush}"/>
-            <circle cx="75" cy="68" r="1.1" fill="${P.ink}"/><circle cx="85" cy="68" r="1.1" fill="${P.ink}"/>
-            <path d="M75 71 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M84 72.5 l1.6 3 1.6 -3 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width=".7"/>
-            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        if (stage === 2) return petSvgWrap(`
-            <path d="M66 40 l-8 -15 12 5 Z M94 40 l8 -15 -12 5 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M80 42 C 94 42 104 52 104 64 C 104 76 93 83 80 83 C 67 83 56 76 56 64 C 56 52 66 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 62, { smile: true })}
-            <circle cx="80" cy="55" r="3.4" fill="${C}" opacity=".7"/>
-            <path d="M56 82 C 70 78 90 78 104 82 L 106 102 C 90 108 70 108 54 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M64 88 h32 M64 94 h32" stroke="${C}" stroke-width="2.4" stroke-linecap="round" opacity=".6"/>
-            <path d="M52 92 q-6 8 -16 6 q4 -10 16 -6 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.8" stroke-linejoin="round" opacity=".85"/>
-            <path d="M104 92 q12 -2 9 -15" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M110 71 l3 -4 3 4 -3 2 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4"/>`);
-        if (stage === 3) return petSvgWrap(`
-            <path d="M62 36 l-10 -18 14 6 Z M98 36 l10 -18 -14 6 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M80 38 C 96 38 108 49 108 62 C 108 75 95 82 80 82 C 65 82 52 75 52 62 C 52 49 64 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            ${petFace(80, 58, { smile: true })}
-            <circle cx="80" cy="50" r="4" fill="${C}" opacity=".7"/>
-            <path d="M66 70 q4 6 8 0 M86 70 q4 6 8 0" fill="none" stroke="${C}" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M56 80 C 70 76 90 76 104 80 L 106 104 C 90 110 70 110 54 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <g stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round"><path d="M62 88 h24 M62 94 h24 M62 100 h24"/></g>
-            <path d="M46 92 q-8 10 -20 8 q5 -12 20 -8 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M104 94 q13 -2 10 -16" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M111 70 l3.5 -5 3.5 5 -3.5 2.5 Z" fill="${C}" stroke="${P.ink}" stroke-width="1.4"/>
-            <path d="M80 22 l2.5 5 5.5 .8 -4 3.9 .9 5.5 -4.9 -2.6 -4.9 2.6 .9 -5.5 -4 -3.9 5.5 -.8 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        return petSvgWrap(`
-            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 10 v-6"/><path d="M56 14 l-5 -5"/><path d="M104 14 l5 -5"/></g>
-            <path d="M46 132 q14 -6 34 0 q20 6 34 0" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round" opacity=".5"/>
-            <ellipse cx="58" cy="126" rx="16" ry="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><ellipse cx="102" cy="126" rx="16" ry="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M80 70 C 104 70 118 88 118 108 C 118 122 102 130 80 130 C 58 130 42 122 42 108 C 42 88 56 70 80 70 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M66 92 q14 9 28 0 l4 14 q-18 11 -36 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="80" cy="112" r="9" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.2"/><circle cx="80" cy="112" r="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4"/>
-            <path d="M42 88 q-14 4 -24 -6 q10 -2 14 -12 q8 8 10 18 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M118 88 q14 4 24 -6 q-10 -2 -14 -12 q-8 8 -10 18 Z" fill="${C}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M80 22 C 100 22 112 34 112 48 C 112 62 97 70 80 70 C 63 70 48 62 48 48 C 48 34 60 22 80 22 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M64 32 l-12 -20 16 7 Z M96 32 l12 -20 -16 7 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M67 28 l-8 -13 L70 20 Z M93 28 l8 -13 L90 20 Z" fill="${P.red}"/>
-            <path d="M66 46 q5 -6 10 0 M84 46 q5 -6 10 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="M74 56 q6 5 12 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M60 52 q-8 4 -14 0 M100 52 q8 4 14 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <ellipse cx="64" cy="54" rx="3.4" ry="2.2" fill="${P.blush}"/><ellipse cx="96" cy="54" rx="3.4" ry="2.2" fill="${P.blush}"/>`);
-    }
-
-    // 小机器人 · 效率线
-    function petRobotSVG(stage) {
-        const P = PET_PAL, C = P.robot;
-        if (stage === 0) return petEggSVG('robot');
-        if (stage === 1) return petSvgWrap(`
-            <path d="M106 118 q12 -2 10 -13 q-1 -6 -7 -4" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <circle cx="80" cy="112" r="5" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/><path d="M80 109.5 v5 M77.5 112 h5" stroke="${P.ink}" stroke-width="1.2"/>
-            <circle cx="58" cy="106" r="1.4" fill="${P.ink}" opacity=".6"/><circle cx="102" cy="106" r="1.4" fill="${P.ink}" opacity=".6"/>
-            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <rect x="63" y="52" width="34" height="23" rx="6" fill="${C}" opacity=".45" stroke="${P.ink}" stroke-width="1.6"/>
-            <g class="re-pet-eyes"><circle cx="71" cy="61" r="3.6" fill="${P.ink}"/><circle cx="89" cy="61" r="3.6" fill="${P.ink}"/></g>
-            <circle cx="72.3" cy="59.7" r="1.2" fill="${P.paper}"/><circle cx="90.3" cy="59.7" r="1.2" fill="${P.paper}"/>
-            <path d="M75 69 q5 3 10 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <ellipse cx="57" cy="71" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="103" cy="71" rx="3.6" ry="2.2" fill="${P.blush}"/>
-            <g transform="rotate(-5 80 38)">
-                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <path d="M78 14 v-7" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="78" cy="5" r="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
-            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        if (stage === 2) return petSvgWrap(`
-            <path d="M80 22 v-10" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/><circle cx="80" cy="9" r="3.2" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
-            <rect x="54" y="46" width="52" height="42" rx="9" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <rect x="62" y="54" width="36" height="18" rx="4" fill="${C}" opacity=".45" stroke="${P.ink}" stroke-width="1.6"/>
-            <path d="M68 62 q3 -4 6 0 M86 62 q3 -4 6 0" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-            <path d="M76 70 q4 3 8 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <rect x="70" y="78" width="20" height="6" rx="3" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" opacity=".9"/>
-            <rect x="60" y="88" width="40" height="12" rx="5" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M44 60 q-10 4 -8 16" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="80" r="4" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M116 60 q10 4 8 16" fill="none" stroke="${P.ink}" stroke-width="3" stroke-linecap="round"/><circle cx="122" cy="80" r="4" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <circle cx="68" cy="106" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="106" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M61 101 v10 M75 101 v10 M85 101 v10 M99 101 v10" stroke="${P.ink}" stroke-width="1.4"/>`);
-        if (stage === 3) return petSvgWrap(`
-            <path d="M80 22 v-12" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><circle cx="80" cy="7" r="3.4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/>
-            <path d="M74 12 l-5 -5 M86 12 l5 -5" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <rect x="52" y="42" width="56" height="44" rx="10" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <rect x="60" y="50" width="40" height="20" rx="4" fill="${C}" opacity=".4" stroke="${P.ink}" stroke-width="1.6"/>
-            <path d="M66 59 q3 -4 6 0 M88 59 q3 -4 6 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M75 68 q5 4 10 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <rect x="42" y="34" width="12" height="8" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.6"/><rect x="106" y="34" width="12" height="8" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.6"/>
-            <rect x="64" y="86" width="32" height="8" rx="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.6"/>
-            <path d="M44 58 q-14 6 -10 22" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><circle cx="36" cy="84" r="4.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="36" cy="84" r="1.8" fill="${C}"/>
-            <path d="M116 58 q14 6 10 22" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><circle cx="124" cy="84" r="4.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="124" cy="84" r="1.8" fill="${C}"/>
-            <rect x="54" y="94" width="52" height="12" rx="6" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="66" cy="112" r="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="94" cy="112" r="7" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M58 107 v10 M74 107 v10 M86 107 v10 M102 107 v10" stroke="${P.ink}" stroke-width="1.4"/>`);
-        return petSvgWrap(`
-            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 14 v-9"/><path d="M56 18 l-6 -6"/><path d="M104 18 l6 -6"/><path d="M40 34 l-8 -4"/><path d="M120 34 l8 -4"/></g>
-            <path d="M40 58 q-16 8 -12 28 q2 10 12 12" fill="none" stroke="${C}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M120 58 q16 8 12 28 q-2 10 -12 12" fill="none" stroke="${C}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M36 62 l-4 8 8 2 M124 62 l4 8 -8 2" stroke="${P.gold}" stroke-width="2" stroke-linecap="round"/>
-            <path d="M80 62 C 104 62 118 84 118 104 C 118 120 102 128 80 128 C 58 128 42 120 42 104 C 42 84 56 62 80 62 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <rect x="60" y="84" width="40" height="24" rx="5" fill="${C}" opacity=".4" stroke="${P.ink}" stroke-width="2"/>
-            <circle cx="72" cy="96" r="2.6" fill="${P.ink}"/><circle cx="88" cy="96" r="2.6" fill="${P.ink}"/>
-            <path d="M74 103 q6 4 12 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <rect x="68" y="114" width="24" height="8" rx="4" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.8"/>
-            <circle cx="80" cy="66" r="6" fill="${P.gold}" stroke="${P.ink}" stroke-width="2"/><path d="M80 63 v6 M77 66 h6" stroke="${P.ink}" stroke-width="1.4"/>
-            <path d="M80 26 v-12" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/><circle cx="80" cy="11" r="3.6" fill="${P.gold}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M72 18 l-7 -6 M88 18 l7 -6" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-            <rect x="50" y="44" width="60" height="42" rx="10" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <rect x="40" y="36" width="14" height="9" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/><rect x="106" y="36" width="14" height="9" rx="3" fill="${C}" stroke="${P.ink}" stroke-width="1.8"/>
-            <path d="M60 54 q4 -5 8 0 M92 54 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
-            <ellipse cx="64" cy="60" rx="3.2" ry="2" fill="${P.blush}"/><ellipse cx="96" cy="60" rx="3.2" ry="2" fill="${P.blush}"/>
-            <path d="M74 66 q6 5 12 0" fill="none" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>`);
-    }
-
-    // 小狐狸 · 慧眼线
-    function petFoxSVG(stage) {
-        const P = PET_PAL, C = P.fox;
-        if (stage === 0) return petEggSVG('fox');
-        if (stage === 1) return petSvgWrap(`
-            <path d="M100 118 q19 -5 15 -26" fill="none" stroke="${P.ink}" stroke-width="5.5" stroke-linecap="round"/>
-            <path d="M100 118 q19 -5 15 -26" fill="none" stroke="${C}" stroke-width="2.6" stroke-linecap="round"/>
-            <circle cx="115" cy="91" r="5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M80 88 C 100 88 108 104 108 118 C 108 130 95 136 80 136 C 65 136 52 130 52 118 C 52 104 60 88 80 88 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <ellipse cx="80" cy="119" rx="19" ry="12" fill="${P.paper}"/>
-            <circle cx="68" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/><circle cx="92" cy="131" r="6.5" fill="${P.paper}" stroke="${P.ink}" stroke-width="2"/>
-            <path d="M66 128 v4 M70 128 v4 M90 128 v4 M94 128 v4" stroke="${P.ink}" stroke-width="1.3" stroke-linecap="round"/>
-            <path d="M56 54 L40 22 L74 44 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M104 54 L120 22 L86 44 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M60 47 L50 30 L70 42 Z" fill="${P.paper}" opacity=".8"/><path d="M100 47 L110 30 L90 42 Z" fill="${P.paper}" opacity=".8"/>
-            <path d="M80 38 C 99 38 109 50 109 65 C 109 80 96 89 80 89 C 64 89 51 80 51 65 C 51 50 61 38 80 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <ellipse cx="64" cy="76" rx="11" ry="9" fill="${P.paper}"/><ellipse cx="96" cy="76" rx="11" ry="9" fill="${P.paper}"/><ellipse cx="80" cy="83" rx="10" ry="6" fill="${P.paper}"/>
-            <g transform="rotate(-5 80 38)">
-                <path d="M62 40 C 62 20 70 10 80 10 C 90 10 98 20 98 40 C 92 44 68 44 62 40 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M62 40 l-5 2 M98 40 l5 2" stroke="${P.ink}" stroke-width="2" stroke-linecap="round"/>
-                <path d="M73 28 l3 5 -4 3 4 4" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-            <circle cx="67" cy="62" r="4" fill="${P.ink}"/><circle cx="93" cy="62" r="4" fill="${P.ink}"/>
-            <circle cx="68.5" cy="60.5" r="1.3" fill="${P.paper}"/><circle cx="94.5" cy="60.5" r="1.3" fill="${P.paper}"/>
-            <path d="M77.5 70 l2.5 -2 2.5 2 -2.5 3.5 Z" fill="${P.ink}"/>
-            <path d="M75 75 q2.5 3 5 0 q2.5 3 5 0" fill="none" stroke="${P.ink}" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M38 132 q4 -7 9 -3 q0 7 -9 3 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M124 133 q3 -5 7 -2 q-1 5 -7 2 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        if (stage === 2) return petSvgWrap(`
-            <path d="M54 50 L38 18 L70 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M106 50 L122 18 L90 38 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M59 44 L49 27 L68 37 Z" fill="${P.paper}" opacity=".75"/><path d="M101 44 L111 27 L92 37 Z" fill="${P.paper}" opacity=".75"/>
-            <path d="M80 42 C 94 42 104 52 104 64 C 104 76 93 83 80 83 C 67 83 56 76 56 64 C 56 52 66 42 80 42 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M68 62 q4 -5 8 0 M84 62 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.2" stroke-linecap="round"/>
-            <ellipse cx="66" cy="68" rx="3.4" ry="2.2" fill="${P.blush}"/><ellipse cx="94" cy="68" rx="3.4" ry="2.2" fill="${P.blush}"/>
-            <path d="M76 74 q4 4 8 0 l-2 4 -2 -2 -2 2 Z" fill="${P.ink}"/>
-            <path d="M58 82 C 72 78 88 78 102 82 L 104 102 C 88 108 72 108 56 102 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <circle cx="100" cy="52" r="7" fill="none" stroke="${P.ink}" stroke-width="2"/><path d="M95 47 l-4 -4 M100 47 v-4" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M104 92 q16 -5 13 -21 q-2 -7 -7 -7" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M110 64 q2 -5 6 -4" fill="none" stroke="${C}" stroke-width="3.4" stroke-linecap="round"/>`);
-        if (stage === 3) return petSvgWrap(`
-            <path d="M52 46 L34 10 L70 34 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/><path d="M108 46 L126 10 L90 34 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.2" stroke-linejoin="round"/>
-            <path d="M58 40 L47 21 L68 33 Z" fill="${P.paper}" opacity=".8"/><path d="M102 40 L113 21 L92 33 Z" fill="${P.paper}" opacity=".8"/>
-            <path d="M80 38 C 96 38 106 49 106 62 C 106 75 95 82 80 82 C 65 82 54 75 54 62 C 54 49 64 38 80 38 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M66 58 q4 -5 8 0 M86 58 q4 -5 8 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
-            <ellipse cx="64" cy="64" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="96" cy="64" rx="3.6" ry="2.2" fill="${P.blush}"/>
-            <path d="M76 70 q4 4 8 0 l-2 5 -2 -2 -2 2 Z" fill="${P.ink}"/>
-            <path d="M56 80 C 70 76 90 76 104 80 L 106 104 C 90 110 70 110 54 104 Z" fill="${P.paper2}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M66 88 h28 M66 94 h28 M66 100 h28" stroke="${C}" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
-            <g stroke="${P.ink}" stroke-width="1.6"><rect x="88" y="90" width="10" height="14" rx="2" fill="${P.paper}"/><path d="M90 96 v4 M94 94 v7 M97 97 v3" stroke-width="1.2"/><circle cx="93" cy="93" r="3.4" fill="none"/></g>
-            <path d="M106 92 q17 -5 14 -22 q-2 -8 -8 -8" fill="none" stroke="${P.ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M112 62 q3 -5 7 -4" fill="none" stroke="${C}" stroke-width="3.6" stroke-linecap="round"/>
-            <path d="M80 22 l2.2 4.4 4.8 .7 -3.5 3.4 .8 4.8 -4.3 -2.3 -4.3 2.3 .8 -4.8 -3.5 -3.4 4.8 -.7 Z" fill="${P.gold}" stroke="${P.ink}" stroke-width="1.4" stroke-linejoin="round"/>`);
-        return petSvgWrap(`
-            <g stroke="${P.gold}" stroke-width="2" stroke-linecap="round"><path d="M80 12 v-7"/><path d="M58 16 l-4 -6"/><path d="M102 16 l4 -6"/><path d="M40 30 l-7 -4"/><path d="M120 30 l7 -4"/></g>
-            <g stroke="${P.ink}" stroke-width="2" stroke-linejoin="round" fill="${C}">
-                <path d="M44 100 Q30 88 34 72 Q46 78 50 84 Z"/><path d="M54 96 Q42 82 46 66 Q58 74 62 82 Z"/><path d="M64 94 Q56 78 60 62 Q70 72 74 82 Z"/>
-                <path d="M116 100 Q130 88 126 72 Q114 78 110 84 Z"/><path d="M106 96 Q118 82 114 66 Q102 74 98 82 Z"/><path d="M96 94 Q104 78 100 62 Q90 72 86 82 Z"/>
-            </g>
-            <path d="M80 68 C 100 68 112 86 112 106 C 112 120 98 128 80 128 C 62 128 48 120 48 106 C 48 86 60 68 80 68 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M66 88 q14 9 28 0 l4 14 q-18 11 -36 0 Z" fill="${P.red}" stroke="${P.ink}" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M76 96 q4 4 8 0 l-2 5 -2 -2 -2 2 Z" fill="${P.ink}"/>
-            <path d="M48 66 L30 30 L62 52 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/><path d="M112 66 L130 30 L98 52 Z" fill="${C}" stroke="${P.ink}" stroke-width="2.4" stroke-linejoin="round"/>
-            <path d="M54 58 L43 39 L64 50 Z" fill="${P.paper}" opacity=".85"/><path d="M106 58 L117 39 L96 50 Z" fill="${P.paper}" opacity=".85"/>
-            <path d="M80 18 C 98 18 110 31 110 46 C 110 60 96 68 80 68 C 64 68 50 60 50 46 C 50 31 62 18 80 18 Z" fill="${P.paper}" stroke="${P.ink}" stroke-width="2.6" stroke-linejoin="round"/>
-            <path d="M64 44 q5 -6 10 0 M86 44 q5 -6 10 0" fill="none" stroke="${P.ink}" stroke-width="2.4" stroke-linecap="round"/>
-            <ellipse cx="62" cy="50" rx="3.6" ry="2.2" fill="${P.blush}"/><ellipse cx="98" cy="50" rx="3.6" ry="2.2" fill="${P.blush}"/>
-            <path d="M76 56 q4 4 8 0 l-2 5 -2 -2 -2 2 Z" fill="${P.ink}"/>`);
-    }
-
-    const PET_RENDERERS = { cat: petCatSVG, dog: petDogSVG, dragon: petDragonSVG, robot: petRobotSVG, fox: petFoxSVG };
-
-    function buildPetSVG(petIdx, mood) {
-        const pet = petStateCache ? petStateCache.pets[petIdx] : null;
-        const stage = pet ? petStageOf(pet.level) : 0;
-        const svg = PET_RENDERERS[PET_DEFS[petIdx].id](stage);
-        // V6.6.0 动效类：re-pet-anim=呼吸+眨眼；蛋阶段用晃动替代眨眼；心情低保留灰态并放缓呼吸
-        const cls = ['re-pet-anim'];
-        if (stage === 0) cls.push('re-pet-stage0');
-        if (mood < 30) cls.push('re-pet-sad');
-        return svg.replace('<svg ', `<svg class="${cls.join(' ')}" `);
-    }
-
-    /* ---------- 宠物点数（V6.4.3）：按审核机型计点，每日结算入账 ---------- */
-    // 机型点数规则：提取机型文本首个 1-2 位数字 ÷ 10（苹果17→1.7、苹果16→1.6，依次类推），无数字默认 1.0
-    function petModelPoints(modelText) {
-        const m = String(modelText || '').match(/(\d{1,2})/);
-        if (!m) return 1;
-        const n = parseInt(m[1], 10);
-        return (n >= 1 && n <= 30) ? n / 10 : 1;
-    }
-
-    // 审核一单（记录历史成功）即累计待结算点数，次日日切时入账
-    function addPetModelPoints(modelText) {
-        if (!petStateCache) return;
-        const st = petStateCache;
-        const today = new Date().toISOString().split('T')[0];
-        if (st.daily.date !== today) {
-            settlePetPoints();
-            st.daily = { date: today, exp: 0, signed: false };
-        }
-        const pts = petModelPoints(modelText);
-        st.pendingPoints = Math.round((st.pendingPoints + pts) * 10) / 10;
-        petLog(`审核机型「${modelText}」点数 +${pts.toFixed(1)}（待结算）`);
-        savePetState();
-        if (isPetPageVisible()) renderPetPage();
-    }
-
-    // 每日结算：昨日待结算点数转为可用余额
-    function settlePetPoints() {
-        if (!petStateCache) return;
-        const st = petStateCache;
-        if (st.pendingPoints > 0) {
-            st.points = Math.round((st.points + st.pendingPoints) * 10) / 10;
-            petLog(`昨日审核点数结算 +${st.pendingPoints.toFixed(1)}（余额 ${st.points.toFixed(1)}）`);
-            st.pendingPoints = 0;
-            updatePetPointsBadge();
-        }
-    }
-
-    // 标题栏客服名左侧的点数徽章（深灰主题）刷新
-    function updatePetPointsBadge() {
-        const numEl = document.getElementById('re-panel-points-num');
-        if (!numEl) return;
-        numEl.textContent = petStateCache ? petStateCache.points.toFixed(1) : '0.0';
-    }
-
-    /* ---------- 宠物道具（V6.4.3）：点数商店 ---------- */
-    const PET_ITEMS = {
-        doublePill: { name: '倍数丸', price: 40, desc: '当日所有获得经验×2' },
-        levelPill:  { name: '直升丸', price: 500, desc: '直接升1级' }
-    };
-
-    function buyPetItem(itemId) {
-        if (!petStateCache) return;
-        const st = petStateCache;
-        const item = PET_ITEMS[itemId];
-        if (!item) return;
-        const pet = st.pets[st.activePet];
-        if (!pet || !pet.unlocked) return;
-        const today = new Date().toISOString().split('T')[0];
-
-        if (st.points < item.price) {
-            showErrorToast(`宠物点数不足（余额 ${st.points.toFixed(1)}，需 ${item.price}）`);
-            return;
-        }
-
-        if (itemId === 'doublePill') {
-            if (st.doubleDate === today) {
-                showErrorToast('倍数丸今日已生效，无需重复购买');
-                return;
-            }
-            st.points = Math.round((st.points - item.price) * 10) / 10;
-            st.doubleDate = today;
-            petLog(`使用道具：倍数丸（-${item.price}点，今日经验×2）`);
-            showSuccessToast('倍数丸已生效：今日所有获得经验×2');
-        } else if (itemId === 'levelPill') {
-            if (pet.level >= PET_MAX_LEVEL) {
-                showErrorToast('当前伙伴已满级，无需直升丸');
-                return;
-            }
-            st.points = Math.round((st.points - item.price) * 10) / 10;
-            pet.level += 1;
-            petLog(`使用道具：直升丸（-${item.price}点，升至 Lv${pet.level}）`);
-            // 升级可能触发进化 / 满级解锁下一只
-            const def = PET_DEFS[st.activePet];
-            const msgs = [];
-            if (petStageOf(pet.level) > petStageOf(pet.level - 1)) {
-                msgs.push(`进化为「${def.stages[petStageOf(pet.level)]}」`);
-            }
-            if (pet.level >= PET_MAX_LEVEL) {
-                pet.exp = 0;
-                const nextIdx = st.activePet + 1;
-                if (nextIdx < st.pets.length && !st.pets[nextIdx].unlocked) {
-                    st.pets[nextIdx].unlocked = true;
-                    msgs.push(`已满级！解锁新伙伴：${PET_DEFS[nextIdx].name}`);
-                } else if (!msgs.length) {
-                    msgs.push('已满级');
-                }
-            }
-            showSuccessToast(`${def.name} ${msgs.length ? msgs.join('，') : `升级！Lv${pet.level}`}`);
-            petCelebrate();
-            refreshPetFloat();
-        }
-        updatePetPointsBadge(); // 扣点后刷新标题栏徽章
-        savePetState();
-        renderPetPage();
-    }
-
-    /* ---------- 经验系统 ---------- */
-    // 去重表瘦身：删 30 天前记录；总量超 4000 时按时间序裁到 3000，防无限膨胀
-    function prunePetCredited(st) {
-        const keys = Object.keys(st.credited);
-        if (keys.length < 4000) {
-            const cutoff = Date.now() - 30 * 86400000;
-            for (const k of keys) if (st.credited[k] < cutoff) delete st.credited[k];
-            return;
-        }
-        keys.sort((a, b) => st.credited[a] - st.credited[b]);
-        for (let i = 0; i < keys.length - 3000; i++) delete st.credited[keys[i]];
-    }
-
-    function gainPetExp(ruleKey, label) {
-        if (!petStateCache) return; // 状态未加载完成时不喂（面板打开必先走 petDailySign 加载）
-        const st = petStateCache;
-        const today = new Date().toISOString().split('T')[0];
-        if (st.daily.date !== today) {
-            settlePetPoints(); // 跨天先结算昨日审核点数
-            st.daily = { date: today, exp: 0, signed: false };
-        }
-        const amount = PET_EXP_RULES[ruleKey] || 0;
-        if (!amount) return;
-        const pet = st.pets[st.activePet];
-        if (!pet || !pet.unlocked) return;
-
-        // V6.5.2 订单级去重：同一订单的同类行为只计一次经验，防狂点按钮刷经验
-        // （签到除外，其自身按日去重；拿不到有效订单号不计——正常成功路径必有订单号，占位时本就拦截提交）
-        if (ruleKey !== 'dailySign') {
-            const orderNo = getPanelOrderNo();
-            if (!orderNo) return;
-            if (!st.credited) st.credited = {};
-            const key = `${ruleKey}:${orderNo}`;
-            if (st.credited[key]) return; // 该单该行为已计过：安静拒绝，不给反馈信号
-            st.credited[key] = Date.now();
-            prunePetCredited(st);
-        }
-
-        // 单日无上限：多劳多得（今日经验仅作统计展示）；倍数丸当日经验×2
-        const doubled = st.doubleDate === today;
-        const gain = doubled ? amount * 2 : amount;
-        st.daily.exp += gain;
-        pet.exp += gain;
-        pet.totalExp += gain;
-        pet.feedCount += 1;
-        pet.lastFeed = Date.now();
-        petLog(`${label} +${gain}${doubled ? '（倍数丸×2）' : ''}`);
-        petFloatCelebrate(gain, ruleKey); // 桌面浮层蹦跳 + 经验气泡 + V6.6.0 行为专属动作
-
-        // 升级循环（一次可能连升多级，Toast 合并为一条）
-        const def = PET_DEFS[st.activePet];
-        const msgs = [];
-        while (pet.level < PET_MAX_LEVEL && pet.exp >= petExpNeeded(pet.level)) {
-            pet.exp -= petExpNeeded(pet.level);
-            pet.level += 1;
-            const evolved = petStageOf(pet.level) > petStageOf(pet.level - 1);
-            if (evolved) msgs.push(`进化为「${def.stages[petStageOf(pet.level)]}」`);
-        }
-        if (pet.level >= PET_MAX_LEVEL) {
-            pet.exp = 0;
-            const nextIdx = st.activePet + 1;
-            if (nextIdx < st.pets.length && !st.pets[nextIdx].unlocked) {
-                st.pets[nextIdx].unlocked = true;
-                msgs.push(`已满级！解锁新伙伴：${PET_DEFS[nextIdx].name}`);
-            } else if (msgs.length === 0) {
-                msgs.push('已满级');
-            }
-        }
-        if (msgs.length) {
-            showSuccessToast(`${def.name} Lv${pet.level} ${msgs.join('，')}`);
-            petCelebrate();
-            refreshPetFloat(); // 进化后浮层形象同步换新
-        }
-        savePetState();
-        if (isPetPageVisible()) renderPetPage();
-    }
-
-    // 升级/进化庆祝：经验条闪光 + 彩带粒子（transform/opacity 动画，GPU 合成零重绘）
-    function petCelebrate() {
-        const box = document.getElementById('re-pet-stage-box');
-        const fill = document.getElementById('re-pet-exp-fill');
-        if (fill) {
-            fill.classList.remove('re-pet-exp-flash');
-            void fill.offsetWidth; // 强制重排以重启动画
-            fill.classList.add('re-pet-exp-flash');
-            setTimeout(() => fill.classList.remove('re-pet-exp-flash'), 1300);
-        }
-        if (!box) return;
-        const colors = ['#E9BC4F', '#E8B478', '#7FBFA8', '#9DB4C9', '#E8946A', '#D97B6C'];
-        for (let i = 0; i < 14; i++) {
-            const c = document.createElement('span');
-            c.className = 're-pet-confetti';
-            const ang = Math.random() * Math.PI * 2;
-            const dist = 55 + Math.random() * 60;
-            c.style.setProperty('--re-cx', `${Math.cos(ang) * dist}px`);
-            c.style.setProperty('--re-cy', `${Math.sin(ang) * dist - 30}px`);
-            c.style.setProperty('--re-cr', `${Math.floor(Math.random() * 540 - 270)}deg`);
-            c.style.background = colors[i % colors.length];
-            c.style.animationDelay = `${Math.random() * 0.15}s`;
-            box.appendChild(c);
-            setTimeout(() => c.remove(), 1100);
-        }
-    }
-
-    // 每日签到：面板打开时加载宠物状态并 +1（每天一次）；若宠物在外则恢复桌面浮层
-    function petDailySign() {
-        loadPetState().then(st => {
-            petStateCache = st;
-            mountPetFloat();
-            updatePetPointsBadge();
-            const today = new Date().toISOString().split('T')[0];
-            if (st.daily.date === today && st.daily.signed) return;
-            gainPetExp('dailySign', '每日签到');
-            st.daily.signed = true;
-            savePetState();
-            if (isPetPageVisible()) renderPetPage();
-        });
-    }
-
-    /* ---------- 养成页渲染 ---------- */
-    function renderPetPage() {
-        if (!petStateCache) return;
-        const st = petStateCache;
-        const idx = st.activePet;
-        const def = PET_DEFS[idx];
-        const pet = st.pets[idx];
-        const mood = petMoodOf(pet);
-        const stage = petStageOf(pet.level);
-
-        const tabsEl = document.getElementById('re-pet-tabs');
-        if (tabsEl) {
-            tabsEl.innerHTML = PET_DEFS.map((d, i) => {
-                const p = st.pets[i];
-                if (!p.unlocked) {
-                    return `<div class="re-pet-tab" style="cursor:not-allowed;opacity:.55;">${d.name}<span class="re-pet-tab-lock">未解锁 · 养满${PET_DEFS[i - 1].name}</span></div>`;
-                }
-                return `<div class="re-pet-tab ${i === idx ? 'active' : ''}" data-pet="${i}">${d.name}<span class="re-pet-tab-lv">Lv${p.level}</span></div>`;
-            }).join('');
-        }
-
-        const stageEl = document.getElementById('re-pet-stage');
-        const stageBoxEl = document.getElementById('re-pet-stage-box');
-        if (stageEl) {
-            if (st.float.active) {
-                // 外出中：展示区显示空窝提示（真身在 body 浮层上）
-                if (stageBoxEl) stageBoxEl.classList.add('re-pet-away');
-                stageEl.innerHTML = `<div class="re-pet-away-hint">
-                    <svg viewBox="0 0 120 70" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 62 Q36 40 60 48 Q84 40 106 62"/><path d="M18 62 L102 62"/><path d="M30 60 Q40 52 52 56" opacity=".6"/></svg>
-                    <span>${def.name}在桌面上溜达（双击桌面上的它可收回）</span>
-                </div>`;
-            } else {
-                if (stageBoxEl) stageBoxEl.classList.remove('re-pet-away');
-                stageEl.innerHTML = buildPetSVG(idx, mood);
-            }
-        }
-
-        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        setText('re-pet-name', def.name);
-        setText('re-pet-line', def.line);
-        setText('re-pet-stage-name', `形态：${def.stages[stage]}`);
-        setText('re-pet-level', pet.level >= PET_MAX_LEVEL ? 'Lv MAX' : `Lv ${pet.level}`);
-        setText('re-pet-mood', `心情 ${mood} · ${petMoodText(mood)}`);
-        setText('re-pet-exp-text', pet.level >= PET_MAX_LEVEL ? 'MAX' : `${pet.exp} / ${petExpNeeded(pet.level)}`);
-        const fillEl = document.getElementById('re-pet-exp-fill');
-        if (fillEl) fillEl.style.width = pet.level >= PET_MAX_LEVEL ? '100%' : `${Math.min(100, Math.floor(pet.exp / petExpNeeded(pet.level) * 100))}%`;
-        setText('re-pet-today-exp', `${st.daily.exp}`);
-        setText('re-pet-total-exp', pet.totalExp);
-        setText('re-pet-feed-count', pet.feedCount);
-        setText('re-pet-points', `点数 ${st.points.toFixed(1)}${st.pendingPoints > 0 ? `（待结算 ${st.pendingPoints.toFixed(1)}）` : ''}`);
-
-        // 道具状态：倍数丸生效标记/按钮态、直升丸满级禁用
-        const doubleActive = st.doubleDate === new Date().toISOString().split('T')[0];
-        const doubleTag = document.getElementById('re-pet-double-tag');
-        const doubleBtn = document.getElementById('re-pet-double-btn');
-        const levelBtn = document.getElementById('re-pet-level-btn');
-        if (doubleTag) doubleTag.style.display = doubleActive ? '' : 'none';
-        if (doubleBtn) {
-            doubleBtn.disabled = doubleActive;
-            doubleBtn.textContent = doubleActive ? '生效中' : '购买';
-        }
-        if (levelBtn) {
-            const maxed = pet.level >= PET_MAX_LEVEL;
-            levelBtn.disabled = maxed;
-            levelBtn.textContent = maxed ? '已满级' : '购买';
-        }
-
-        const hintEl = document.getElementById('re-pet-hint');
-        if (hintEl) {
-            const nextIdx = idx + 1;
-            hintEl.textContent = nextIdx < PET_DEFS.length && !st.pets[nextIdx].unlocked
-                ? `养满 ${def.name}（Lv${PET_MAX_LEVEL}）解锁下一只：${PET_DEFS[nextIdx].name} · 单日经验无上限`
-                : `办单即喂养：分配+2 · 客服备注+3 · 风控备注+3 · 自动处理+5 · 历史+2 · 一单全自动共+15 · 单日无上限`;
-        }
-
-        const logEl = document.getElementById('re-pet-log');
-        if (logEl) {
-            logEl.innerHTML = st.log.length === 0
-                ? `<div class="re-pet-log-item"><span class="re-pet-log-text">还没有喂养记录，去办一单试试</span><span class="re-pet-log-time"></span></div>`
-                : st.log.map(item => {
-                    const d = new Date(item.t);
-                    const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                    const md = `${d.getMonth() + 1}-${d.getDate()}`;
-                    return `<div class="re-pet-log-item"><span class="re-pet-log-text">${item.text}</span><span class="re-pet-log-time">${md} ${hm}</span></div>`;
-                  }).join('');
-        }
-    }
-
-    /* ---------- 浮层宠物：拖出面板后挂在 body 上（fixed 避开面板 transform 祖先） ---------- */
-    function getPetFloatEl() { return document.getElementById('re-pet-float'); }
-
-    function petFloatTipText() {
-        if (!petStateCache) return '';
-        const idx = petStateCache.activePet;
-        const def = PET_DEFS[idx];
-        const pet = petStateCache.pets[idx];
-        const mood = petMoodOf(pet);
-        return `${def.name} · Lv${pet.level >= PET_MAX_LEVEL ? 'MAX' : pet.level} · ${petMoodText(mood)} · 双击收回`;
-    }
-
-    function mountPetFloat() {
-        if (!petStateCache || !petStateCache.float.active) return;
-        let el = getPetFloatEl();
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 're-pet-float';
-            el.innerHTML = '<div class="re-pet-float-inner"></div><span class="re-pet-float-bubble"></span><span class="re-pet-float-tip"></span>';
-            document.body.appendChild(el);
-            bindPetFloatDrag(el);
-            el.addEventListener('dblclick', function() {
-                petRecallFloat(true);
-            });
-        }
-        refreshPetFloat();
-        schedulePetWalk(); // V6.6.0 桌面散步：浮层存在期间定时溜达
-    }
-
-    function refreshPetFloat() {
-        const el = getPetFloatEl();
-        if (!el || !petStateCache) return;
-        const f = petStateCache.float;
-        const idx = petStateCache.activePet;
-        const pet = petStateCache.pets[idx];
-        el.style.left = `${Math.max(0, Math.min(f.x, window.innerWidth - 120))}px`;
-        el.style.top = `${Math.max(0, Math.min(f.y, window.innerHeight - 120))}px`;
-        el.querySelector('.re-pet-float-inner').innerHTML = buildPetSVG(idx, petMoodOf(pet));
-        el.classList.toggle('re-pet-float-sad', petMoodOf(pet) < 30);
-        el.querySelector('.re-pet-float-tip').textContent = petFloatTipText();
-    }
-
-    function unmountPetFloat() {
-        clearTimeout(petWalkTimer); // 收回即停散步
-        const el = getPetFloatEl();
-        if (el) el.remove();
-    }
-
-    function petRecallFloat(withToast) {
-        if (!petStateCache) return;
-        petStateCache.float.active = false;
-        savePetState();
-        unmountPetFloat();
-        if (withToast) showSuccessToast('宠物已收回面板');
-        if (isPetPageVisible()) renderPetPage();
-    }
-
-    /* V6.6.0 业务动作库：按喂养行为分发庆祝动作（浮层 + 养成页大图同步播放） */
-    const PET_ACT_CLASS = {
-        assign: 're-pet-act-nod',      // 客服分配：点头两连
-        staffRemark: 're-pet-act-jump', // 客服备注：开心跳
-        riskRemark: 're-pet-act-wave',  // 风控备注：左右挥舞
-        autoBonus: 're-pet-act-spin',   // 自动处理：转圈
-        history: 're-pet-act-jump',     // 记录历史：开心跳
-        dailySign: 're-pet-act-nod',    // 每日签到：点头
-        levelUp: 're-pet-act-shine'     // 升级/进化：金光脉冲（petCelebrate 内也可复用）
-    };
-
-    function petPlayAction(kind) {
-        const act = PET_ACT_CLASS[kind] || 're-pet-act-jump';
-        const targets = [];
-        const floatEl = getPetFloatEl();
-        if (floatEl) targets.push(floatEl);
-        const box = document.getElementById('re-pet-stage-box');
-        if (box && isPetPageVisible()) targets.push(box);
-        targets.forEach(t => {
-            Object.values(PET_ACT_CLASS).forEach(c => t.classList.remove(c));
-            void t.offsetWidth; // 强制重排以重启动画
-            t.classList.add(act);
-            setTimeout(() => t.classList.remove(act), 1250);
-        });
-    }
-
-    /* 摸头：squish 弹性形变 + 爱心飘出（拖动/带出操作不触发） */
-    let petJustDragged = false;
-    function petPat(container) {
-        if (!container || petJustDragged) return;
-        container.classList.remove('re-pet-squishing');
-        void container.offsetWidth;
-        container.classList.add('re-pet-squishing');
-        const heart = document.createElement('span');
-        heart.className = 're-pet-heart';
-        heart.textContent = '♥';
-        container.appendChild(heart);
-        setTimeout(() => { heart.remove(); container.classList.remove('re-pet-squishing'); }, 900);
-    }
-
-    function petFloatCelebrate(gain, ruleKey) {
-        const el = getPetFloatEl();
-        if (!el) return;
-        const bubble = el.querySelector('.re-pet-float-bubble');
-        if (bubble) bubble.textContent = `+${gain}`;
-        el.classList.remove('re-pet-float-hop');
-        void el.offsetWidth; // 强制重排以重启动画
-        el.classList.add('re-pet-float-hop');
-        setTimeout(() => el.classList.remove('re-pet-float-hop'), 1200);
-        if (ruleKey) petPlayAction(ruleKey);
-    }
-
-    /* V6.6.0 桌面散步：每 30~60 秒随机溜达一小段（transform/transition，走路时步态摇摆 + 朝向翻转） */
-    let petWalkTimer = null;
-
-    function schedulePetWalk() {
-        clearTimeout(petWalkTimer);
-        petWalkTimer = setTimeout(petWalkStep, 30000 + Math.random() * 30000);
-    }
-
-    function petWalkStep() {
-        const el = getPetFloatEl();
-        if (el && petStateCache && petStateCache.float.active && !petFloatDragging && !el.classList.contains('re-pet-float-dragging')) {
-            const f = petStateCache.float;
-            const dx = (Math.random() - 0.5) * 170;
-            const dy = (Math.random() - 0.5) * 120;
-            const nx = Math.max(0, Math.min(Math.round(f.x + dx), window.innerWidth - 120));
-            const ny = Math.max(0, Math.min(Math.round(f.y + dy), window.innerHeight - 120));
-            el.classList.toggle('re-pet-float-flip', dx < 0);
-            el.classList.add('re-pet-float-walking');
-            el.style.transition = 'left 2.6s ease-in-out, top 2.6s ease-in-out';
-            el.style.left = `${nx}px`;
-            el.style.top = `${ny}px`;
-            setTimeout(() => {
-                el.classList.remove('re-pet-float-walking');
-                el.style.transition = '';
-                f.x = nx; f.y = ny;
-                savePetState();
-            }, 2650);
-        }
-        schedulePetWalk();
-    }
-
-    let petFloatDragging = false;
-
-    function bindPetFloatDrag(el) {
-        el.addEventListener('mousedown', function(e) {
-            if (e.button !== 0) return;
-            e.preventDefault();
-            e.stopPropagation();
-            petFloatDragging = true;
-            el.style.transition = ''; // 拖动必须直跟手，清掉散步过渡
-            el.classList.add('re-pet-float-dragging');
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const rect = el.getBoundingClientRect();
-            const originX = rect.left;
-            const originY = rect.top;
-            let moved = false;
-
-            function onMove(ev) {
-                if (!petFloatDragging) return;
-                if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 5) moved = true;
-                const nx = Math.max(0, Math.min(originX + ev.clientX - startX, window.innerWidth - 120));
-                const ny = Math.max(0, Math.min(originY + ev.clientY - startY, window.innerHeight - 120));
-                el.style.left = `${nx}px`;
-                el.style.top = `${ny}px`;
-            }
-            function onUp() {
-                petFloatDragging = false;
-                el.classList.remove('re-pet-float-dragging');
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                if (moved) { // 拖动后不触发摸头
-                    petJustDragged = true;
-                    setTimeout(() => { petJustDragged = false; }, 200);
-                }
-                if (petStateCache) {
-                    petStateCache.float.x = parseFloat(el.style.left) || 24;
-                    petStateCache.float.y = parseFloat(el.style.top) || 24;
-                    savePetState();
-                }
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
-        el.addEventListener('click', function() { petPat(el); }); // V6.6.0 摸头
-    }
-
-    /* 从养成页展示区拖出：按住宠物移动超过阈值即带出，松手落位为 body 浮层 */
-    function bindPetStageCarry() {
-        const box = document.getElementById('re-pet-stage-box');
-        if (!box) return;
-        box.addEventListener('mousedown', function(e) {
-            if (e.button !== 0 || !petStateCache || petStateCache.float.active) return;
-            e.preventDefault();
-            const startX = e.clientX;
-            const startY = e.clientY;
-            let carrying = false;
-            let ghost = null;
-
-            function onMove(ev) {
-                const dx = ev.clientX - startX;
-                const dy = ev.clientY - startY;
-                if (!carrying && Math.hypot(dx, dy) > 14) {
-                    carrying = true;
-                    ghost = document.createElement('div');
-                    ghost.id = 're-pet-carry';
-                    document.body.appendChild(ghost);
-                    document.body.style.userSelect = 'none';
-                }
-                if (carrying && ghost) {
-                    ghost.style.left = `${ev.clientX - 48}px`;
-                    ghost.style.top = `${ev.clientY - 48}px`;
-                }
-            }
-            function onUp(ev) {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                document.body.style.userSelect = '';
-                if (ghost) ghost.remove();
-                if (carrying) { // 带出动作不触发摸头
-                    petJustDragged = true;
-                    setTimeout(() => { petJustDragged = false; }, 200);
-                }
-                if (!carrying || !petStateCache) return;
-                // 拖出面板：落位为浮层（视口内 clamp）
-                petStateCache.float.active = true;
-                petStateCache.float.x = Math.max(0, Math.min(ev.clientX - 48, window.innerWidth - 120));
-                petStateCache.float.y = Math.max(0, Math.min(ev.clientY - 48, window.innerHeight - 120));
-                petLog('宠物外出（拖出面板）');
-                savePetState();
-                mountPetFloat();
-                renderPetPage();
-                showSuccessToast('宠物已带到桌面，双击可收回');
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
-        box.addEventListener('click', function() { petPat(box); }); // V6.6.0 养成页摸头（拖出不触发）
-    }
-
-    function initPetPage() {
-        bindPetStageCarry();
-        const tabsEl = document.getElementById('re-pet-tabs');
-        if (tabsEl) {
-            tabsEl.addEventListener('click', function(e) {
-                const tab = e.target.closest('.re-pet-tab[data-pet]');
-                if (!tab || !petStateCache) return;
-                const i = parseInt(tab.getAttribute('data-pet'), 10);
-                if (!petStateCache.pets[i].unlocked) {
-                    showErrorToast(`养满 ${PET_DEFS[i - 1].name}（Lv${PET_MAX_LEVEL}）后解锁`);
-                    return;
-                }
-                petStateCache.activePet = i;
-                petLog(`切换主养：${PET_DEFS[i].name}`);
-                savePetState();
-                renderPetPage();
-                refreshPetFloat(); // 浮层跟随切换主养换形象
-            });
-        }
-
-        // 道具购买（事件委托）
-        const shopEl = document.getElementById('re-pet-shop');
-        if (shopEl) {
-            shopEl.addEventListener('click', function(e) {
-                const btn = e.target.closest('.re-pet-item-btn');
-                if (!btn || btn.disabled) return;
-                buyPetItem(btn.getAttribute('data-item'));
-            });
-        }
     }
 
     function getAppearanceSettings() {
@@ -14589,8 +14410,6 @@
     applySwitchColor();
     applyAppearanceFlags();
     renderWorkflowPreview(); // 工作流条常驻：启动即展示自动处理将执行的节点链
-    // 页面加载即恢复桌面宠物（若上次拖出过）；签到经验仍等面板打开时算
-    loadPetState().then(st => { petStateCache = st; mountPetFloat(); updatePetPointsBadge(); });
 
     function initAnalysisEvents() {
         // 趋势图范围切换（近7天/近14天/本月/上月），机型图联动同一范围
