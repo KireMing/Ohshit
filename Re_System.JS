@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      7.0.0
+// @version      7.1.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V7.0.0</span>
+                    <span class="re-panel-version">V7.1.0</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -6187,6 +6187,27 @@
             opacity: .4;
             cursor: not-allowed;
         }
+        /* 【分配】按钮：疑似重新下单/待人工判断条目专属，indigo 系呼应无锁胶囊色 */
+        .re-review-assign {
+            font-size: 11px;
+            font-weight: 600;
+            color: #4f46e5;
+            background: #e0e7ff;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 2px 9px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: color .12s ease, border-color .12s ease, background .12s ease;
+        }
+        .re-review-assign:hover {
+            color: #4338ca;
+            background: #c7d2fe;
+        }
+        .re-review-assign:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
         /* 条目整行可点击：新标签页打开该客户后台订单 */
         .re-review-item[data-review-name] {
             cursor: pointer;
@@ -6194,6 +6215,33 @@
         .re-review-item[data-review-name]:hover {
             background: rgba(59, 130, 246, 0.06);
             border-color: rgba(59, 130, 246, 0.45);
+        }
+        /* 未被筛选选中的条目：淡化灰显，不隐藏 */
+        .re-review-item.dimmed {
+            opacity: .28;
+            filter: grayscale(.6);
+        }
+        .re-review-item.dimmed:hover {
+            background: rgba(249, 250, 251, 0.8);
+            border-color: transparent;
+        }
+
+        /* 状态筛选下拉（开始查询左侧） */
+        .re-review-filter {
+            font-size: 11px;
+            color: #374151;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0 4px;
+            height: 28px;
+            cursor: pointer;
+            outline: none;
+            max-width: 130px;
+            flex-shrink: 0;
+        }
+        .re-review-filter:focus {
+            border-color: #93c5fd;
         }
 
         /* 审查结果胶囊（审查中心列表内） */
@@ -6636,19 +6684,29 @@
             const recsByDate = {};
             records.forEach(r => {
                 if (!r.date) return;
-                if (!recsByDate[r.date]) recsByDate[r.date] = { reviewed: 0, passed: 0 };
+                if (!recsByDate[r.date]) recsByDate[r.date] = { reviewed: 0, passed: 0, nolockSkip: 0, plus: 0 };
                 if (r.reviewStatus) recsByDate[r.date].reviewed++;
                 if (r.reviewStatus === '已通过') recsByDate[r.date].passed++;
+                if (r.reviewStatus === '无锁·跳过分配') recsByDate[r.date].nolockSkip++;
+                if (r.reviewPlus) recsByDate[r.date].plus += r.reviewPlus;
             });
             const rateData = chartData.map(c => {
-                const rec = recsByDate[c.date] || { reviewed: 0, passed: 0 };
+                const rec = recsByDate[c.date] || { reviewed: 0, passed: 0, nolockSkip: 0, plus: 0 };
+                // 通过率口径 B：分母排除「无锁·跳过分配」豁免单，只算真正审查过的；
+                // 计入 +1 变化基数（reviewPlus：更新重查变为已通过的新订单）
+                const base = c.count - rec.nolockSkip;
+                const denom = base + rec.plus;
                 return {
                     date: c.date,
-                    total: c.count,
+                    total: denom,
+                    base: base,
+                    rawTotal: c.count,
                     reviewed: rec.reviewed,
                     passed: rec.passed,
-                    // clamp 防越界：手动修正总量小于已通过数时，比率封顶 100%，避免点画到图表顶边外
-                    rate: rec.reviewed > 0 && c.count > 0 ? Math.min(rec.passed / c.count, 1) : null
+                    nolockSkip: rec.nolockSkip,
+                    plus: rec.plus,
+                    // clamp 防越界：修正总量小于已通过数时，比率封顶 100%，避免点画到图表顶边外
+                    rate: rec.reviewed > 0 && denom > 0 ? Math.min(rec.passed / denom, 1) : null
                 };
             });
 
@@ -7204,7 +7262,8 @@
             const ds = formatDateForAnalysis(d);
             const edited = editedDays[ds];
             const dayRecs = records.filter(r => r.date === ds);
-            prevTotal += edited !== undefined ? edited : dayRecs.length;
+            // 与当前口径一致：分母排除「无锁·跳过分配」豁免单，并计入 +1 变化基数（reviewPlus）
+            prevTotal += (edited !== undefined ? edited : dayRecs.length) - dayRecs.filter(r => r.reviewStatus === '无锁·跳过分配').length + dayRecs.reduce((s, r) => s + (r.reviewPlus || 0), 0);
             prevPass += dayRecs.filter(r => r.reviewStatus === '已通过').length;
         }
         if (prevTotal <= 0) return null;
@@ -7335,7 +7394,7 @@
                 const x = padding.left + i * xStep;
                 const y = yOf(d.rate);
                 const isZero = d.passed === 0 && d.reviewed > 0;
-                chartPoints.push({ x, y, date: d.date, rate: d.rate, passed: d.passed, total: d.total, reviewed: d.reviewed, isZero });
+                chartPoints.push({ x, y, date: d.date, rate: d.rate, passed: d.passed, base: d.base, plus: d.plus || 0, total: d.total, reviewed: d.reviewed, nolockSkip: d.nolockSkip || 0, isZero });
 
                 ctx.beginPath();
                 ctx.arc(x, y, 3.5, 0, Math.PI * 2);
@@ -7381,9 +7440,10 @@
             }
             if (found) {
                 const pct = Math.floor(found.rate * 100);
+                const denomText = found.base + (found.plus ? '+' + found.plus : '');
                 const extra = found.isZero
-                    ? '<br/><span style="color:#ef4444;">已通过 0 / 共 ' + found.total + ' 单 [全部未通过]</span>'
-                    : '<br/><span style="color:#9ca3af;font-size:11px;">已通过 ' + found.passed + ' / 共 ' + found.total + ' 单（已审查 ' + found.reviewed + '）</span>';
+                    ? '<br/><span style="color:#ef4444;">已通过 0 / 有效 ' + denomText + ' 单 [全部未通过]</span>'
+                    : '<br/><span style="color:#9ca3af;font-size:11px;">已通过 ' + found.passed + ' / 有效 ' + denomText + ' 单（已审查 ' + found.reviewed + (found.nolockSkip ? '，无锁豁免 ' + found.nolockSkip : '') + (found.plus ? '，含新单 +' + found.plus : '') + '）</span>';
                 tooltip.innerHTML = `<strong>${found.date}</strong><br/>通过率：${pct}%${extra}`;
                 tooltip.style.display = 'block';
                 tooltip.style.left = found.x + 'px';
@@ -7959,12 +8019,17 @@
                 const monthStr = `${monthObj.getFullYear()}年${monthObj.getMonth() + 1}月`;
                 const monthData = groupedByMonth[month];
                 const monthTotalCount = Object.values(monthData).reduce((sum, arr) => sum + arr.length, 0);
-                // 月通过率：该月审查结果为「已通过」（绿标）的订单 / 该月总订单；无审查记录则不显示
+                // 月通过率：该月审查结果为「已通过」（绿标）/ 有效分母；口径 B：分母排除「无锁·跳过分配」豁免单，
+                // 并计入 +1 变化基数（reviewPlus，当月累计）；无审查记录则不显示
                 const monthAllRecords = Object.values(monthData).reduce((all, arr) => all.concat(arr), []);
                 const monthReviewed = monthAllRecords.filter(it => it.reviewStatus).length;
                 const monthPass = monthAllRecords.filter(it => it.reviewStatus === '已通过').length;
+                const monthNoLock = monthAllRecords.filter(it => it.reviewStatus === '无锁·跳过分配').length;
+                const monthPlus = monthAllRecords.reduce((s, it) => s + (it.reviewPlus || 0), 0);
+                const monthBase = monthTotalCount - monthNoLock;
+                const monthDenom = monthBase + monthPlus;
                 const monthRateHtml = monthReviewed > 0
-                    ? `<span class="re-history-month-rate" title="已通过 ${monthPass} / 共 ${monthTotalCount} 单（已审查 ${monthReviewed} 单）">月通过率 ${Math.floor(monthPass / monthTotalCount * 100)}%</span>`
+                    ? `<span class="re-history-month-rate" title="已通过 ${monthPass} / 有效 ${monthBase}${monthPlus ? '+' + monthPlus : ''} 单（无锁豁免 ${monthNoLock}，共 ${monthTotalCount} 单）">月通过率 ${monthDenom > 0 ? Math.floor(monthPass / monthDenom * 100) + '%' : '--'}</span>`
                     : '';
                 const isCurrentMonth = month === currentMonth;
 
@@ -7981,11 +8046,16 @@
                 const totalCount = items.length;
                 const displayCount = 4;
                 const hasMore = totalCount > displayCount;
-                // 当日通过率：审查结果为「已通过」（绿标）的订单 / 当日总订单；无审查记录则不显示
+                // 当日通过率：审查结果为「已通过」（绿标）/ 有效分母；口径 B：分母排除「无锁·跳过分配」豁免单，
+                // 并计入 +1 变化基数（reviewPlus：更新重查变为已通过的新订单）；无审查记录则不显示
                 const dayReviewed = items.filter(it => it.reviewStatus).length;
                 const dayPass = items.filter(it => it.reviewStatus === '已通过').length;
+                const dayNoLock = items.filter(it => it.reviewStatus === '无锁·跳过分配').length;
+                const dayPlus = items.reduce((s, it) => s + (it.reviewPlus || 0), 0);
+                const dayBase = totalCount - dayNoLock;
+                const dayDenom = dayBase + dayPlus;
                 const dayRateHtml = dayReviewed > 0
-                    ? `<span class="re-history-day-rate" title="已通过 ${dayPass} / 共 ${totalCount} 单（已审查 ${dayReviewed} 单）">通过率 ${Math.floor(dayPass / totalCount * 100)}%</span>`
+                    ? `<span class="re-history-day-rate" title="已通过 ${dayPass} / 有效 ${dayBase}${dayPlus ? '+' + dayPlus : ''} 单（无锁豁免 ${dayNoLock}，共 ${totalCount} 单）">通过率 ${dayDenom > 0 ? Math.floor(dayPass / dayDenom * 100) + '%' : '--'}</span>`
                     : '';
 
                 let itemsHtml = '';
@@ -8332,6 +8402,7 @@
     let reviewRunning = false;
     let reviewAbortFlag = false;
     let reviewStaffName = '';
+    let reviewFilter = ''; // 状态筛选（''=全部；不隐藏条目，仅淡化未选中状态；重渲染保持，刷新重置）
 
     function saveReviewQueue() {
         try { GM_setValue(REVIEW_QUEUE_KEY, JSON.stringify(reviewQueue)); } catch (e) {}
@@ -8344,7 +8415,8 @@
         } catch (e) { reviewQueue = null; }
         if (reviewQueue && Array.isArray(reviewQueue.items)) {
             // 页面刷新恢复：中断在「查询中」的条目退回待查询，运行标志复位（等同停止态）
-            reviewQueue.items.forEach(it => { if (it.status === 'querying') it.status = 'pending'; });
+            // assigning 为运行态，持久化残留会导致按钮卡在「分配中…」，恢复时统一清除
+            reviewQueue.items.forEach(it => { if (it.status === 'querying') it.status = 'pending'; it.assigning = false; });
             reviewQueue.running = false;
         } else {
             reviewQueue = null;
@@ -8507,10 +8579,11 @@
             return { type: 'nolockskip', text: '无锁·跳过分配' };
         }
         // ⑤ 客服=空 + 待归还 → ⑤.1 比对同身份证尾号且客服备注含面板客服名的订单
+        // firstOrderNo：第一单订单号，供【分配】按钮把该单认领给自己
         if (!staff && state === '待归还') {
             const matched = rows.find(r => r.idTail && idTail && r.idTail === idTail && (r.remark || '').includes(staffName));
-            if (matched) return { type: 'resubmit', text: '疑似重新下单', refOrder: matched.orderNo };
-            return { type: 'manual', text: '待人工判断' };
+            if (matched) return { type: 'resubmit', text: '疑似重新下单', refOrder: matched.orderNo, firstOrderNo: first.orderNo };
+            return { type: 'manual', text: '待人工判断', firstOrderNo: first.orderNo };
         }
         // 未覆盖情况：直接显示后台原文状态（已买断、客服空+其他状态、客服他人+待审核等）
         return { type: 'raw', text: state || '未知状态', rawState: state, rawStaff: staff };
@@ -8596,17 +8669,32 @@
             statusTip = '<span class="re-review-status-tip" style="color:#6b7280;">待查询 ' + pendingCount + ' 条</span>';
         }
 
+        // 状态筛选：按队列实际存在的状态动态生成选项；筛选值失效（状态已不存在）时自动回落「全部」
+        const filterTexts = [];
+        items.forEach(it => {
+            const m = getReviewStatusMeta(it);
+            if (!filterTexts.includes(m.text)) filterTexts.push(m.text);
+        });
+        if (reviewFilter && !filterTexts.includes(reviewFilter)) reviewFilter = '';
+        const filterOptionsHtml = ['<option value="">全部状态</option>']
+            .concat(filterTexts.map(t => `<option value="${t}">${t}</option>`))
+            .join('');
+
         const listHtml = items.map((it, idx) => {
             const meta = getReviewStatusMeta(it);
             const models = (it.models || []).join('、');
             const isQuerying = it.status === 'querying';
+            const isDimmed = reviewFilter && meta.text !== reviewFilter;
             const refPart = it.result && it.result.refOrder ? '关联订单：' + it.result.refOrder + ' ｜ ' : '';
             const errPart = meta.err ? '失败原因：' + meta.err + ' ｜ ' : '';
             return `
-                <div class="re-review-item${isQuerying ? ' querying' : ''}" data-review-name="${encodeURIComponent(it.name || '')}" title="${errPart}${refPart}${models ? models + ' ｜ ' : ''}点击在新标签页打开该客户的后台订单">
+                <div class="re-review-item${isQuerying ? ' querying' : ''}${isDimmed ? ' dimmed' : ''}" data-review-name="${encodeURIComponent(it.name || '')}" title="${errPart}${refPart}${models ? models + ' ｜ ' : ''}点击在新标签页打开该客户的后台订单">
                     <span class="re-review-item-idx">${idx + 1}</span>
                     <span class="re-review-item-name">${it.name || '未知'}</span>
                     <span class="re-review-tag ${meta.cls}"${meta.tip ? ' title="' + meta.tip + '"' : ''}>${meta.text}</span>
+                    ${(it.status === 'done' && it.result && (it.result.type === 'resubmit' || it.result.type === 'manual') && it.result.firstOrderNo && !completed)
+                        ? `<button class="re-review-assign" data-name="${encodeURIComponent(it.name || '')}" title="将该客户第一单分配给自己（复用自动处理的分配流程）"${(reviewRunning || it.assigning) ? ' disabled' : ''}>${it.assigning ? '分配中…' : '分配'}</button>`
+                        : ''}
                     <button class="re-review-update" data-name="${encodeURIComponent(it.name || '')}"${(isQuerying || completed || reviewRunning) ? ' disabled' : ''}>更新</button>
                 </div>`;
         }).join('');
@@ -8620,6 +8708,7 @@
                     ${statusTip}
                 </div>
                 <div class="re-review-btns">
+                    <select class="re-review-filter" id="re-review-filter" title="按状态筛选：未选中状态的条目淡化显示">${filterOptionsHtml}</select>
                     <button class="re-review-btn" id="re-review-start-btn"${dis(completed || reviewRunning || pendingCount === 0)}>开始查询</button>
                     <button class="re-review-btn secondary" id="re-review-stop-btn"${dis(!reviewRunning)}>停止查询</button>
                     <button class="re-review-btn secondary" id="re-review-finish-btn"${dis(completed || reviewRunning || !allDone)}>处理完毕</button>
@@ -8633,11 +8722,17 @@
         container.querySelectorAll('.re-review-item[data-review-name]').forEach(row => {
             row.addEventListener('click', function(e) {
                 e.stopPropagation();
-                if (e.target.closest('.re-review-update')) return; // 更新按钮不触发跳转
+                if (e.target.closest('.re-review-update') || e.target.closest('.re-review-assign')) return; // 更新/分配按钮不触发跳转
                 const rname = decodeURIComponent(this.getAttribute('data-review-name') || '');
                 if (!rname) return;
                 window.open('https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name='
                     + encodeURIComponent(rname) + '&out_order_no=', '_blank');
+            });
+        });
+        container.querySelectorAll('.re-review-assign').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                assignReviewItemByName(decodeURIComponent(this.getAttribute('data-name')));
             });
         });
         container.querySelectorAll('.re-review-update').forEach(btn => {
@@ -8646,6 +8741,16 @@
                 updateReviewItemByName(decodeURIComponent(this.getAttribute('data-name')));
             });
         });
+        // 状态筛选：切换后仅淡化未选中条目（不隐藏）；重渲染后保持筛选值
+        const filterSel = document.getElementById('re-review-filter');
+        if (filterSel) {
+            filterSel.value = reviewFilter;
+            filterSel.addEventListener('change', function(e) {
+                e.stopPropagation();
+                reviewFilter = this.value;
+                renderReviewCenter();
+            });
+        }
         const startBtn = document.getElementById('re-review-start-btn');
         if (startBtn) startBtn.addEventListener('click', function(e) { e.stopPropagation(); startReviewQuery(); });
         const stopBtn = document.getElementById('re-review-stop-btn');
@@ -8792,9 +8897,19 @@
         await sleepReview(600 + Math.random() * 400);
         try {
             const rows = await queryReviewOrderByName(item.name);
+            const prevType = item.result ? item.result.type : null;
             item.result = judgeReviewOrder(rows, reviewStaffName, item.hasNoLockTag);
             item.status = 'done';
-            showSuccessToast('已更新：' + item.name + ' → ' + (item.result.text || ''));
+            // 分母基数+1：更新重查后从其他状态变为「已通过」= 客户重新下单归你（新订单，历史一条记录代表两单）。
+            // 仅限旧单是退的/别人的/不存在的状态；「审核中/待审核」等同单推进不 +1；已通过→已通过无变化不重复计；
+            // 一旦计入只加不减（B 口径：后续再变其他状态基数保留）
+            const PLUS_FROM_TYPES = ['rejected', 'resubmit', 'manual', 'notfound', 'otherpass', 'raw'];
+            if (prevType && PLUS_FROM_TYPES.includes(prevType) && item.result.type === 'pass') {
+                item.plus = (item.plus || 0) + 1;
+                showSuccessToast('已更新：' + item.name + ' → 已通过（分母基数 +1）');
+            } else {
+                showSuccessToast('已更新：' + item.name + ' → ' + (item.result.text || ''));
+            }
         } catch (e) {
             item.status = 'failed';
             item.errorMsg = (e && e.message) ? e.message : '网络错误';
@@ -8802,6 +8917,42 @@
         }
         saveReviewQueue();
         renderReviewCenter();
+    }
+
+    // 【分配】：把「疑似重新下单/待人工判断」的第一单认领给自己（复用自动处理的 iframe 分配），
+    // 成功后 1.5s 自动重查判定——resubmit→已通过 会自然触发分母 +1（客户重新下的单归你）
+    async function assignReviewItemByName(name) {
+        if (!reviewQueue || reviewQueue.completed || reviewRunning) return;
+        const item = reviewQueue.items.find(it => it.name === name);
+        if (!item || item.status !== 'done' || !item.result || !item.result.firstOrderNo) return;
+        if (item.result.type !== 'resubmit' && item.result.type !== 'manual') return;
+        const orderNo = item.result.firstOrderNo;
+
+        const staff = await ensureReviewStaffName();
+        if (!staff) {
+            showErrorToast('未获取到客服姓名，无法分配');
+            return;
+        }
+        // 点击即分配：无需弹窗确认，靠 assigning 防重 + 失败 Toast 兜底
+        // 分配中态：按钮禁用转「分配中…」，防止重复点击
+        item.assigning = true;
+        saveReviewQueue();
+        renderReviewCenter();
+
+        doStaffAssign(orderNo, staff, (success) => {
+            item.assigning = false;
+            saveReviewQueue();
+            if (!success) {
+                renderReviewCenter();
+                showErrorToast('分配失败：' + item.name + '（订单 ' + orderNo + '）');
+                return;
+            }
+            showSuccessToast('分配成功，正在重新查询判定…');
+            // 等待后台分配生效后自动重查
+            setTimeout(() => {
+                updateReviewItemByName(item.name);
+            }, 1500);
+        });
     }
 
     // 「他人已通过」写回文案 → 配色
@@ -8915,7 +9066,8 @@
                 const info = getReviewWriteBackInfo(item, confirmedMap);
                 for (const rid of (item.recordIds || [])) {
                     try {
-                        await updateHistoryRecordFields(rid, { reviewStatus: info.text, reviewStatusCls: info.cls });
+                        // reviewPlus：更新重查变为「已通过」累计的 +1 变化基数（分母加成，只加不减）
+                        await updateHistoryRecordFields(rid, { reviewStatus: info.text, reviewStatusCls: info.cls, reviewPlus: item.plus || 0 });
                         writeCount++;
                     } catch (e) {}
                 }
