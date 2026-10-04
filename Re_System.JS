@@ -8602,7 +8602,7 @@
             case 'resubmit': return { text: '疑似重新下单', cls: 're-review-tag-resubmit', tip: '后台第一单：客服为空、状态=待归还，且找到同身份证尾号+客服备注含你名的订单' };
             case 'rejected': return { text: '已退单', cls: 're-review-tag-rejected', tip: '后台第一单：视频面审客服=你，状态=已退单' };
             case 'nolockskip': return { text: '无锁·跳过分配', cls: 're-review-tag-nolock', tip: '无锁不满足的单自动处理跳过客服分配（后台客服为空），已豁免审查' };
-            case 'manual': return { text: '待人工判断', cls: 're-review-tag-gray', tip: '后台第一单：客服为空、状态=待归还，未找到关联订单，请人工确认' };
+            case 'manual': return { text: '待人工判断', cls: 're-review-tag-gray', tip: '后台第一单：客服为空、状态=待归还，未找到关联订单；处理完毕时需二选一确认最终状态（人工标记不计入重新分配基数）' };
             case 'notfound': return { text: '未查到', cls: 're-review-tag-gray', tip: '按姓名搜索后台无订单记录' };
             case 'raw':
                 // 后台原文状态分色：已买断=金、待审核=橙、其余=灰
@@ -8964,7 +8964,9 @@
     // 「他人已通过」写回文案 → 配色
     function getReviewWriteBackInfo(item, confirmedMap) {
         const r = item.result || {};
-        if (r.type === 'otherpass') {
+        // 「他人已通过」与「待人工判断」：处理完毕时弹窗二选一（已通过/已退单），按人工选择写回；
+        // 人工标记本质是自己去后台核实结果，不属于重新下单，不 +1 变化基数（plus 仅在【更新】重查路径累加）
+        if (r.type === 'otherpass' || r.type === 'manual') {
             return confirmedMap[item.name] === '已通过'
                 ? { text: '已通过', cls: 're-review-tag-pass' }
                 : { text: '已退单', cls: 're-review-tag-rejected' };
@@ -8975,7 +8977,6 @@
             resubmit: ['疑似重新下单', 're-review-tag-resubmit'],
             rejected: ['已退单', 're-review-tag-rejected'],
             nolockskip: ['无锁·跳过分配', 're-review-tag-nolock'],
-            manual: ['待人工判断', 're-review-tag-gray'],
             notfound: ['未查到', 're-review-tag-gray']
         };
         if (map[r.type]) return { text: map[r.type][0], cls: map[r.type][1] };
@@ -8994,24 +8995,29 @@
             modal = document.createElement('div');
             modal.id = 're-review-confirm-modal';
             modal.className = 're-modal-overlay';
-            const rowsHtml = others.map(it => `
+            const rowsHtml = others.map(it => {
+                const sub = (it.result && it.result.type === 'manual')
+                    ? '客服为空 · 待归还 · 未找到关联订单'
+                    : '后台视频面审客服：' + ((it.result && it.result.otherStaff) || '未知');
+                return `
                 <div class="re-review-confirm-row">
                     <div class="re-review-confirm-who">
                         <span class="re-review-confirm-name">${it.name || '未知'}</span>
-                        <span class="re-review-confirm-sub">后台视频面审客服：${(it.result && it.result.otherStaff) || '未知'}</span>
+                        <span class="re-review-confirm-sub">${sub}</span>
                     </div>
                     <div class="re-review-confirm-opts" data-name="${encodeURIComponent(it.name || '')}">
                         <button class="re-review-opt" data-choice="已通过">已通过</button>
                         <button class="re-review-opt" data-choice="已退单">已退单</button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
             modal.innerHTML = `
                 <div class="re-modal" style="width: 360px;">
                     <div class="re-modal-header">
                         <span class="re-modal-title">确认最终状态</span>
                     </div>
                     <div class="re-modal-body" style="padding: 16px 20px;">
-                        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;line-height:1.6;">检测到 ${others.length} 条「他人已通过」订单，写回历史前请逐条确认最终状态：</div>
+                        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;line-height:1.6;">检测到 ${others.length} 条需人工确认的订单（他人已通过 / 待人工判断），写回历史前请逐条确认最终状态：</div>
                         <div style="display:flex;flex-direction:column;gap:8px;">${rowsHtml}</div>
                         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
                             <button class="re-contact-btn" id="re-review-confirm-cancel">取消</button>
@@ -9058,7 +9064,8 @@
             showErrorToast('还有 ' + unfinished.length + ' 条未处理完毕，全部出结果后才能写回');
             return;
         }
-        const others = reviewQueue.items.filter(it => it.result && it.result.type === 'otherpass');
+        // 「他人已通过」+「待人工判断」均需处理完毕时人工二选一（已通过/已退单）后才写回
+        const others = reviewQueue.items.filter(it => it.result && (it.result.type === 'otherpass' || it.result.type === 'manual'));
         const confirmedMap = {};
         if (others.length) {
             const ok = await showReviewConfirmModal(others, confirmedMap);
