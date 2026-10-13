@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      7.1.0
+// @version      7.2.5
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V7.1.0</span>
+                    <span class="re-panel-version">V7.2.5</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -458,186 +458,138 @@
                                 </div>
                                 <div class="re-settings-content">
                                     <div class="re-settings-panel active" id="re-settings-basic">
-                                        <div class="re-settings-grid">
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-blue">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        <div class="re-set2-grid">
+                                            <div class="re-set2-card">
+                                                <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#3b82f6;"></span><span class="re-set2-card-name">订单自动化</span><span class="re-set2-card-count">3</span></div>
+                                                <div class="re-set2-row" title="打开面板时自动获取订单信息">
+                                                    <div class="re-setting-icon re-setting-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                                                    <div class="re-set2-line"><span class="re-setting-name">自动获取订单</span><span class="re-set2-inline-desc">打开面板时自动获取订单信息</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-auto-fetch">
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
                                                 </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">自动年龄</span>
-                                                    <span class="re-setting-desc">根据身份证号自动计算年龄</span>
+                                                <div class="re-set2-row" title="根据身份证号自动计算年龄">
+                                                    <div class="re-setting-icon re-setting-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                                                    <div class="re-set2-line"><span class="re-setting-name">自动年龄</span><span class="re-set2-inline-desc">根据身份证号自动计算年龄</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-auto-age">
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
                                                 </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-auto-age">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
+                                                <div class="re-set2-row" title="打开面板时自动查询手机号使用时长">
+                                                    <div class="re-setting-icon re-setting-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+                                                    <div class="re-set2-line"><span class="re-setting-name">自动查询联系人</span><span class="re-set2-inline-desc">自动查询手机号使用时长</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-auto-contact-query">
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-green">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            <div class="re-set2-card">
+                                                <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#22c55e;"></span><span class="re-set2-card-name">提交与刷新</span><span class="re-set2-card-count">3</span></div>
+                                                <div class="re-set2-row" title="点自动处理时，将芝麻信用提交到风控报告">
+                                                    <div class="re-setting-icon re-setting-icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                                                    <div class="re-set2-line"><span class="re-setting-name">主动提交芝麻分</span><span class="re-set2-inline-desc">提交到风控报告</span></div>
+                                                    <div class="re-appearance-control">
+                                                        <button class="re-zhima-test-btn" id="re-zhima-test-btn" title="手动测试一次芝麻分提交链路">测试提交</button>
+                                                        <label class="re-switch re-switch-small">
+                                                            <input type="checkbox" id="re-setting-zhima-submit">
+                                                            <span class="re-switch-slider"></span>
+                                                        </label>
+                                                    </div>
                                                 </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">自动获取订单</span>
-                                                    <span class="re-setting-desc">打开面板时自动获取订单信息</span>
+                                                <div class="re-set2-row" title="自动处理完成后自动刷新页面">
+                                                    <div class="re-setting-icon re-setting-icon-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+                                                    <div class="re-set2-line"><span class="re-setting-name">自动刷新</span><span class="re-set2-inline-desc">处理完成后自动刷新页面</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-auto-refresh" checked>
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
                                                 </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-auto-fetch">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
+                                                <div class="re-set2-row" title="芝麻信用有数据时刷新页面需确认">
+                                                    <div class="re-setting-icon re-setting-icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                                                    <div class="re-set2-line"><span class="re-setting-name">防手误刷新</span><span class="re-set2-inline-desc">有芝麻分时刷新需确认</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-prevent-refresh">
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-purple">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            <div class="re-set2-card re-set2-card-full">
+                                                <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#f97316;"></span><span class="re-set2-card-name">系统</span><span class="re-set2-card-count">2</span></div>
+                                                <div class="re-set2-half">
+                                                    <div class="re-set2-slot" title="开启后流水宝开关跨订单保持，关闭则每单重置">
+                                                        <div class="re-setting-icon re-setting-icon-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                                                        <div class="re-set2-line"><span class="re-setting-name">流水宝记忆</span><span class="re-set2-inline-desc">开关状态跨订单保持</span></div>
+                                                        <label class="re-switch re-switch-small">
+                                                            <input type="checkbox" id="re-setting-liushui-bao-memory">
+                                                            <span class="re-switch-slider"></span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="re-set2-slot" title="禁用模糊和动画，提升Chrome流畅度">
+                                                        <div class="re-setting-icon re-setting-icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                                                        <div class="re-set2-line"><span class="re-setting-name">低性能模式</span><span class="re-set2-inline-desc">禁用模糊动画提升流畅度</span></div>
+                                                        <label class="re-switch re-switch-small">
+                                                            <input type="checkbox" id="re-setting-low-perf">
+                                                            <span class="re-switch-slider"></span>
+                                                        </label>
+                                                    </div>
                                                 </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">自动查询联系人</span>
-                                                    <span class="re-setting-desc">打开面板时自动查询手机号使用时长</span>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-auto-contact-query">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
                                             </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-orange">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">防手误刷新</span>
-                                                    <span class="re-setting-desc">芝麻信用有数据时刷新页面需确认</span>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-prevent-refresh">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
-                                            </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-green">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">主面板流水宝记忆</span>
-                                                    <span class="re-setting-desc">开启后流水宝开关跨订单保持，关闭则每单重置</span>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-liushui-bao-memory">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
-                                            </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-green">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">主动提交芝麻分</span>
-                                                    <span class="re-setting-desc">点自动处理时，将芝麻信用提交到风控报告</span>
-                                                    <button class="re-zhima-test-btn" id="re-zhima-test-btn" title="手动测试一次芝麻分提交链路">测试提交</button>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-zhima-submit">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
-                                            </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-cyan">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">自动刷新</span>
-                                                    <span class="re-setting-desc">自动处理完成后自动刷新页面</span>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-auto-refresh" checked>
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
-                                            </div>
-                                            <div class="re-setting-card">
-                                                <div class="re-setting-icon re-setting-icon-red">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">低性能模式</span>
-                                                    <span class="re-setting-desc">禁用模糊和动画，提升Chrome流畅度</span>
-                                                </div>
-                                                <label class="re-switch re-switch-small">
-                                                    <input type="checkbox" id="re-setting-low-perf">
-                                                    <span class="re-switch-slider"></span>
-                                                </label>
-                                            </div>
-                                            <div class="re-setting-card" id="re-setting-staff-name-card" style="cursor:pointer;">
-                                                <div class="re-setting-icon re-setting-icon-indigo">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                                </div>
-                                                <div class="re-setting-info">
-                                                    <span class="re-setting-name">修改姓名</span>
-                                                    <span class="re-setting-desc" id="re-setting-staff-desc">当前：未设置</span>
-                                                </div>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;"><polyline points="15 3 21 9 9 21H3v-6L15 3z"/></svg>
-                                            </div>
+                                        </div>
+                                        <div class="re-set2-staff" id="re-setting-staff-name-card">
+                                            <div class="re-setting-icon re-setting-icon-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                            <div class="re-set2-line"><span class="re-setting-name">修改姓名</span><span class="re-set2-inline-desc" id="re-setting-staff-desc">当前：未设置</span></div>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;"><polyline points="15 3 21 9 9 21H3v-6L15 3z"/></svg>
                                         </div>
                                     </div>
                                     <div class="re-settings-panel" id="re-settings-appearance">
-                                        <div class="re-appearance-section">
-                                            <div class="re-appearance-group">配色</div>
-                                            <div class="re-appearance-colors">
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">背板颜色</span>
-                                                        <span class="re-appearance-desc">自定义面板背景颜色</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
+                                        <div class="re-appearance-cols">
+                                        <div class="re-appearance-main">
+                                        <div class="re-set2-card">
+                                            <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#a855f7;"></span><span class="re-set2-card-name">配色</span><span class="re-set2-card-count">5</span></div>
+                                            <div class="re-color-grid">
+                                                <div class="re-color-cell" title="自定义面板背景颜色">
+                                                    <div class="re-color-cell-ctl">
                                                         <input type="color" id="re-setting-bg-color" value="#e8eaed" class="re-color-picker">
                                                         <button class="re-reset-icon-btn" id="re-reset-bg-color" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
                                                     </div>
+                                                    <span class="re-color-label">背板颜色</span>
                                                 </div>
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">标题栏背景色</span>
-                                                        <span class="re-appearance-desc">自定义顶部标题栏背景</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
+                                                <div class="re-color-cell" title="自定义顶部标题栏背景">
+                                                    <div class="re-color-cell-ctl">
                                                         <input type="color" id="re-setting-header-bg" value="#6b7280" class="re-color-picker">
                                                         <button class="re-reset-icon-btn" id="re-reset-header-bg" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
                                                     </div>
+                                                    <span class="re-color-label">标题栏背景色</span>
                                                 </div>
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">标题栏文字颜色</span>
-                                                        <span class="re-appearance-desc">标题、客户数据、客服名字色</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
+                                                <div class="re-color-cell" title="标题、客户数据、客服名字色">
+                                                    <div class="re-color-cell-ctl">
                                                         <input type="color" id="re-setting-header-text" value="#ffffff" class="re-color-picker">
                                                         <button class="re-reset-icon-btn" id="re-reset-header-text" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
                                                     </div>
+                                                    <span class="re-color-label">标题栏文字颜色</span>
                                                 </div>
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">开关激活色</span>
-                                                        <span class="re-appearance-desc">所有开关打开时的颜色</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
+                                                <div class="re-color-cell" title="所有开关打开时的颜色">
+                                                    <div class="re-color-cell-ctl">
                                                         <input type="color" id="re-setting-switch-color" value="#3b82f6" class="re-color-picker">
                                                         <button class="re-reset-icon-btn" id="re-reset-switch-color" title="重置为默认"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
                                                     </div>
+                                                    <span class="re-color-label">开关激活色</span>
                                                 </div>
                                             </div>
-                                            <div class="re-appearance-item">
-                                                <div class="re-appearance-header">
-                                                    <span class="re-appearance-title">输入框染色浓度</span>
-                                                    <span class="re-appearance-desc">输入框/下拉背景跟随开关激活色的深浅</span>
-                                                </div>
-                                                <div class="re-appearance-control">
-                                                    <input type="range" id="re-setting-input-tint" min="0" max="100" value="100" class="re-range-slider">
-                                                    <span id="re-input-tint-value" class="re-opacity-text">100%</span>
-                                                </div>
+                                            <div class="re-set2-slider-row" title="输入框/下拉背景跟随开关激活色的深浅">
+                                                <span class="re-setting-name">输入框染色</span>
+                                                <input type="range" id="re-setting-input-tint" min="0" max="100" value="100" class="re-range-slider">
+                                                <span id="re-input-tint-value" class="re-opacity-text">100%</span>
                                             </div>
-                                            <div class="re-appearance-group">背景</div>
-                                            <div class="re-appearance-bg">
-                                            <div class="re-appearance-item">
-                                                <div class="re-appearance-header">
-                                                    <span class="re-appearance-title">背景图片</span>
-                                                    <span class="re-appearance-desc">选图后可裁剪、缩放、拉伸</span>
-                                                </div>
+                                        </div>
+                                        <div class="re-set2-card">
+                                            <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#f97316;"></span><span class="re-set2-card-name">背景与质感</span><span class="re-set2-card-count">5</span></div>
+                                            <div class="re-set2-row" title="选图后可裁剪、缩放、拉伸">
+                                                <div class="re-setting-icon re-setting-icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                                                <div class="re-set2-line"><span class="re-setting-name">背景图片</span><span class="re-set2-inline-desc">选图后可裁剪、缩放、拉伸</span></div>
                                                 <div class="re-appearance-control">
                                                     <span id="re-bg-image-name" class="re-filename-text"></span>
                                                     <label class="re-file-upload-btn" id="re-bg-image-upload-label">
@@ -647,59 +599,42 @@
                                                     <button class="re-btn-sm re-btn-danger" id="re-clear-bg-image" style="display:none;">清除</button>
                                                 </div>
                                             </div>
-                                            <div class="re-appearance-duo re-appearance-duo-stack">
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">背景透明度</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
-                                                        <input type="range" id="re-setting-bg-opacity" min="0" max="100" value="80" class="re-range-slider">
-                                                        <span id="re-opacity-value" class="re-opacity-text">80%</span>
-                                                    </div>
+                                            <div class="re-set2-half">
+                                                <div class="re-set2-slot">
+                                                    <span class="re-setting-name">背景透明度</span>
+                                                    <input type="range" id="re-setting-bg-opacity" min="0" max="100" value="80" class="re-range-slider">
+                                                    <span id="re-opacity-value" class="re-opacity-text">80%</span>
                                                 </div>
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">组件背景透明度</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
-                                                        <input type="range" id="re-setting-comp-opacity" min="0" max="100" value="80" class="re-range-slider">
-                                                        <span id="re-comp-opacity-value" class="re-opacity-text">80%</span>
-                                                    </div>
+                                                <div class="re-set2-slot">
+                                                    <span class="re-setting-name">组件透明度</span>
+                                                    <input type="range" id="re-setting-comp-opacity" min="0" max="100" value="80" class="re-range-slider">
+                                                    <span id="re-comp-opacity-value" class="re-opacity-text">80%</span>
                                                 </div>
                                             </div>
-                                            <div class="re-appearance-duo">
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">磨砂模式</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
-                                                        <label class="re-switch re-switch-small">
-                                                            <input type="checkbox" id="re-setting-glass-mode" checked>
-                                                            <span class="re-switch-slider"></span>
-                                                        </label>
-                                                    </div>
+                                            <div class="re-set2-half">
+                                                <div class="re-set2-slot">
+                                                    <div class="re-set2-line"><span class="re-setting-name">磨砂模式</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-glass-mode" checked>
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
                                                 </div>
-                                                <div class="re-appearance-item">
-                                                    <div class="re-appearance-header">
-                                                        <span class="re-appearance-title">交互组件白底</span>
-                                                    </div>
-                                                    <div class="re-appearance-control">
-                                                        <label class="re-switch re-switch-small">
-                                                            <input type="checkbox" id="re-setting-comp-white-bg" checked>
-                                                            <span class="re-switch-slider"></span>
-                                                        </label>
-                                                    </div>
+                                                <div class="re-set2-slot">
+                                                    <div class="re-set2-line"><span class="re-setting-name">交互组件白底</span></div>
+                                                    <label class="re-switch re-switch-small">
+                                                        <input type="checkbox" id="re-setting-comp-white-bg" checked>
+                                                        <span class="re-switch-slider"></span>
+                                                    </label>
                                                 </div>
                                             </div>
-                                            </div>
-                                            <div class="re-appearance-group">字体</div>
-                                            <div class="re-appearance-item">
-                                                <div class="re-appearance-header">
-                                                    <span class="re-appearance-title">字体大小</span>
-                                                    <span class="re-appearance-desc">面板文字大小 · 右侧开关为加粗</span>
-                                                </div>
-                                                <div class="re-appearance-control">
-                                                    <input type="range" id="re-setting-font-size" min="12" max="18" step="1" value="14" class="re-range-slider">
+                                        </div>
+                                        <div class="re-set2-card">
+                                            <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#ec4899;"></span><span class="re-set2-card-name">字体</span><span class="re-set2-card-count">2</span></div>
+                                            <div class="re-set2-row">
+                                                <div class="re-setting-icon re-setting-icon-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
+                                                <div class="re-set2-line"><span class="re-setting-name">字体大小</span><span class="re-set2-inline-desc">面板文字大小 · 右侧开关为加粗</span></div>
+                                                <div class="re-appearance-control" style="flex:1;max-width:200px;">
+                                                    <input type="range" id="re-setting-font-size" min="12" max="18" step="1" value="14" class="re-range-slider" style="flex:1;min-width:0;">
                                                     <span id="re-font-size-value" class="re-opacity-text">14px</span>
                                                     <label class="re-switch re-switch-small" title="字体加粗">
                                                         <input type="checkbox" id="re-setting-font-bold">
@@ -707,12 +642,16 @@
                                                     </label>
                                                 </div>
                                             </div>
+                                        </div>
+                                        </div>
+                                        <div class="re-appearance-side">
                                             <div class="re-appearance-preview">
                                                 <span class="re-appearance-preview-title">预览效果</span>
                                                 <div class="re-preview-card" id="re-bg-preview-card">
                                                     <div class="re-preview-inner" id="re-bg-preview-inner"></div>
                                                 </div>
                                             </div>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2824,27 +2763,183 @@
             display: block;
         }
 
-        .re-settings-grid {
+        /* ===== 设置区 V2 布局：组卡网格 + 行内描述 ===== */
+        .re-set2-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
 
-        .re-setting-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
+        .re-set2-card {
             background: rgba(255, 255, 255, 0.7);
             border: 1px solid rgba(107, 114, 128, 0.08);
             border-radius: 10px;
+            overflow: hidden;
         }
 
-        .re-setting-card:hover {
+        .re-set2-card-full {
+            grid-column: 1 / -1;
+        }
+
+        .re-set2-card-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(107, 114, 128, 0.06);
+        }
+
+        .re-set2-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .re-set2-card-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            letter-spacing: 1px;
+        }
+
+        .re-set2-card-count {
+            margin-left: auto;
+            font-size: 10px;
+            color: #9ca3af;
+            background: rgba(107, 114, 128, 0.08);
+            padding: 1px 7px;
+            border-radius: 999px;
+        }
+
+        .re-set2-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-top: 1px solid rgba(107, 114, 128, 0.06);
+        }
+
+        .re-set2-line {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .re-set2-inline-desc {
+            flex: 1;
+            min-width: 0;
+            font-size: 11px;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .re-set2-half {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid rgba(107, 114, 128, 0.06);
+        }
+
+        .re-set2-half > .re-set2-slot + .re-set2-slot {
+            border-left: 1px solid rgba(107, 114, 128, 0.06);
+        }
+
+        .re-set2-slot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            min-width: 0;
+        }
+
+        .re-set2-slot .re-range-slider {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .re-set2-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-top: 1px solid rgba(107, 114, 128, 0.06);
+        }
+
+        .re-set2-slider-row .re-setting-name {
+            flex-shrink: 0;
+        }
+
+        .re-set2-slider-row .re-range-slider {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .re-set2-staff {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(107, 114, 128, 0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background .15s, border-color .15s;
+        }
+
+        .re-set2-staff:hover {
             background: rgba(255, 255, 255, 0.9);
             border-color: rgba(107, 114, 128, 0.15);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 行内小号图标：复用 re-setting-icon 色系，仅覆盖尺寸 */
+        .re-set2-row .re-setting-icon,
+        .re-set2-slot .re-setting-icon,
+        .re-set2-staff .re-setting-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+        }
+
+        .re-set2-row .re-setting-icon svg,
+        .re-set2-slot .re-setting-icon svg,
+        .re-set2-staff .re-setting-icon svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* 设置区开关放大：抵消 small 缩放，升级 44x24 中号触控尺寸（激活色仍走 re-switch 的变量渐变） */
+        .re-set2-row .re-switch-small,
+        .re-set2-slot .re-switch-small,
+        .re-appearance-main .re-switch-small {
+            transform: none;
+            width: 44px;
+            height: 24px;
+        }
+
+        .re-set2-row .re-switch-small .re-switch-slider,
+        .re-set2-slot .re-switch-small .re-switch-slider,
+        .re-appearance-main .re-switch-small .re-switch-slider {
+            border-radius: 24px;
+        }
+
+        .re-set2-row .re-switch-small .re-switch-slider:before,
+        .re-set2-slot .re-switch-small .re-switch-slider:before,
+        .re-appearance-main .re-switch-small .re-switch-slider:before {
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            bottom: 3px;
+        }
+
+        .re-set2-row .re-switch-small input:checked + .re-switch-slider:before,
+        .re-set2-slot .re-switch-small input:checked + .re-switch-slider:before,
+        .re-appearance-main .re-switch-small input:checked + .re-switch-slider:before {
+            transform: translateX(20px);
         }
 
         /* 芝麻分测试提交：描述下方的文字链接式按钮，保持卡片右侧只有开关 */
@@ -2945,11 +3040,6 @@
             stroke: #6366f1;
         }
 
-        .re-setting-info {
-            flex: 1;
-            min-width: 0;
-        }
-
         .re-setting-name {
             font-size: 13px;
             font-weight: 500;
@@ -2957,105 +3047,63 @@
             display: block;
         }
 
-        .re-setting-desc {
-            font-size: 11px;
-            color: #9ca3af;
-            display: block;
-            margin-top: 2px;
-        }
-
-
-
         .re-switch-small {
             transform: scale(0.85);
             transform-origin: right center;
         }
 
-        .re-appearance-section {
+        /* ===== 外观 V2：左控件右预览双栏 ===== */
+        .re-appearance-cols {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .re-appearance-main {
+            flex: 1.6;
+            min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        /* 外观设置分组标题：配色 / 背景 / 字体 */
-        .re-appearance-group {
-            font-size: 11px;
-            font-weight: 600;
-            color: #9ca3af;
-            letter-spacing: 3px;
-            padding-left: 2px;
-            margin-top: 4px;
-        }
-
-        .re-appearance-group:first-child {
-            margin-top: 0;
-        }
-
-        /* 配色组：两列网格，压缩纵向高度 */
-        .re-appearance-colors {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
 
-        .re-appearance-colors .re-appearance-item {
-            padding: 10px 12px;
-            gap: 8px;
+        .re-appearance-side {
+            flex: 1;
+            min-width: 0;
         }
 
-        /* 背景组保持整行 */
-        .re-appearance-bg .re-appearance-item {
-            padding: 10px 12px;
-        }
-
-        /* 双列紧凑行：成对的开关/滑块并排收纳 */
-        .re-appearance-duo {
+        /* 配色色块格：取色器+重置一行，名称在下 */
+        .re-color-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 10px;
+            padding: 10px 12px;
         }
 
-        /* 滑块双列：纵向堆叠，滑块占满列宽 */
-        .re-appearance-duo-stack .re-appearance-item {
+        .re-color-cell {
+            display: flex;
             flex-direction: column;
-            align-items: stretch;
+            gap: 4px;
+        }
+
+        .re-color-cell-ctl {
+            display: flex;
+            align-items: center;
             gap: 6px;
         }
 
-        .re-appearance-duo-stack .re-appearance-control {
-            width: 100%;
-        }
-
-        .re-appearance-duo-stack .re-range-slider {
+        .re-color-cell-ctl .re-color-picker {
             flex: 1;
+            min-width: 0;
             width: auto;
         }
 
-        .re-appearance-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(107, 114, 128, 0.08);
-            border-radius: 10px;
-        }
-
-        .re-appearance-header {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .re-appearance-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .re-appearance-desc {
+        .re-color-label {
             font-size: 11px;
-            color: #9ca3af;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .re-appearance-control {
@@ -10844,7 +10892,8 @@
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
     function extractModelToken(s) {
         const n = (s || '').toLowerCase().replace(/\s+/g, '').replace(/（[^）]*）|\([^)]*\)/g, '');
-        const m = n.match(/(\d{1,2})(promax|pro|plus|mini|ultra)/);
+        // 后缀白名单含 air/e：区分 17↔17 Air↔17e、16↔16e，避免兜底取数字后互判（promax 必须在 pro 前）
+        const m = n.match(/(\d{1,2})(promax|pro|plus|mini|ultra|air|e)/);
         if (m) return m[1] + m[2];
         const d = n.match(/(\d{1,2})/);
         return d ? d[1] : n;
@@ -11635,15 +11684,13 @@
                 return match ? match[1].trim() : '';
             }
 
-            const checkEl = getElementByXPath(CONFIG.XPATH.MAIN_PAGE.valueAddedServiceCheck);
-            const checkText = checkEl ? checkEl.textContent.trim() : '';
-            const isValueAddedServiceOrder = checkText.includes('增值服务订单号');
-            const pOffset = isValueAddedServiceOrder ? 1 : 0;
+            // 按标签文本查找行（替代位置索引 XPath）：页面可能插入「租赁计划」等非常规行导致位置漂移
+            const tdPTexts = tdEl ? Array.from(tdEl.querySelectorAll('p')).map(p => (p.textContent || '').trim()) : [];
+            function findPTextByLabel(label) {
+                return tdPTexts.find(t => t.startsWith(label + '：') || t.startsWith(label + ':')) || '';
+            }
 
             const minDownPaymentXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[6]/p[5]';
-            const packageInfo1XPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${3 + pOffset}]`;
-            const packageInfo2XPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${5 + pOffset}]/span`;
-            const shopCategoryXPath = `/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${8 + pOffset}]`;
 
             const productModel = readProductModel();
             cachedProductModel = productModel;
@@ -11653,16 +11700,14 @@
             const minDownPaymentMatch = minDownPaymentText.match(/[\d.]+/);
             const minDownPayment = minDownPaymentMatch ? minDownPaymentMatch[0] : '';
 
-            const packageInfo1El = getElementByXPath(packageInfo1XPath);
-            const packageInfo1Text = packageInfo1El ? packageInfo1El.textContent.trim() : '';
+            const packageInfo1Text = findPTextByLabel('套餐');
             const packageInfo1Match = packageInfo1Text.match(/【([^】]+)】/);
             const packageInfo1 = packageInfo1Match ? packageInfo1Match[1] : '';
 
             const memoryMatch = packageInfo1Text.match(/内存[：:]\s*(\d+)/i);
             const memory = memoryMatch ? memoryMatch[1] : '';
 
-            const packageInfo2El = getElementByXPath(packageInfo2XPath);
-            const packageInfo2Text = packageInfo2El ? packageInfo2El.textContent.trim() : '';
+            const packageInfo2Text = findPTextByLabel('来源');
             const packageInfo2Match = packageInfo2Text.match(/【([^】]+)】/);
             const packageInfo2 = packageInfo2Match ? packageInfo2Match[1] : '';
 
@@ -11679,8 +11724,7 @@
 
             const shopRemarkText = findShopRemark(tdText, '店铺备注');
 
-            const shopCategoryEl = getElementByXPath(shopCategoryXPath);
-            const shopCategoryText = shopCategoryEl ? shopCategoryEl.textContent.trim() : '';
+            const shopCategoryText = findPTextByLabel('店铺');
             const shopCategory = shopCategoryText.includes('出资商家') ? '出资商家' : '普通商家';
 
             const shopOverdue = findNumberAfterLabel(tdText, '店铺逾期率');
@@ -11714,16 +11758,11 @@
             const expandBadgeEl = document.getElementById('re-expand-restrict-badge');
             let newTitle = '拓展业务';
             if (packageInfo) {
-                const len = packageInfo.length;
-                if (len >= 3) {
-                    const thirdLastChar = packageInfo.charAt(len - 3);
-                    const fourthLastChar = packageInfo.charAt(len - 4);
-                    if (thirdLastChar === '折' && /\d/.test(fourthLastChar)) {
-                        newTitle = '拓展业务（' + fourthLastChar + '折）';
-                        cachedDiscount = parseFloat(fourthLastChar) / 10;
-                    } else {
-                        cachedDiscount = null;
-                    }
+                // 全文搜索「X折/X.X折」：兼容折字不在末尾（多段套餐拼接）、后缀文字（折起/折优惠）、小数折
+                const discountMatch = packageInfo.match(/(\d+(?:\.\d+)?)折/);
+                if (discountMatch) {
+                    newTitle = '拓展业务（' + discountMatch[1] + '折）';
+                    cachedDiscount = parseFloat(discountMatch[1]) / 10;
                 } else {
                     cachedDiscount = null;
                 }
@@ -12404,21 +12443,12 @@
     let activeSuggestMenu = null;
 
     function getPriceSuggestions() {
+        // 价格建议保留「最低结果」「初审结果」；最低首付易误点填错审核价格，已移除
         const suggestions = [];
-
         const minPrice = getMinPrice();
         if (minPrice && minPrice > 0) {
             suggestions.push({ label: '最低结果', value: String(minPrice) });
         }
-
-        const minDownPaymentEl = document.getElementById('re-min-down-payment');
-        if (minDownPaymentEl) {
-            const text = minDownPaymentEl.textContent.replace('¥', '').replace(/,/g, '').trim();
-            if (text && text !== '0' && text !== '0.00') {
-                suggestions.push({ label: '最低首付', value: minDownPaymentEl.textContent.replace('¥', '').trim() });
-            }
-        }
-
         const v4RiskEl = document.getElementById('re-v4-risk');
         if (v4RiskEl) {
             const text = v4RiskEl.textContent.trim();
