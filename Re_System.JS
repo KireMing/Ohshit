@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      7.2.5
+// @version      7.2.6
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V7.2.5</span>
+                    <span class="re-panel-version">V7.2.6</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -8541,9 +8541,10 @@
     }
 
     // 按姓名查询预授权订单（全状态视图 state=-2，按授权时间排序），解析每行的客服/状态/身份证尾号/客服备注
+    // min_create_time/max_create_time 显式传空值，覆盖后台默认起始日期筛选，确保能查到历史订单
     async function queryReviewOrderByName(name) {
         const url = 'https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name='
-            + encodeURIComponent(name) + '&out_order_no=';
+            + encodeURIComponent(name) + '&out_order_no=&min_create_time=&max_create_time=';
         const resp = await fetch(url, { credentials: 'include' });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const html = await resp.text();
@@ -8780,7 +8781,7 @@
                 const rname = decodeURIComponent(this.getAttribute('data-review-name') || '');
                 if (!rname) return;
                 window.open('https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name='
-                    + encodeURIComponent(rname) + '&out_order_no=', '_blank');
+                    + encodeURIComponent(rname) + '&out_order_no=&min_create_time=&max_create_time=', '_blank');
             });
         });
         container.querySelectorAll('.re-review-assign').forEach(btn => {
@@ -8987,14 +8988,21 @@
             showErrorToast('未获取到客服姓名，无法分配');
             return;
         }
+        // 全局提交互斥：主面板 4 按钮共用，分配进行中拦截其他提交（跨页面防并发）
+        if (submitInProgress) {
+            showErrorToast('已有提交进行中，请等待完成');
+            return;
+        }
         // 点击即分配：无需弹窗确认，靠 assigning 防重 + 失败 Toast 兜底
         // 分配中态：按钮禁用转「分配中…」，防止重复点击
         item.assigning = true;
+        submitInProgress = true;
         saveReviewQueue();
         renderReviewCenter();
 
         doStaffAssign(orderNo, staff, (success) => {
             item.assigning = false;
+            submitInProgress = false; // 释放互斥锁
             saveReviewQueue();
             if (!success) {
                 renderReviewCenter();
@@ -9002,8 +9010,12 @@
                 return;
             }
             showSuccessToast('分配成功，正在重新查询判定…');
-            // 等待后台分配生效后自动重查
+            // 等待后台分配生效后自动重查；批量查询进行中时入口会静默拦截，此处提示改为手动更新
             setTimeout(() => {
+                if (reviewRunning) {
+                    showErrorToast('批量查询进行中，该单请稍后手动点【更新】刷新判定');
+                    return;
+                }
                 updateReviewItemByName(item.name);
             }, 1500);
         });
@@ -9095,6 +9107,18 @@
                         this.classList.add(this.getAttribute('data-choice') === '已通过' ? 'sel-pass' : 'sel-fail');
                         refreshOk();
                     });
+                });
+            });
+            // 点姓名/副标题区域跳转后台搜索该客户（与审查中心条目行跳转同源）
+            modal.querySelectorAll('.re-review-confirm-who').forEach(who => {
+                who.style.cursor = 'pointer';
+                who.title = '点击新标签页搜索该客户后台订单';
+                who.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const cname = decodeURIComponent(this.closest('.re-review-confirm-row').querySelector('.re-review-confirm-opts').getAttribute('data-name'));
+                    if (!cname) return;
+                    window.open('https://backendproenv.aixzu.com/app-pre-auth-order/index?operation_type=0&source=-1&rent_plan=-1&business_type=-1&state=-2&staff_id=&video_review_staff_id=0&sort_key=auth_time&name='
+                        + encodeURIComponent(cname) + '&out_order_no=&min_create_time=&max_create_time=', '_blank');
                 });
             });
             // 弹窗按钮同样 stopPropagation：closeModal 会 remove 弹窗节点，外点白名单随之失效
@@ -10033,6 +10057,15 @@
     let preventRefreshEnabled = false;
     let autoRefreshEnabled = true;
     let lowPerfEnabled = false;
+    // 提交互斥锁：客服分配/客服备注/风控备注/自动处理 4 按钮共用，进行中拦截二次点击避免并发重复提交
+    let submitInProgress = false;
+    // 等待芝麻分异步提交完成（runZhimaSubmit 为回调式，用 zhimaSubmitting 标志轮询）
+    function waitZhimaDone() {
+        return new Promise(resolve => {
+            const check = () => { if (!zhimaSubmitting) resolve(); else setTimeout(check, 200); };
+            check();
+        });
+    }
 
     const lazyInit = {
         appearance: false,
@@ -11034,10 +11067,33 @@
         // 无锁胶囊（仅模式内显示）
         refreshNoLockCapsule(qualified);
 
+        // 无锁判定实时写入特殊备注（满足/不满足无锁条件）
+        syncNoLockSpecialRemark(qualified);
+
         if (typeof updatePreview === 'function') updatePreview();
         if (typeof updateRiskPreview === 'function') updateRiskPreview();
         // 工作流预览联动：无锁状态/达标态变化会影响「跳过分配」预展示
         renderWorkflowPreview();
+    }
+
+    // 无锁判定文案写入特殊备注（幂等：先清旧再写新，成本未知不写，退出模式只清不写，用户手写内容保留）
+    function syncNoLockSpecialRemark(qualified) {
+        const input = document.getElementById('re-special-remark');
+        if (!input) return;
+        // 成本未知时不写入（getNoLockRatioPercent 返回 null 表示手机成本未就绪，此时判定结果不可靠）
+        if (getNoLockRatioPercent() === null) return;
+        const text = qualified ? '满足无锁条件' : '不满足无锁条件';
+        // 1. 清除旧的无锁自动文案（含前置分隔符「；」）
+        const cleanRe = /^(.*?)(?:；)?(?:满足无锁条件|不满足无锁条件)(.*)$/s;
+        const m = input.value.match(cleanRe);
+        let base = m ? (m[1] + m[2]).replace(/[；\s]+$/, '').replace(/^[；\s]+/, '') : input.value;
+        // 2. 无锁模式激活：追加当前文案（原值非空用「；」连接）
+        // 3. 无锁模式关闭（exitNoLockMode 路径）：只清除不写入
+        if (noLockModeActive) {
+            input.value = base ? base + '；' + text : text;
+        } else {
+            input.value = base;
+        }
     }
 
     // 退出无锁模式（手动关闭 / 切换订单时调用），恢复拓展开关进入前状态
@@ -11080,7 +11136,7 @@
     const WF_STEP_FAST = 220;   // 已有结果时节点的滑过间隔(ms)
 
     // 初始化/重置工作流条：showZhima = 芝麻分节点是否参与本次流程；preview = 预览态（不启动蛇头爬行）
-    function initWorkflowBar(showZhima, skipAssign, preview) {
+    function initWorkflowBar(showZhima, skipAssign, preview, skipZhima) {
         const bar = document.getElementById('re-workflow-bar');
         const wrap = document.getElementById('re-workflow-nodes');
         if (!bar || !wrap) return;
@@ -11101,11 +11157,13 @@
             { key: 'history', label: '记录历史', doneText: '已记录' }
         ];
         workflowNodesConfig = defs.filter(d => d.key !== 'zhima' || showZhima);
-        wfState = workflowNodesConfig.map(d => ({
-            key: d.key,
-            doneText: d.doneText,
-            real: (d.key === 'assign' && skipAssign) ? { status: 'skipped', text: '跳过分配' } : null
-        }));
+        wfState = workflowNodesConfig.map(d => {
+            // 客服分配：无锁不达标时跳过（既有逻辑）
+            if (d.key === 'assign' && skipAssign) return { key: d.key, doneText: d.doneText, real: { status: 'skipped', text: '跳过分配' } };
+            // 芝麻分：无锁模式主动跳过（节点上链但标 skipped，hover 解释原因）
+            if (d.key === 'zhima' && skipZhima) return { key: d.key, doneText: d.doneText, real: { status: 'skipped', text: '跳过芝麻分', title: '无锁模式不提交芝麻分' } };
+            return { key: d.key, doneText: d.doneText, real: null };
+        });
         wfCursor = -1;
 
         // 蛇形分行：偶数行左→右，奇数行右→左
@@ -11122,8 +11180,9 @@
                 const st = wfState.find(s => s.key === d.key);
                 let cls = 'pending';
                 let text = d.label;
-                if (st.real) { cls = st.real.status; text = st.real.text; }
-                html += `<span class="re-workflow-node ${cls}" data-wf-key="${d.key}">${text}</span>`;
+                let titleAttr = '';
+                if (st.real) { cls = st.real.status; text = st.real.text; if (st.real.title) titleAttr = ' title="' + st.real.title + '"'; }
+                html += `<span class="re-workflow-node ${cls}" data-wf-key="${d.key}"${titleAttr}>${text}</span>`;
                 if (i < row.length - 1) {
                     html += `<span class="re-workflow-link" data-wf-after="${d.key}"></span>`;
                 }
@@ -11149,7 +11208,7 @@
     function renderWorkflowPreview() {
         if (wfProcessing) return;
         const skipAssign = noLockModeActive && !isNoLockQualified();
-        initWorkflowBar(zhimaAutoSubmitEnabled && isLiushuiBaoEnabled(), skipAssign, true);
+        initWorkflowBar(zhimaAutoSubmitEnabled && isLiushuiBaoEnabled(), skipAssign, true, noLockModeActive);
     }
 
     // 蛇头推进：按顺序逐节点点亮；有结果的快速定格滑过，无结果的保持 running 等真实回调
@@ -11311,7 +11370,7 @@
             if (headerDataEl) {
                 const orderCountNum = parseInt(orderCount, 10) || 0;
                 const ageNum = parseInt(age, 10) || 0;
-                let displayText = '【客户办单：' + orderCount + '次】';
+                let displayText = '<span class="re-new-chain-link">客户办单：' + orderCount + '次</span>';
                 if (cleanName) {
                     if (cachedNewChainLink) {
                         displayText += ' <span class="re-new-chain-link">' + cachedNewChainLink + '</span>';
@@ -11458,7 +11517,7 @@
                 const item = document.createElement('div');
                 item.className = 're-model-order-item' + (isCurrent ? ' re-model-order-current' : '');
                 item.innerHTML = '<div class="re-model-order-info">'
-                    + '<div class="re-model-order-name">订单号：<span class="' + (isUnfinished ? 're-repeat-order-no-red' : '') + '">' + order.orderNo + '</span>' + (isUnfinished ? '<span class="re-repeat-unfinished-badge" data-order="' + order.orderNo + '" title="点击追加到其他备注">未完结</span>' : '') + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
+                    + '<div class="re-model-order-name">订单号：<span class="' + (isUnfinished ? 're-repeat-order-no-red' : '') + '">' + order.orderNo + '</span>' + (isUnfinished ? '<span class="re-repeat-unfinished-badge" data-order="' + order.orderNo + '" title="点击追加到特殊备注">未完结</span>' : '') + (isCurrent ? '<span class="re-current-order-badge">当前单</span>' : '') + '</div>'
                     + '<div class="re-repeat-order-fields">'
                     + '<div>机型：<span class="re-repeat-strong">' + (order.model || '—') + '</span></div>'
                     + '<div>状态：<span class="re-repeat-strong">' + (order.state || '—') + '</span></div>'
@@ -11489,20 +11548,22 @@
                 });
             });
 
-            // 未完结胶囊点击 → 追加其他备注：{订单号} 未完结，需要完结此订单
+            // 未完结胶囊点击 → 追加特殊备注：{订单号} 未完结，需要完结此订单
             listEl.querySelectorAll('.re-repeat-unfinished-badge').forEach(el => {
                 el.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const orderNo = this.getAttribute('data-order');
-                    const input = document.getElementById('re-other-remark');
+                    const input = document.getElementById('re-special-remark');
                     if (!input || !orderNo) return;
                     const entry = orderNo + ' 未完结，需要完结此订单';
                     if (input.value.includes(entry)) {
-                        showSuccessToast('该订单已在其他备注中');
+                        showSuccessToast('该订单已在特殊备注中');
                         return;
                     }
                     input.value = input.value ? input.value.replace(/;\s*$/, '') + ';' + entry : entry;
-                    showSuccessToast('已追加到其他备注：' + entry);
+                    showSuccessToast('已追加到特殊备注：' + entry);
+                    // 联动预览（对齐序列号点击的现有做法）
+                    if (typeof updatePreview === 'function') updatePreview();
                 });
             });
 
@@ -12539,7 +12600,7 @@
             return;
         }
 
-        const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
+        const calculatedMinPrice = ceilMinPrice(cost * cachedDiscount + 50);
 
         let minDownPayment = 0;
         if (minDownPaymentEl) {
@@ -12558,7 +12619,7 @@
         if (cachedDiscount === 0.5 || cachedDiscount === 0.6) {
             finalMinPrice = minDownPayment;
         } else if (memberAmount > 0) {
-            finalMinPrice = Math.round(minDownPayment + memberAmount);
+            finalMinPrice = ceilMinPrice(minDownPayment + memberAmount);
         } else {
             finalMinPrice = Math.max(calculatedMinPrice, minDownPayment);
         }
@@ -12566,6 +12627,13 @@
 
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
         if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : placeholderText;
+    }
+
+    // 最低结果取整口径：有小数→往上凑整；无小数→保持整数
+    // 先 round 到 6 位小数消除浮点噪声（如 2340.0000000000005 会被误 ceil 进 1 元），再 ceil
+    function ceilMinPrice(v) {
+        const cleaned = Math.round(v * 1e6) / 1e6;
+        return Math.ceil(cleaned);
     }
 
     function getMinPrice() {
@@ -12578,7 +12646,7 @@
         const cost = parseFloat(costText);
         if (isNaN(cost) || isNaN(cachedDiscount)) return null;
 
-        const calculatedMinPrice = Math.round(cost * cachedDiscount + 50);
+        const calculatedMinPrice = ceilMinPrice(cost * cachedDiscount + 50);
 
         let minDownPayment = 0;
         if (minDownPaymentEl) {
@@ -12596,7 +12664,8 @@
         if (cachedDiscount === 0.5 || cachedDiscount === 0.6) {
             return minDownPayment;
         } else if (memberAmount > 0) {
-            return Math.round(minDownPayment + memberAmount);
+            // 与 updatePricePlaceholder 的占位符口径保持一致：有小数往上凑整、无小数保持整数（ceilMinPrice）
+            return ceilMinPrice(minDownPayment + memberAmount);
         } else {
             return Math.max(calculatedMinPrice, minDownPayment);
         }
@@ -13318,6 +13387,8 @@
     const staffAssignBtn = document.getElementById('re-btn-staff-assign');
     if (staffAssignBtn) {
         staffAssignBtn.addEventListener('click', function() {
+            if (submitInProgress) { showTooltip('已有提交进行中，请等待完成', window.innerWidth / 2, window.innerHeight / 2); return; }
+
             const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
@@ -13325,13 +13396,16 @@
                 return;
             }
 
+            submitInProgress = true;
             getStaffName().then(staffName => {
                 if (!staffName) {
+                    submitInProgress = false;
                     showStaffInputModal();
                     return;
                 }
 
                 doStaffAssignViaIframe(orderNo, staffName, function(success, message) {
+                    submitInProgress = false;
                     if (success) {
                         showSuccessToast('客服分配：' + staffName + ' 已完成！');
                     } else {
@@ -13339,6 +13413,7 @@
                     }
                 });
             }).catch(err => {
+                submitInProgress = false;
                 showStaffInputModal();
             });
         });
@@ -13548,6 +13623,7 @@
             if (this.classList.contains('disabled') || this.hasAttribute('disabled')) {
                 return;
             }
+            if (submitInProgress) { showTooltip('已有提交进行中，请等待完成', window.innerWidth / 2, window.innerHeight / 2); return; }
 
             const orderNo = getPanelOrderNo();
 
@@ -13564,8 +13640,10 @@
                 return;
             }
 
+            submitInProgress = true;
             // 复用自动处理的公共提交函数（POST 直达，不再先 GET 预检）
             doStaffRemark(orderNo, previewContent, function(success, msg) {
+                submitInProgress = false;
                 if (success) {
                     showSuccessToast('客服备注 已添加！');
                 } else {
@@ -13581,6 +13659,7 @@
             if (this.classList.contains('disabled') || this.hasAttribute('disabled')) {
                 return;
             }
+            if (submitInProgress) { showTooltip('已有提交进行中，请等待完成', window.innerWidth / 2, window.innerHeight / 2); return; }
 
             const orderNo = getPanelOrderNo();
 
@@ -13597,8 +13676,10 @@
                 return;
             }
 
+            submitInProgress = true;
             // 复用自动处理的公共收集+提交函数（与自动处理完全同源）
             doRiskRemark(orderNo, collectRiskRemarkData(), function(success, msg) {
+                submitInProgress = false;
                 if (success) {
                     showSuccessToast('风控备注 已添加！');
                 } else {
@@ -13648,6 +13729,8 @@
     const autoProcessBtn = document.getElementById('re-btn-auto-process');
     if (autoProcessBtn) {
         autoProcessBtn.addEventListener('click', function() {
+            if (submitInProgress) { showTooltip('已有提交进行中，请等待完成', window.innerWidth / 2, window.innerHeight / 2); return; }
+
             const orderNo = getPanelOrderNo();
 
             if (!orderNo) {
@@ -13672,21 +13755,26 @@
             // 无锁模式 + 胶囊"不满足"：跳过客服分配，仅执行客服备注 + 风控备注
             const skipAssign = noLockModeActive && !noLockQualified;
             // 工作流预览：初始化节点链（芝麻分节点需「主动提交」设置与流水宝开关同时开启才上链）
-            initWorkflowBar(zhimaAutoSubmitEnabled && isLiushuiBaoEnabled(), skipAssign);
+            // 无锁模式：芝麻分节点上链但标 skipped「跳过芝麻分」（视觉告知这一步主动跳过）
+            initWorkflowBar(zhimaAutoSubmitEnabled && isLiushuiBaoEnabled(), skipAssign, false, noLockModeActive);
 
             // 芝麻分自动提交（异步并行，不阻塞自动处理主流程；流水宝未开启时直接不参与）
-            if (zhimaAutoSubmitEnabled && isLiushuiBaoEnabled()) {
+            // 无锁模式：主动跳过，不调用 runZhimaSubmit（表单照常提交）
+            const zhimaActive = zhimaAutoSubmitEnabled && isLiushuiBaoEnabled() && !noLockModeActive;
+            if (zhimaActive) {
                 runZhimaSubmit(false);
             }
 
             const originalContent = this.innerHTML;
             this.classList.add('processing');
             this.disabled = true;
+            submitInProgress = true;
 
             getStaffName().then(staffName => {
                 if (!staffName) {
                     autoProcessBtn.classList.remove('processing');
                     autoProcessBtn.disabled = false;
+                    submitInProgress = false;
                     showStaffInputModal();
                     return;
                 }
@@ -13716,6 +13804,7 @@
                 const total = skipAssign ? 2 : 3;
                 const results = { assign: false, staffRemark: false, riskRemark: false };
                 const failMsgs = [];   // 收集失败项原因，部分失败时透传到 Toast 便于定位
+                let historyPromise = Promise.resolve(); // 记录历史的 Promise（reload 前等它完成）
 
                 function checkAllCompleted() {
                     completed++;
@@ -13744,21 +13833,27 @@
                                     time: now.toTimeString().split(' ')[0]
                                 };
 
-                                saveHistoryRecord(record).then(() => {
+                                historyPromise = saveHistoryRecord(record);
+                                historyPromise.then(() => {
                                     setWorkflowNode('history', 'done', '已记录');
                                     renderHistoryRecords();
                                 }).catch(err => {
                                     setWorkflowNode('history', 'failed', '记录失败');
                                 });
 
-                                setTimeout(() => {
+                                setTimeout(async () => {
                                     autoProcessBtn.classList.remove('completed');
                                     autoProcessBtn.innerHTML = originalContent;
                                     autoProcessBtn.disabled = false;
+                                    submitInProgress = false; // 释放互斥锁
                                     // 未开自动刷新时 5 秒后滑出；开启则保持到页面刷新
                                     hideWorkflowBar();
 
                                     if (autoRefreshEnabled) {
+                                        // 等芝麻分和历史记录异步完成才刷新，避免中断导致部分动作未执行
+                                        const waitTasks = [historyPromise];
+                                        if (zhimaActive) waitTasks.push(waitZhimaDone());
+                                        await Promise.allSettled(waitTasks);
                                         showSuccessToast('页面即将刷新...');
                                         setTimeout(() => {
                                             location.reload();
@@ -13768,6 +13863,7 @@
 
                             } else {
                                 autoProcessBtn.disabled = false;
+                                submitInProgress = false; // 释放互斥锁（部分失败）
                                 showSuccessToast(`自动处理完成！成功 ${successCount}/${total} 项` + (failMsgs.length ? '，' + failMsgs.join('；') : ''));
                                 // 部分失败：记录历史不再执行（复制已在流程启动时完成），标记跳过让蛇爬完整条链
                                 setWorkflowNode('history', 'skipped', '未执行');
@@ -13812,6 +13908,7 @@
             }).catch(err => {
                 autoProcessBtn.classList.remove('processing');
                 autoProcessBtn.disabled = false;
+                submitInProgress = false; // 释放互斥锁（getStaffName 失败）
                 showStaffInputModal();
             });
         });
