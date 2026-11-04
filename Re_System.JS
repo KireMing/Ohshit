@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      7.2.7
+// @version      8.0.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V7.2.7</span>
+                    <span class="re-panel-version">V8.0.0</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -929,8 +929,8 @@
             transform: translate(-50%, -50%);
             width: 65%;
             height: 70%;
-            min-width: 800px;
-            min-height: 500px;
+            min-width: min(800px, 95vw);
+            min-height: min(500px, 95vh);
             max-width: 95vw;
             max-height: 95vh;
             background: linear-gradient(135deg, #e8eaed 0%, #d1d5db 50%, #e5e7eb 100%);
@@ -1042,15 +1042,10 @@
             display: none !important;
         }
 
-        .re-panel-visible {
-        }
-
-        .re-panel-closing {
-        }
-
         .re-panel-header {
             position: relative;
             z-index: 10;
+            flex-shrink: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1126,6 +1121,8 @@
             z-index: 5;
             display: flex;
             flex: 1;
+            min-width: 0;
+            min-height: 0;
             overflow: hidden;
             border-radius: 0 0 16px 16px;
         }
@@ -1133,6 +1130,7 @@
         .re-column {
             display: flex;
             flex-direction: column;
+            min-height: 0;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
             /* 提升独立合成层：backdrop-filter 的模糊采样结果可被浏览器缓存，
@@ -1149,7 +1147,10 @@
 
         .re-column-center {
             flex: 1;
-            min-width: 300px;
+            min-width: 0;
+            min-height: 0;
+            /* 按面板内部宽度重排，不依赖浏览器窗口宽度。 */
+            container: re-main / inline-size;
         }
 
         /* 客户数据：并入深色顶栏，居中自适应省略 */
@@ -1191,9 +1192,9 @@
             white-space: nowrap;
         }
 
-        .re-repeat-customer {
+        .re-repeat-customer,
+        .re-overage-customer {
             display: inline-block;
-            background: #3b82f6;
             color: #fff;
             font-size: 13px;
             padding: 2px 8px;
@@ -1203,16 +1204,12 @@
             vertical-align: middle;
         }
 
+        .re-repeat-customer {
+            background: #3b82f6;
+        }
+
         .re-overage-customer {
-            display: inline-block;
             background: #dc2626;
-            color: #fff;
-            font-size: 13px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-right: 6px;
-            font-weight: 600;
-            vertical-align: middle;
         }
 
         #re-expand-business-title {
@@ -1230,6 +1227,23 @@
         .re-expand-badges .re-repeat-customer {
             margin-right: 0;
             margin-left: 0;
+        }
+
+        .re-huawei-badge {
+            display: inline-block;
+            padding: 1px 8px;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        #re-rent-expand:disabled + .re-switch-slider {
+            opacity: 0.45;
+            cursor: not-allowed;
         }
 
         /* 无锁模式胶囊：达标绿 / 未达标灰 */
@@ -1281,8 +1295,11 @@
 
         .re-column-content {
             flex: 1;
+            min-width: 0;
+            min-height: 0;
             padding: 12px;
-            overflow-y: auto;
+            overflow: auto;
+            overscroll-behavior: contain;
         }
 
         .re-column-left .re-column-content {
@@ -1477,30 +1494,7 @@
             flex-shrink: 0;
         }
 
-        .re-history-month-export {
-            width: 28px;
-            height: 28px;
-            border: none;
-            background: transparent;
-            color: #9ca3af;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: auto;
-        }
-
-        .re-history-month-export:hover {
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-        }
-
-        .re-history-month-export svg {
-            width: 16px;
-            height: 16px;
-        }
-
+        .re-history-month-export,
         .re-history-month-delete {
             width: 28px;
             height: 28px;
@@ -1514,14 +1508,24 @@
             justify-content: center;
         }
 
-        .re-history-month-delete:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+        .re-history-month-export {
+            margin-left: auto;
         }
 
+        .re-history-month-export:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .re-history-month-export svg,
         .re-history-month-delete svg {
             width: 16px;
             height: 16px;
+        }
+
+        .re-history-month-delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
         }
 
         .re-history-month-content {
@@ -1656,30 +1660,7 @@
             height: 14px;
         }
 
-        .re-history-day-more {
-            width: 100%;
-            margin-top: 2px;
-            padding: 5px 0;
-            border: 1px dashed rgba(107, 114, 128, 0.35);
-            background: transparent;
-            color: #6b7280;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            font-family: inherit;
-            transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-        }
-
-        .re-history-day-more:hover {
-            background: rgba(59, 130, 246, 0.08);
-            border-color: rgba(59, 130, 246, 0.4);
-            color: #3b82f6;
-        }
-
+        .re-history-day-more,
         .re-history-day-collapse {
             width: 100%;
             margin-top: 2px;
@@ -1689,7 +1670,6 @@
             color: #6b7280;
             border-radius: 6px;
             cursor: pointer;
-            display: none;
             align-items: center;
             justify-content: center;
             font-size: 11px;
@@ -1698,6 +1678,15 @@
             transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
         }
 
+        .re-history-day-more {
+            display: flex;
+        }
+
+        .re-history-day-collapse {
+            display: none;
+        }
+
+        .re-history-day-more:hover,
         .re-history-day-collapse:hover {
             background: rgba(59, 130, 246, 0.08);
             border-color: rgba(59, 130, 246, 0.4);
@@ -1897,22 +1886,7 @@
         }
 
         /* Lightbox 模态遮罩：仅放大态点亮，盖住面板（后插入 DOM 同层级居上），点击即收起 */
-        .re-history-hover-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.28);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.18s linear;
-            z-index: 2147483647;
-        }
-
-        .re-history-hover-backdrop.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* ===== 风控预览详情 Lightbox（V6.7.0）：点击风控预览展开的分组浮窗 ===== */
+        .re-history-hover-backdrop,
         .re-risk-detail-backdrop {
             position: fixed;
             inset: 0;
@@ -1923,11 +1897,13 @@
             z-index: 2147483647;
         }
 
+        .re-history-hover-backdrop.show,
         .re-risk-detail-backdrop.show {
             opacity: 1;
             pointer-events: auto;
         }
 
+        /* ===== 风控预览详情 Lightbox（V6.7.0）：点击风控预览展开的分组浮窗 ===== */
         .re-risk-detail-card {
             position: fixed;
             width: min(600px, 92vw);
@@ -2227,7 +2203,8 @@
             gap: 12px;
         }
 
-        .re-form-group {
+        .re-form-group,
+        .re-info-card {
             background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border-radius: 10px;
             padding: 14px;
@@ -2247,14 +2224,18 @@
             display: flex;
             flex-direction: column;
             gap: 0;
+            box-sizing: border-box;
+            min-width: 0;
+            min-height: 100%;
             padding: 20px;
-            height: 100%;
-            overflow-y: auto;
+            /* 统一由 .re-column-content 滚动，避免嵌套滚动裁切。 */
+            overflow: visible;
         }
 
         .re-analysis-section {
             display: flex;
             flex-direction: column;
+            min-width: 0;
             gap: 14px;
         }
 
@@ -2701,58 +2682,91 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
         }
 
-        .re-settings-container {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+        /* ==================== 设置：布局、分组、控件 ====================
+           仅作用于设置区；字体保留 px 声明，继续参与现有字号缩放。
+           公共变量集中控制间距、描边和圆角，状态选择器保留在组件旁。 */
+        #re-page-settings {
+            container: re-settings-page / inline-size;
         }
 
+        .re-settings-container {
+            --re-settings-gap: 14px;
+            --re-settings-radius: 12px;
+            --re-settings-border: rgba(107, 114, 128, 0.12);
+            --re-settings-divider: rgba(107, 114, 128, 0.08);
+            display: grid;
+            align-items: start;
+            gap: var(--re-settings-gap);
+            min-width: 0;
+        }
+
+        /* 页签采用轻量下划线导航，不随面板宽度拉伸。 */
         .re-settings-tabs {
             display: flex;
-            gap: 4px;
-            padding: 4px;
-            background: rgba(107, 114, 128, 0.06);
-            border-radius: 10px;
-            margin-bottom: 16px;
+            align-items: center;
+            gap: 24px;
+            padding: 0 2px;
+            border-bottom: 1px solid rgba(107, 114, 128, 0.16);
         }
 
         .re-settings-tab {
-            flex: 1;
-            display: flex;
+            position: relative;
+            flex: 0 0 auto;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
+            gap: 7px;
+            min-width: 0;
+            padding: 11px 2px 13px;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
+            line-height: 1.5;
             color: #6b7280;
             background: transparent;
             border: none;
-            border-radius: 8px;
+            border-radius: 0;
             cursor: pointer;
+            transition: color .15s;
+        }
+
+        .re-settings-tab::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: -1px;
+            left: 0;
+            height: 2px;
+            border-radius: 2px;
+            background: transparent;
         }
 
         .re-settings-tab svg {
-            width: 16px;
-            height: 16px;
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
             stroke: currentColor;
         }
 
         .re-settings-tab:hover {
             color: #374151;
-            background: rgba(255, 255, 255, 0.5);
         }
 
         .re-settings-tab.active {
-            color: #374151;
-            background: #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            color: var(--re-accent-dark, #2563eb);
+        }
+
+        .re-settings-tab.active::after {
+            background: currentColor;
+        }
+
+        .re-settings-tab:focus-visible {
+            outline: 2px solid var(--re-accent-dark, #2563eb);
+            outline-offset: 3px;
         }
 
         .re-settings-content {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 4px;
+            min-width: 0;
+            container: re-settings-body / inline-size;
         }
 
         .re-settings-panel {
@@ -2763,17 +2777,23 @@
             display: block;
         }
 
-        /* ===== 设置区 V2 布局：组卡网格 + 行内描述 ===== */
         .re-set2-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: minmax(0, 1fr);
+            gap: var(--re-settings-gap);
+            align-items: stretch;
+        }
+
+        .re-set2-card,
+        .re-set2-staff,
+        .re-appearance-preview {
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--re-settings-border);
+            border-radius: var(--re-settings-radius);
         }
 
         .re-set2-card {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(107, 114, 128, 0.08);
-            border-radius: 10px;
             overflow: hidden;
         }
 
@@ -2785,8 +2805,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 12px;
-            background: rgba(107, 114, 128, 0.06);
+            padding: 12px 14px;
+            background: rgba(107, 114, 128, 0.04);
         }
 
         .re-set2-dot {
@@ -2799,110 +2819,87 @@
         .re-set2-card-name {
             font-size: 12px;
             font-weight: 600;
-            color: #6b7280;
-            letter-spacing: 1px;
+            color: #4b5563;
+            letter-spacing: 0.5px;
         }
 
         .re-set2-card-count {
             margin-left: auto;
             font-size: 10px;
-            color: #9ca3af;
+            color: #6b7280;
             background: rgba(107, 114, 128, 0.08);
-            padding: 1px 7px;
+            padding: 2px 7px;
             border-radius: 999px;
         }
 
-        .re-set2-row {
+        .re-set2-row,
+        .re-set2-slot,
+        .re-set2-slider-row,
+        .re-set2-staff {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 12px;
-            border-top: 1px solid rgba(107, 114, 128, 0.06);
+            min-width: 0;
+            padding: 12px 14px;
+        }
+
+        .re-set2-row,
+        .re-set2-half,
+        .re-set2-slider-row {
+            border-top: 1px solid var(--re-settings-divider);
         }
 
         .re-set2-line {
             flex: 1;
             min-width: 0;
             display: flex;
-            align-items: baseline;
-            gap: 6px;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .re-set2-inline-desc {
-            flex: 1;
-            min-width: 0;
             font-size: 11px;
-            color: #9ca3af;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            line-height: 1.5;
+            color: #6b7280;
+            overflow-wrap: anywhere;
         }
 
         .re-set2-half {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-top: 1px solid rgba(107, 114, 128, 0.06);
+            grid-template-columns: minmax(0, 1fr);
         }
 
         .re-set2-half > .re-set2-slot + .re-set2-slot {
-            border-left: 1px solid rgba(107, 114, 128, 0.06);
+            border-top: 1px solid var(--re-settings-divider);
         }
 
-        .re-set2-slot {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            min-width: 0;
-        }
-
-        .re-set2-slot .re-range-slider {
+        .re-set2-slot .re-range-slider,
+        .re-set2-slider-row .re-range-slider {
             flex: 1;
             min-width: 0;
-        }
-
-        .re-set2-slider-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-top: 1px solid rgba(107, 114, 128, 0.06);
         }
 
         .re-set2-slider-row .re-setting-name {
             flex-shrink: 0;
         }
 
-        .re-set2-slider-row .re-range-slider {
-            flex: 1;
-            min-width: 0;
-        }
-
         .re-set2-staff {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(107, 114, 128, 0.08);
-            border-radius: 10px;
+            margin-top: var(--re-settings-gap);
             cursor: pointer;
             transition: background .15s, border-color .15s;
         }
 
         .re-set2-staff:hover {
             background: rgba(255, 255, 255, 0.9);
-            border-color: rgba(107, 114, 128, 0.15);
+            border-color: rgba(107, 114, 128, 0.2);
         }
 
-        /* 行内小号图标：复用 re-setting-icon 色系，仅覆盖尺寸 */
         .re-set2-row .re-setting-icon,
         .re-set2-slot .re-setting-icon,
         .re-set2-staff .re-setting-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
         }
 
         .re-set2-row .re-setting-icon svg,
@@ -2912,13 +2909,14 @@
             height: 15px;
         }
 
-        /* 设置区开关放大：抵消 small 缩放，升级 44x24 中号触控尺寸（激活色仍走 re-switch 的变量渐变） */
+        /* 设置开关统一 44×24；开关颜色与 checked 状态沿用全局规则。 */
         .re-set2-row .re-switch-small,
         .re-set2-slot .re-switch-small,
         .re-appearance-main .re-switch-small {
             transform: none;
             width: 44px;
             height: 24px;
+            flex-shrink: 0;
         }
 
         .re-set2-row .re-switch-small .re-switch-slider,
@@ -2942,10 +2940,16 @@
             transform: translateX(20px);
         }
 
-        /* 芝麻分测试提交：描述下方的文字链接式按钮，保持卡片右侧只有开关 */
+        /* 测试按钮与开关同行，开关始终对齐卡片右侧。 */
+        #re-settings-basic .re-appearance-control {
+            flex-direction: row;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
         .re-zhima-test-btn {
             display: inline-block;
-            margin-top: 3px;
             padding: 0;
             border: none;
             background: none;
@@ -2966,6 +2970,26 @@
             opacity: 0.6;
             color: #6b7280;
             text-decoration: none;
+        }
+
+        /* 两张基础卡片共享标题及三条设置行的自然高度。 */
+        @container re-settings-body (min-width: 760px) {
+            .re-set2-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            #re-settings-basic .re-set2-card:not(.re-set2-card-full) {
+                display: grid;
+                grid-template-rows: subgrid;
+                grid-row: span 4;
+                row-gap: 0;
+            }
+            #re-settings-basic .re-set2-half {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            #re-settings-basic .re-set2-half > .re-set2-slot + .re-set2-slot {
+                border-top: none;
+                border-left: 1px solid var(--re-settings-divider);
+            }
         }
 
         .re-setting-icon {
@@ -3052,38 +3076,111 @@
             transform-origin: right center;
         }
 
-        /* ===== 外观 V2：左控件右预览双栏 ===== */
+        /* 外观：窄面板先显示控件，再显示预览；宽面板双栏。 */
         .re-appearance-cols {
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: var(--re-settings-gap);
+            align-items: start;
         }
 
         .re-appearance-main {
-            flex: 1.6;
             min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: grid;
+            gap: var(--re-settings-gap);
+            container: re-appearance-controls / inline-size;
+        }
+
+        .re-appearance-main .re-set2-row {
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr) minmax(180px, 220px);
+        }
+
+        .re-appearance-main .re-appearance-control {
+            min-width: 0;
+            width: 100%;
+            max-width: none !important;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .re-appearance-main .re-filename-text {
+            flex: 1 0 100%;
+            max-width: none;
+            text-align: right;
+        }
+
+        .re-appearance-main .re-filename-text:empty {
+            display: none;
+        }
+
+        .re-appearance-main .re-set2-slider-row,
+        .re-appearance-main .re-set2-slot:has(> .re-range-slider) {
+            display: grid;
+            grid-template-columns: minmax(6.5em, auto) minmax(0, 1fr) 3.5em;
+        }
+
+        .re-appearance-main .re-range-slider {
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+        }
+
+        .re-appearance-main .re-opacity-text {
+            min-width: 0;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
         }
 
         .re-appearance-side {
-            flex: 1;
             min-width: 0;
         }
 
-        /* 配色色块格：取色器+重置一行，名称在下 */
+        @container re-settings-body (min-width: 1000px) {
+            .re-appearance-cols {
+                grid-template-columns: minmax(0, 1fr) 260px;
+            }
+            .re-appearance-side {
+                position: sticky;
+                top: 0;
+            }
+        }
+
+        @container re-appearance-controls (min-width: 640px) {
+            .re-appearance-main .re-color-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+            .re-set2-half {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .re-set2-half > .re-set2-slot + .re-set2-slot {
+                border-top: none;
+                border-left: 1px solid var(--re-settings-divider);
+            }
+        }
+
+        @container re-appearance-controls (max-width: 520px) {
+            .re-appearance-main .re-set2-row {
+                grid-template-columns: 30px minmax(0, 1fr);
+            }
+            .re-appearance-main .re-appearance-control {
+                grid-column: 2 / -1;
+            }
+        }
+
+        /* 配色控件：色块、重置按钮与名称保持成组。 */
         .re-color-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 10px;
-            padding: 10px 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px 16px;
+            padding: 14px;
         }
 
         .re-color-cell {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
+            min-width: 0;
         }
 
         .re-color-cell-ctl {
@@ -3144,9 +3241,6 @@
 
         .re-appearance-preview {
             padding: 16px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(107, 114, 128, 0.08);
-            border-radius: 10px;
         }
 
         .re-appearance-preview-title {
@@ -3384,13 +3478,33 @@
         }
 
         .re-form-work {
+            flex: 1;
+            min-width: 0;
             gap: 8px;
+        }
+
+        .re-form-work .re-switch-content {
+            flex: 1 1 260px;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        #re-work-content {
+            flex: 1 1 130px;
+            min-width: 0;
+        }
+
+        #re-work-proof {
+            flex: 1 1 160px;
+            min-width: min(100%, 160px);
+            max-width: 100%;
         }
 
         .re-form-row {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 20px;
+            gap: 12px 20px;
         }
 
         .re-form-item-inline {
@@ -3401,7 +3515,8 @@
         }
 
         .re-form-item-work {
-            flex: 1;
+            flex: 1 1 420px;
+            min-width: 0;
             min-height: 38px;
         }
 
@@ -3421,7 +3536,9 @@
         }
 
         .re-flow-grid-5 {
-            grid-template-columns: repeat(5, 1fr);
+            /* 每项保留可读宽度；缩小时减少列数，随字号一起调整。 */
+            font-size: 13px;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 13em), 1fr));
         }
 
         .re-flow-grid-2 {
@@ -3431,7 +3548,13 @@
         .re-flow-item {
             display: flex;
             align-items: center;
+            min-width: 0;
             gap: 8px;
+        }
+
+        .re-flow-item .re-price-wrapper {
+            flex: 1;
+            min-width: 0;
         }
 
         .re-flow-item-full {
@@ -3449,19 +3572,25 @@
             min-width: 60px;
         }
 
-        .re-input {
-            flex: 1;
-            min-width: 60px;
+        .re-input,
+        .re-select,
+        .re-multi-select-header {
             padding: 8px 12px;
             border: 1px solid rgba(107, 114, 128, 0.3);
             border-radius: 6px;
             font-size: 13px;
             color: #374151;
             background: var(--re-input-bg, rgba(255, 255, 255, 0.9));
+        }
+
+        .re-input {
+            flex: 1;
+            min-width: 60px;
             width: 100%;
         }
 
-        .re-input:focus {
+        .re-input:focus,
+        .re-select:focus {
             outline: none;
             border-color: var(--re-switch-on-1, #3b82f6);
             box-shadow: 0 0 0 3px var(--re-focus-ring, rgba(59, 130, 246, 0.1));
@@ -3473,9 +3602,7 @@
         }
 
         .re-input-small {
-            flex: 0 0 auto;
             width: 80px;
-            min-width: 60px;
         }
 
         .re-input-mini {
@@ -3487,37 +3614,30 @@
         .re-select {
             flex: 1;
             min-width: 80px;
-            padding: 8px 12px;
-            border: 1px solid rgba(107, 114, 128, 0.3);
-            border-radius: 6px;
-            font-size: 13px;
-            color: #374151;
-            background: var(--re-input-bg, rgba(255, 255, 255, 0.9));
             cursor: pointer;
         }
 
-        .re-select:focus {
-            outline: none;
-            border-color: var(--re-switch-on-1, #3b82f6);
-            box-shadow: 0 0 0 3px var(--re-focus-ring, rgba(59, 130, 246, 0.1));
+        .re-input-small,
+        .re-select-small {
+            flex: 0 0 auto;
+            min-width: 60px;
         }
 
         .re-select-small {
-            flex: 0 0 auto;
             width: 70px;
-            min-width: 60px;
         }
 
         .re-old-device-select {
             width: auto;
-            min-width: 110px;
+            min-width: min(110px, 100%);
+            max-width: 100%;
         }
 
         .re-multi-select {
             position: relative;
             display: inline-block;
-            min-width: 200px;
-            max-width: 280px;
+            min-width: min(200px, 100%);
+            max-width: min(280px, 100%);
             vertical-align: middle;
         }
 
@@ -3525,12 +3645,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 12px;
-            border: 1px solid rgba(107, 114, 128, 0.3);
-            border-radius: 6px;
-            font-size: 13px;
-            color: #374151;
-            background: var(--re-input-bg, rgba(255, 255, 255, 0.9));
             cursor: pointer;
             gap: 8px;
         }
@@ -3772,7 +3886,8 @@
         }
 
         /* ===== 多选「管理选项」弹窗（独立前缀，不与可编辑下拉的管理弹窗共用） ===== */
-        .re-msmanage-modal {
+        .re-msmanage-modal,
+        .re-select-manage-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -3783,7 +3898,8 @@
             display: none;
         }
 
-        .re-msmanage-modal.show {
+        .re-msmanage-modal.show,
+        .re-select-manage-modal.show {
             display: block;
         }
 
@@ -4073,21 +4189,6 @@
             border-color: #ef4444;
             color: #ef4444;
             background: rgba(239, 68, 68, 0.06);
-        }
-
-        .re-select-manage-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 2147483650;
-            display: none;
-        }
-
-        .re-select-manage-modal.show {
-            display: block;
         }
 
         .re-select-manage-content {
@@ -4522,7 +4623,9 @@
             max-height: 200px;
         }
 
-        .re-contact-info.re-hidden {
+        .re-contact-info.re-hidden,
+        .re-risk-preview.re-hidden,
+        .re-workflow-bar.re-workflow-hidden {
             opacity: 0;
             max-height: 0;
             margin-top: 0;
@@ -4692,15 +4795,6 @@
             max-height: 300px;
         }
 
-        .re-risk-preview.re-hidden {
-            opacity: 0;
-            max-height: 0;
-            margin-top: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            border: none;
-        }
-
         /* ===== 工作流预览（蛇形节点链）===== */
         .re-workflow-bar {
             margin-top: 12px;
@@ -4711,15 +4805,6 @@
             overflow: hidden;
             max-height: 200px;
             transition: opacity 0.25s ease, max-height 0.25s ease, margin 0.25s ease, padding 0.25s ease;
-        }
-
-        .re-workflow-bar.re-workflow-hidden {
-            opacity: 0;
-            max-height: 0;
-            margin-top: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            border: none;
         }
 
         .re-workflow-title {
@@ -4937,6 +5022,7 @@
         .re-data-section-3 .re-data-col {
             flex: 1;
             min-width: 0;
+            container: re-data-card / inline-size;
             border-right: 1px solid rgba(107, 114, 128, 0.15);
             padding-right: 16px;
         }
@@ -4957,6 +5043,40 @@
 
         .re-data-section-3 .re-data-col:not(:first-child) {
             padding-left: 16px;
+        }
+
+        /* 中等宽度：订单、商品并排，报价独占一行；窄宽度全部纵排。 */
+        @container re-main (max-width: 1100px) {
+            .re-data-section-3 {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .re-data-section-3 .re-data-col {
+                padding: 0;
+                border-right: none;
+            }
+
+            .re-data-section-3 .re-data-col:not(:first-child) {
+                padding-left: 0;
+            }
+
+            .re-data-section-3 .re-data-col:last-child {
+                grid-column: 1 / -1;
+                border-top: 1px solid rgba(107, 114, 128, 0.15);
+                padding-top: 16px;
+            }
+        }
+
+        @container re-main (max-width: 620px) {
+            .re-data-section-3 {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .re-data-section-3 .re-data-col:not(:first-child) {
+                border-top: 1px solid rgba(107, 114, 128, 0.15);
+                padding-top: 16px;
+            }
         }
 
         .re-data-left,
@@ -4982,11 +5102,14 @@
 
         .re-data-form-row {
             display: flex;
+            flex-wrap: wrap;
             gap: 12px;
+            min-width: 0;
         }
 
         .re-data-form-row .re-data-form-inline {
-            flex: 1;
+            flex: 1 1 180px;
+            min-width: 0;
         }
 
         .re-data-form-full {
@@ -5022,9 +5145,32 @@
             min-width: 0;
         }
 
-        .re-price-input {
-            flex: 0 0 auto;
-            width: 100px;
+        /* 两条报价行共用四列：价格标签 / 价格输入 / 结果标签 / 结果下拉。
+           仅展开审核行的布局包装，不改 DOM 结构及业务事件。 */
+        #re-audit-row,
+        .re-expand-result-row {
+            grid-template-columns: 4em minmax(0, 1fr) 4em minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            font-size: 13px;
+        }
+
+        #re-audit-row {
+            display: grid;
+        }
+
+        #re-audit-row > .re-data-form-inline {
+            display: contents;
+        }
+
+        #re-audit-row .re-input,
+        #re-audit-row .re-select,
+        .re-expand-result-row .re-input,
+        .re-expand-result-row .re-select {
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
         }
 
         .re-rent-expand-select {
@@ -5040,12 +5186,14 @@
         }
 
         .re-expand-result-row.re-visible {
-            display: flex;
+            display: grid;
         }
 
-        .re-expand-result-row .re-input {
-            flex: 1;
-            min-width: 0;
+        @container re-data-card (max-width: 440px) {
+            #re-audit-row,
+            .re-expand-result-row {
+                grid-template-columns: 4em minmax(0, 1fr);
+            }
         }
 
         .re-preview-box {
@@ -5248,11 +5396,7 @@
         }
 
         .re-info-card {
-            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
-            border-radius: 10px;
-            padding: 14px;
             margin-bottom: 12px;
-            border: 1px solid rgba(107, 114, 128, 0.15);
         }
 
         .re-info-card.re-card-collapsed {
@@ -5555,22 +5699,14 @@
             vertical-align: middle;
         }
 
-        .re-serial-clickable {
-            cursor: pointer;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .re-serial-clickable:hover {
-            opacity: 0.75;
-        }
-
+        .re-serial-clickable,
         .re-bill-overdue-click {
             cursor: pointer;
             text-decoration: underline;
             text-underline-offset: 2px;
         }
 
+        .re-serial-clickable:hover,
         .re-bill-overdue-click:hover {
             opacity: 0.75;
         }
@@ -5695,13 +5831,6 @@
             flex-shrink: 0;
         }
 
-        .re-day-edit-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
         .re-day-edit-checkbox input[type="checkbox"] {
             width: 16px;
             height: 16px;
@@ -5810,11 +5939,7 @@
             background: rgba(255, 255, 255, 0.92);
         }
 
-        #re-system-panel.re-low-perf .re-overlay {
-            backdrop-filter: none;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
+        #re-system-panel.re-low-perf .re-overlay,
         #re-system-panel.re-low-perf .re-modal-overlay {
             backdrop-filter: none;
             background: rgba(0, 0, 0, 0.5);
@@ -5854,6 +5979,30 @@
             border-color: #3b82f6;
             background: rgba(59, 130, 246, 0.10);
             color: #1d4ed8;
+        }
+
+        /* 无锁模式：两项流水输入使用浅蓝色呼吸光晕。 */
+        #re-system-panel.re-no-lock-mode #re-huabei-status,
+        #re-system-panel.re-no-lock-mode #re-wechat-fenfu {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.14), 0 0 8px rgba(96, 165, 250, 0.20);
+            animation: re-no-lock-input-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes re-no-lock-input-glow {
+            0%, 100% {
+                border-color: #93c5fd;
+                box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.12), 0 0 6px rgba(96, 165, 250, 0.16);
+            }
+            50% {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.28), 0 0 14px rgba(96, 165, 250, 0.32);
+            }
+        }
+
+        #re-system-panel.re-low-perf.re-no-lock-mode #re-huabei-status,
+        #re-system-panel.re-low-perf.re-no-lock-mode #re-wechat-fenfu {
+            animation: none;
         }
 
         /* ===== 外观扩展（V6.1.0）===== */
@@ -6377,6 +6526,107 @@
             color: #374151;
             border-color: #6b7280;
             background: #f3f4f6;
+        }
+
+        /* 面板缩放适配：按内部可用宽度重排，超高内容交给所在栏滚动。 */
+        .re-form-section,
+        .re-form-group,
+        .re-data-section,
+        .re-data-col,
+        .re-history-container,
+        .re-analysis-two,
+        .re-analysis-two > * {
+            min-width: 0;
+        }
+
+        .re-form-item-inline,
+        .re-switch-content.re-visible {
+            min-width: 0;
+            max-width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .re-history-day-row {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+        }
+
+        .re-history-month-header,
+        .re-history-day-header,
+        .re-history-day-actions {
+            flex-wrap: wrap;
+        }
+
+        .re-history-month-title,
+        .re-history-day-title {
+            min-width: 0;
+            flex-shrink: 1;
+            overflow-wrap: anywhere;
+        }
+
+        .re-analysis-overview {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+        }
+
+        .re-analysis-two {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+        }
+
+        .re-mbar-row {
+            grid-template-columns: minmax(0, 120px) minmax(60px, 1fr) minmax(0, 84px);
+        }
+
+        @container re-main (max-width: 520px) {
+            .re-analysis-container {
+                padding: 12px;
+            }
+
+            .re-mbar-row {
+                grid-template-columns: minmax(0, 1fr) auto;
+            }
+
+            .re-mbar-name {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .re-mbar-meta {
+                grid-column: 2;
+                grid-row: 1;
+            }
+
+            .re-mbar-track {
+                grid-column: 1 / -1;
+                grid-row: 2;
+            }
+
+            .re-mdaily-box {
+                margin-left: 4px;
+                margin-right: 4px;
+            }
+        }
+
+        @container re-settings-body (max-width: 520px) {
+            .re-set2-slider-row {
+                flex-wrap: wrap;
+            }
+
+            .re-set2-slider-row .re-setting-name {
+                flex: 1 1 100%;
+            }
+
+            .re-appearance-main .re-set2-slider-row,
+            .re-appearance-main .re-set2-slot:has(> .re-range-slider) {
+                grid-template-columns: minmax(0, 1fr) 3.5em;
+            }
+
+            .re-appearance-main .re-set2-slider-row > .re-setting-name,
+            .re-appearance-main .re-set2-slot:has(> .re-range-slider) > .re-setting-name {
+                grid-column: 1 / -1;
+            }
+
+            .re-appearance-main .re-color-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
     `;
 
@@ -10987,6 +11237,41 @@
         return !!(userToken && orderToken && userToken === orderToken);
     }
 
+    // 按本单商品机型识别华为系列，不区分大小写。
+    function isHuaweiSeries() {
+        return /huawei/i.test(cachedProductModel);
+    }
+
+    function syncHuaweiExpandRestriction() {
+        const restricted = isHuaweiSeries();
+        const expandSwitch = document.getElementById('re-rent-expand');
+        if (expandSwitch) {
+            expandSwitch.disabled = restricted;
+            const switchLabel = expandSwitch.closest('.re-switch');
+            if (switchLabel) switchLabel.title = restricted ? '华为系列只有一个方案，不支持拓展' : '';
+            if (restricted && expandSwitch.checked) {
+                expandSwitch.checked = false;
+                expandSwitch.dispatchEvent(new Event('change'));
+                // 无锁结果行独立于拓展开关，保留无锁模式现有行为。
+                if (noLockModeActive) refreshNoLockUI();
+            }
+        }
+        const badgeWrap = document.getElementById('re-expand-restrict-badge');
+        if (badgeWrap) {
+            const existing = badgeWrap.querySelector('.re-huawei-badge');
+            if (restricted && !existing) {
+                const badge = document.createElement('span');
+                badge.className = 're-huawei-badge';
+                badge.textContent = '华为系列';
+                badge.title = '华为系列只有一个方案，不支持拓展';
+                badgeWrap.appendChild(badge);
+            } else if (!restricted && existing) {
+                existing.remove();
+            }
+            badgeWrap.style.display = badgeWrap.children.length ? 'inline-flex' : 'none';
+        }
+    }
+
     // 上锁字段名两态：非无锁「审核价格」；无锁内恒为「正常上锁」
     function getLockLabel() {
         if (!noLockModeActive) return '审核价格';
@@ -11049,6 +11334,7 @@
         }
         cachedDiscount = null;
         cachedProductModel = '';
+        syncHuaweiExpandRestriction();
         cachedShop = '';
         cachedNewChainLink = null;
         // 年龄/性别缓存同样按单失效：未解密时不得沿用上一位客户的值
@@ -11225,7 +11511,7 @@
         const expandSwitch = document.getElementById('re-rent-expand');
         const expandResultRow = document.querySelector('.re-expand-result-row');
         if (expandSwitch) {
-            const restore = noLockExpandSnapshot === true;
+            const restore = noLockExpandSnapshot === true && !isHuaweiSeries();
             if (expandSwitch.checked !== restore) {
                 expandSwitch.checked = restore;
                 expandSwitch.dispatchEvent(new Event('change'));
@@ -11414,6 +11700,7 @@
 
             const customerCell = getCurrentCustomerCell();
             cachedProductModel = readProductModel();
+            syncHuaweiExpandRestriction();
             const nameParagraph = customerCell
                 ? Array.from(customerCell.querySelectorAll('p')).find(p => p.textContent.includes('姓名：'))
                 : null;
@@ -11890,6 +12177,7 @@
 
             const productModel = readProductModel();
             cachedProductModel = productModel;
+            syncHuaweiExpandRestriction();
 
             const minDownPaymentEl = getElementByXPath(minDownPaymentXPath);
             const minDownPaymentText = minDownPaymentEl ? minDownPaymentEl.textContent.trim() : '';
@@ -11989,7 +12277,8 @@
                     }
                 };
 
-                // 胶囊区 innerHTML 重建会清掉无锁胶囊；模式仍激活时补回并同步行显隐
+                // 胶囊区重建后补回机型限制和无锁状态。
+                syncHuaweiExpandRestriction();
                 if (noLockModeActive) refreshNoLockUI();
             }
 
@@ -12736,8 +13025,8 @@
             return;
         }
 
-        // 最低结果唯一口径：手机成本 × 折数 + 50，有小数往上进 1，无小数保持原值
-        const finalMinPrice = ceilMinPrice(cost * cachedDiscount + 50);
+        // 提示与价格建议、校验共用公式：华为保留小数，其他机型向上取整。
+        const finalMinPrice = calculateMinPrice(cost);
         const placeholderText = '最低结果：¥' + finalMinPrice;
 
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
@@ -12751,6 +13040,14 @@
         return Math.ceil(cleaned);
     }
 
+    function calculateMinPrice(cost) {
+        if (isHuaweiSeries()) {
+            // 华为加 139 并保留小数；只消除浮点运算尾差，不进位到整数。
+            return Math.round((cost * cachedDiscount + 139) * 1e6) / 1e6;
+        }
+        return ceilMinPrice(cost * cachedDiscount + 50);
+    }
+
     function getMinPrice() {
         const phoneCostEl = document.getElementById('re-phone-cost');
 
@@ -12759,8 +13056,7 @@
         const cost = parseMoneyInput(phoneCostEl.value);
         if (cost === null || cost <= 0 || isNaN(cachedDiscount)) return null;
 
-        // 与占位符同一口径：手机成本 × 折数 + 50（有小数进 1）
-        return ceilMinPrice(cost * cachedDiscount + 50);
+        return calculateMinPrice(cost);
     }
 
     function validatePrice(input) {
@@ -12769,7 +13065,8 @@
 
         const isNewChainLink = cachedNewChainLink !== null;
 
-        if (isNewChainLink) {
+        // 华为报价允许小数，新链路校验也不将其进位到整数。
+        if (isNewChainLink && !isHuaweiSeries()) {
             const hasDecimal = input.value.includes('.') || !Number.isInteger(inputValue);
             if (hasDecimal) {
                 inputValue = Math.ceil(inputValue);
@@ -12915,6 +13212,8 @@
 
     if (rentExpandSwitch && rentExpandSelect && expandResultRow) {
         rentExpandSwitch.addEventListener('change', function(e) {
+            // 同时拦截脚本恢复状态触发的 change，避免华为订单重新开启拓展。
+            if (isHuaweiSeries()) this.checked = false;
             if (this.checked) {
                 rentExpandSelect.classList.add('re-visible');
                 expandResultRow.classList.add('re-visible');
