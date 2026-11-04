@@ -929,8 +929,8 @@
             transform: translate(-50%, -50%);
             width: 65%;
             height: 70%;
-            min-width: min(800px, 95vw);
-            min-height: min(500px, 95vh);
+            min-width: 800px;
+            min-height: 500px;
             max-width: 95vw;
             max-height: 95vh;
             background: linear-gradient(135deg, #e8eaed 0%, #d1d5db 50%, #e5e7eb 100%);
@@ -1147,10 +1147,8 @@
 
         .re-column-center {
             flex: 1;
-            min-width: 0;
+            min-width: 300px;
             min-height: 0;
-            /* 按面板内部宽度重排，不依赖浏览器窗口宽度。 */
-            container: re-main / inline-size;
         }
 
         /* 客户数据：并入深色顶栏，居中自适应省略 */
@@ -2224,18 +2222,14 @@
             display: flex;
             flex-direction: column;
             gap: 0;
-            box-sizing: border-box;
-            min-width: 0;
-            min-height: 100%;
             padding: 20px;
-            /* 统一由 .re-column-content 滚动，避免嵌套滚动裁切。 */
-            overflow: visible;
+            height: 100%;
+            overflow-y: auto;
         }
 
         .re-analysis-section {
             display: flex;
             flex-direction: column;
-            min-width: 0;
             gap: 14px;
         }
 
@@ -3484,27 +3478,24 @@
         }
 
         .re-form-work .re-switch-content {
-            flex: 1 1 260px;
+            flex: 1;
             min-width: 0;
-            flex-wrap: wrap;
         }
 
         #re-work-content {
-            flex: 1 1 130px;
+            flex: 1;
             min-width: 0;
         }
 
         #re-work-proof {
-            flex: 1 1 160px;
-            min-width: min(100%, 160px);
-            max-width: 100%;
+            flex: 0 0 auto;
+            min-width: 0;
         }
 
         .re-form-row {
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
-            gap: 12px 20px;
+            gap: 12px;
         }
 
         .re-form-item-inline {
@@ -3515,7 +3506,7 @@
         }
 
         .re-form-item-work {
-            flex: 1 1 420px;
+            flex: 1;
             min-width: 0;
             min-height: 38px;
         }
@@ -3536,9 +3527,7 @@
         }
 
         .re-flow-grid-5 {
-            /* 每项保留可读宽度；缩小时减少列数，随字号一起调整。 */
-            font-size: 13px;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 13em), 1fr));
+            grid-template-columns: repeat(5, 1fr);
         }
 
         .re-flow-grid-2 {
@@ -3629,15 +3618,14 @@
 
         .re-old-device-select {
             width: auto;
-            min-width: min(110px, 100%);
-            max-width: 100%;
+            min-width: 110px;
         }
 
         .re-multi-select {
             position: relative;
             display: inline-block;
-            min-width: min(200px, 100%);
-            max-width: min(280px, 100%);
+            min-width: 200px;
+            max-width: 280px;
             vertical-align: middle;
         }
 
@@ -5022,7 +5010,6 @@
         .re-data-section-3 .re-data-col {
             flex: 1;
             min-width: 0;
-            container: re-data-card / inline-size;
             border-right: 1px solid rgba(107, 114, 128, 0.15);
             padding-right: 16px;
         }
@@ -5043,40 +5030,6 @@
 
         .re-data-section-3 .re-data-col:not(:first-child) {
             padding-left: 16px;
-        }
-
-        /* 中等宽度：订单、商品并排，报价独占一行；窄宽度全部纵排。 */
-        @container re-main (max-width: 1100px) {
-            .re-data-section-3 {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .re-data-section-3 .re-data-col {
-                padding: 0;
-                border-right: none;
-            }
-
-            .re-data-section-3 .re-data-col:not(:first-child) {
-                padding-left: 0;
-            }
-
-            .re-data-section-3 .re-data-col:last-child {
-                grid-column: 1 / -1;
-                border-top: 1px solid rgba(107, 114, 128, 0.15);
-                padding-top: 16px;
-            }
-        }
-
-        @container re-main (max-width: 620px) {
-            .re-data-section-3 {
-                grid-template-columns: minmax(0, 1fr);
-            }
-
-            .re-data-section-3 .re-data-col:not(:first-child) {
-                border-top: 1px solid rgba(107, 114, 128, 0.15);
-                padding-top: 16px;
-            }
         }
 
         .re-data-left,
@@ -5102,13 +5055,12 @@
 
         .re-data-form-row {
             display: flex;
-            flex-wrap: wrap;
             gap: 12px;
             min-width: 0;
         }
 
         .re-data-form-row .re-data-form-inline {
-            flex: 1 1 180px;
+            flex: 1;
             min-width: 0;
         }
 
@@ -5145,9 +5097,9 @@
             min-width: 0;
         }
 
-        /* 两条报价行共用四列：价格标签 / 价格输入 / 结果标签 / 结果下拉。
-           仅展开审核行的布局包装，不改 DOM 结构及业务事件。 */
-        #re-audit-row,
+        /* 两条报价行视觉上都呈四列：价格标签 / 价格输入 / 结果标签 / 结果下拉。
+           拓展行本身即四列 grid；审核行改为「两个等宽半区，各含标签+控件」，
+           这样内层包装保留真实盒子，价格建议弹层的定位父级不会失效。 */
         .re-expand-result-row {
             grid-template-columns: 4em minmax(0, 1fr) 4em minmax(0, 1fr);
             align-items: center;
@@ -5158,10 +5110,19 @@
 
         #re-audit-row {
             display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            font-size: 13px;
         }
 
         #re-audit-row > .re-data-form-inline {
-            display: contents;
+            display: grid;
+            grid-template-columns: 4em minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
         }
 
         #re-audit-row .re-input,
@@ -5187,13 +5148,6 @@
 
         .re-expand-result-row.re-visible {
             display: grid;
-        }
-
-        @container re-data-card (max-width: 440px) {
-            #re-audit-row,
-            .re-expand-result-row {
-                grid-template-columns: 4em minmax(0, 1fr);
-            }
         }
 
         .re-preview-box {
@@ -6528,106 +6482,6 @@
             background: #f3f4f6;
         }
 
-        /* 面板缩放适配：按内部可用宽度重排，超高内容交给所在栏滚动。 */
-        .re-form-section,
-        .re-form-group,
-        .re-data-section,
-        .re-data-col,
-        .re-history-container,
-        .re-analysis-two,
-        .re-analysis-two > * {
-            min-width: 0;
-        }
-
-        .re-form-item-inline,
-        .re-switch-content.re-visible {
-            min-width: 0;
-            max-width: 100%;
-            flex-wrap: wrap;
-        }
-
-        .re-history-day-row {
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-        }
-
-        .re-history-month-header,
-        .re-history-day-header,
-        .re-history-day-actions {
-            flex-wrap: wrap;
-        }
-
-        .re-history-month-title,
-        .re-history-day-title {
-            min-width: 0;
-            flex-shrink: 1;
-            overflow-wrap: anywhere;
-        }
-
-        .re-analysis-overview {
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-        }
-
-        .re-analysis-two {
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-        }
-
-        .re-mbar-row {
-            grid-template-columns: minmax(0, 120px) minmax(60px, 1fr) minmax(0, 84px);
-        }
-
-        @container re-main (max-width: 520px) {
-            .re-analysis-container {
-                padding: 12px;
-            }
-
-            .re-mbar-row {
-                grid-template-columns: minmax(0, 1fr) auto;
-            }
-
-            .re-mbar-name {
-                grid-column: 1;
-                grid-row: 1;
-            }
-
-            .re-mbar-meta {
-                grid-column: 2;
-                grid-row: 1;
-            }
-
-            .re-mbar-track {
-                grid-column: 1 / -1;
-                grid-row: 2;
-            }
-
-            .re-mdaily-box {
-                margin-left: 4px;
-                margin-right: 4px;
-            }
-        }
-
-        @container re-settings-body (max-width: 520px) {
-            .re-set2-slider-row {
-                flex-wrap: wrap;
-            }
-
-            .re-set2-slider-row .re-setting-name {
-                flex: 1 1 100%;
-            }
-
-            .re-appearance-main .re-set2-slider-row,
-            .re-appearance-main .re-set2-slot:has(> .re-range-slider) {
-                grid-template-columns: minmax(0, 1fr) 3.5em;
-            }
-
-            .re-appearance-main .re-set2-slider-row > .re-setting-name,
-            .re-appearance-main .re-set2-slot:has(> .re-range-slider) > .re-setting-name {
-                grid-column: 1 / -1;
-            }
-
-            .re-appearance-main .re-color-grid {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
     `;
 
     GM_addStyle(styles.replace(/font-size:\s*(\d+(?:\.\d+)?)px/g, 'font-size: calc($1px * var(--re-fs-scale, 1))'));
