@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.1.12
+// @version      8.1.13
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.1.12</span>
+                    <span class="re-panel-version">V8.1.13</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -289,7 +289,7 @@
                                         <label class="re-form-label" for="re-guide-price">指导价格</label>
                                         <input type="text" class="re-input re-input-mini re-guide-price-input" id="re-guide-price" value="--" readonly>
                                     </div>
-                                    <div class="re-flow-item re-flow-item-full re-notch">
+                                    <div class="re-flow-item re-flow-item-share re-notch">
                                         <label class="re-form-label" for="re-share-rent">共租情况</label>
                                         <input type="text" class="re-input" id="re-share-rent" placeholder="请输入">
                                     </div>
@@ -859,10 +859,9 @@
                             <span class="re-audit-staff-label">审单客服</span>
                             <span class="re-audit-staff-bracket">【<span id="re-audit-staff-name">--</span>】</span>
                         </div>
-                        <!-- 降低幅度：从风控预览拆出的独立模块（V8.1.12） -->
+                        <!-- 降低幅度：从风控预览拆出的独立模块（V8.1.13） -->
                         <div class="re-reduction-card" id="re-reduction-card">
-                            <span class="re-reduction-title">降低幅度</span>
-                            <span class="re-risk-reduction" id="re-risk-reduction">--</span>
+                            <span class="re-risk-reduction" id="re-risk-reduction">【降低幅度：--】</span>
                         </div>
                     </div>
                 </div>
@@ -3592,13 +3591,18 @@
         }
 
         /* 10 列轨道：普通字段跨 2 列 = 原 5 列宽度的 1/5；
-           手机成本/指导价格跨 2 列，共租情况/其他备注各跨 3 列，刚好并成一行 */
+           手机成本/指导价格各跨 2 列，共租情况跨 6 列，三者并成一行；
+           其他备注独占一整行 */
         .re-flow-grid-5 > .re-flow-item {
             grid-column: span 2;
         }
 
+        .re-flow-grid-5 > .re-flow-item.re-flow-item-share {
+            grid-column: span 6;
+        }
+
         .re-flow-grid-5 > .re-flow-item.re-flow-item-full {
-            grid-column: span 3;
+            grid-column: 1 / -1;
         }
 
         .re-flow-item .re-form-label {
@@ -4923,25 +4927,16 @@
             overflow-wrap: anywhere;
         }
 
-        /* 降低幅度：审单客服下方的独立模块（V8.1.12） */
+        /* 降低幅度：审单客服下方的独立模块（V8.1.13） */
         .re-reduction-card {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
+            display: block;
             margin-top: 8px;
             padding: 9px 12px;
             background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
             border: 1px solid rgba(107, 114, 128, 0.15);
             border-radius: 10px;
             min-width: 0;
-        }
-
-        .re-reduction-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            white-space: nowrap;
-            flex-shrink: 0;
+            white-space: pre-line;
         }
 
         #re-system-panel.re-no-comp-bg .re-audit-staff-copy,
@@ -14104,9 +14099,9 @@
             if (phoneCost2 > 0 && v4Risk2 > 0) {
                 const expandPercent = ((expandPriceNum - v4Risk2) / phoneCost2 * 100).toFixed(1);
                 if (parseFloat(expandPercent) < 0) {
-                    expandReductionText = '拓展：降低' + Math.abs(expandPercent) + '%';
+                    expandReductionText = '拓展降低：降低' + Math.abs(expandPercent) + '%';
                 } else {
-                    expandReductionText = '拓展：提高' + expandPercent + '%';
+                    expandReductionText = '拓展降低：提高' + expandPercent + '%';
                 }
                 // 追加到降低幅度模块内展示（沿用配色规则）
                 if (reductionEl) {
@@ -14116,6 +14111,15 @@
                         : currentReduction + '\n' + expandReductionText;
                 }
             }
+        }
+
+        if (reductionEl) {
+            let reductionContent = '【降低幅度：' + (reductionText || '--');
+            if (expandReductionText) {
+                reductionContent += '；\n' + expandReductionText;
+            }
+            reductionContent += '】';
+            reductionEl.textContent = reductionContent;
         }
 
         const handleMethod = getCachedElement('handleMethod', '#re-handle-method')?.value || '';
