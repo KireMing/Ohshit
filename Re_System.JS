@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.1.0
+// @version      8.1.1
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.1.0</span>
+                    <span class="re-panel-version">V8.1.1</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -11161,6 +11161,7 @@
     const APPSTORE_REFERENCE_SPEECH = '对客户：订单通过之后，会自动安装我们的【WebAppStore】作为替代下载渠道，主流应用的话都是可以正常下载的，您看这边可以接受吗？';
     let appStoreRiskOrderNo = '';
     let appStoreRiskText = '';
+    let appStoreRemarkInitialized = false; // 本次订单只自动填写一次，之后交由用户编辑。
     let riskRequestGeneration = 0;
     let orderContextGeneration = 0;
     let appStorePreviewReady = false;
@@ -11183,17 +11184,17 @@
 
     function composeAppStoreSpecialRemark(text, restricted) {
         const original = String(text || '');
-        const segments = original.split(/[；;]/);
-        const count = segments.filter(segment => segment.trim() === APPSTORE_RESTRICTION_REMARK).length;
-        // 无需增删时保留原样；只处理独立的固定标记，保留用户句子及无锁文案。
-        if ((!restricted && count === 0) || (restricted && count === 1)) return original;
-        if (restricted && count === 0) {
+        if (restricted) {
+            // 首次命中时补齐标记；已有标记就保留用户原文，不做去重或改写。
+            if (original.includes(APPSTORE_RESTRICTION_REMARK)) return original;
             const base = original.replace(/[；;]\s*$/, '');
             return base.trim() ? base + '；' + APPSTORE_RESTRICTION_REMARK : APPSTORE_RESTRICTION_REMARK;
         }
-        const base = segments.filter(segment => segment.trim() !== APPSTORE_RESTRICTION_REMARK)
+        // 仅切单时清理上单的独立标记，保留用户句子中主动提及的标记及无锁文案。
+        const segments = original.split(/[；;]/);
+        if (!segments.some(segment => segment.trim() === APPSTORE_RESTRICTION_REMARK)) return original;
+        return segments.filter(segment => segment.trim() !== APPSTORE_RESTRICTION_REMARK)
             .map(segment => segment.trim()).filter(Boolean).join('；');
-        return restricted ? (base ? base + '；' : '') + APPSTORE_RESTRICTION_REMARK : base;
     }
 
     // 仅同步 DOM/输入值，不在这里重绘预览，避免启动阶段读取尚未初始化的预览常量。
@@ -11216,8 +11217,9 @@
             badgeWrap.style.display = badgeWrap.children.length ? 'inline-flex' : 'none';
         }
         const input = document.getElementById('re-special-remark');
-        if (input) {
-            const next = composeAppStoreSpecialRemark(input.value, !!level);
+        if (input && level && !appStoreRemarkInitialized) {
+            appStoreRemarkInitialized = true;
+            const next = composeAppStoreSpecialRemark(input.value, true);
             if (input.value !== next) input.value = next;
         }
     }
@@ -11275,6 +11277,12 @@
         orderContextGeneration++;
         appStoreRiskOrderNo = '';
         appStoreRiskText = '';
+        appStoreRemarkInitialized = false;
+        const remarkInput = document.getElementById('re-special-remark');
+        if (remarkInput) {
+            const next = composeAppStoreSpecialRemark(remarkInput.value, false);
+            if (remarkInput.value !== next) remarkInput.value = next;
+        }
         ['re-new-rent', 're-today-apply', 're-7day-apply', 're-30day-apply',
             're-risk-level', 're-v4-risk', 're-legal-status'].forEach(id => setText(id, ''));
         const refreshIcon = document.getElementById('re-order-refresh');
