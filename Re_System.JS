@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.1.1
+// @version      8.1.12
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.1.1</span>
+                    <span class="re-panel-version">V8.1.12</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -238,63 +238,63 @@
                             <div class="re-form-group">
                                 <div class="re-form-title">流水信息</div>
                                 <div class="re-flow-grid re-flow-grid-5 re-flow-section">
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">微信流水</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-wechat-flow">微信流水</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-flow" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">支宝流水</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-alipay-flow">支宝流水</label>
                                         <input type="text" class="re-input re-input-mini" id="re-alipay-flow" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">芝麻信用</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-zhima-credit">芝麻信用</label>
                                         <input type="text" class="re-input re-input-mini" id="re-zhima-credit" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">花呗情况</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-huabei-status">花呗情况</label>
                                         <input type="text" class="re-input re-input-mini" id="re-huabei-status" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">支宝资产</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-alipay-assets">支宝资产</label>
                                         <input type="text" class="re-input re-input-mini" id="re-alipay-assets" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">微信分付</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-wechat-fenfu">微信分付</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-fenfu" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">抖音月付</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-douyin-pay">抖音月付</label>
                                         <input type="text" class="re-input re-input-mini" id="re-douyin-pay" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">美团月付</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-meituan-pay">美团月付</label>
                                         <input type="text" class="re-input re-input-mini" id="re-meituan-pay" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">支付分</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-wechat-credit-score">支付分</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-credit-score" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">微信余额</label>
+                                    <div class="re-flow-item re-notch">
+                                        <label class="re-form-label" for="re-wechat-balance">微信余额</label>
                                         <input type="text" class="re-input re-input-mini" id="re-wechat-balance" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">手机成本</label>
+                                    <div class="re-flow-item re-notch re-notch-readonly re-notch-price">
+                                        <label class="re-form-label" for="re-phone-cost">手机成本</label>
                                         <div class="re-price-wrapper">
                                             <input type="text" class="re-input re-input-mini re-phone-cost-input" id="re-phone-cost" value="--" readonly>
                                             <span class="re-price-diff-container" id="re-phone-cost-diff"></span>
                                         </div>
                                     </div>
-                                    <div class="re-flow-item">
-                                        <label class="re-form-label">指导价格</label>
+                                    <div class="re-flow-item re-notch re-notch-readonly re-notch-price">
+                                        <label class="re-form-label" for="re-guide-price">指导价格</label>
                                         <input type="text" class="re-input re-input-mini re-guide-price-input" id="re-guide-price" value="--" readonly>
                                     </div>
-                                    <div class="re-flow-item re-flow-item-full">
-                                        <label class="re-form-label">共租情况</label>
+                                    <div class="re-flow-item re-flow-item-full re-notch">
+                                        <label class="re-form-label" for="re-share-rent">共租情况</label>
                                         <input type="text" class="re-input" id="re-share-rent" placeholder="请输入">
                                     </div>
-                                    <div class="re-flow-item re-flow-item-full">
-                                        <label class="re-form-label">其他备注</label>
+                                    <div class="re-flow-item re-flow-item-full re-notch">
+                                        <label class="re-form-label" for="re-other-remark">其他备注</label>
                                         <input type="text" class="re-input re-other-remark-input" id="re-other-remark" placeholder="请输入">
                                     </div>
                                 </div>
@@ -380,9 +380,11 @@
                                     <div class="re-card-title" id="re-expand-business-title"><span class="re-expand-title-text">拓展业务</span><span class="re-expand-badges" id="re-expand-restrict-badge" style="display:none;"></span></div>
                                     <div class="re-data-form">
                                         <div class="re-data-form-row" id="re-audit-row">
-                                            <div class="re-data-form-inline">
-                                                <label class="re-form-label" id="re-audit-price-label">审核价格</label>
-                                                <input type="text" class="re-input re-price-input" id="re-audit-result" placeholder="请输入">
+                                            <div class="re-data-form-inline re-notch-inline">
+                                                <div class="re-notch">
+                                                    <label class="re-form-label" id="re-audit-price-label" for="re-audit-result">审核价格</label>
+                                                    <input type="text" class="re-input re-price-input" id="re-audit-result" placeholder="请输入">
+                                                </div>
                                             </div>
                                             <div class="re-data-form-inline">
                                                 <label class="re-form-label">审核结果</label>
@@ -397,8 +399,12 @@
                                         </div>
                                         <div class="re-data-form-row">
                                             <div class="re-data-form-inline re-expand-result-row">
-                                                <label class="re-form-label" id="re-expand-price-label">拓展价格</label>
-                                                <input type="text" class="re-input re-price-input" id="re-expand-result" placeholder="请输入">
+                                                <div class="re-notch-cell">
+                                                    <div class="re-notch">
+                                                        <label class="re-form-label" id="re-expand-price-label" for="re-expand-result">拓展价格</label>
+                                                        <input type="text" class="re-input re-price-input" id="re-expand-result" placeholder="请输入">
+                                                    </div>
+                                                </div>
                                                 <label class="re-form-label">拓展结果</label>
                                                 <select class="re-select" id="re-expand-order-result">
                                                     <option>通过</option>
@@ -428,9 +434,11 @@
                                             </div>
                                         </div>
                                         <div class="re-data-form-row">
-                                            <div class="re-data-form-inline re-data-form-full">
-                                                <label class="re-form-label">特殊备注</label>
-                                                <input type="text" class="re-input" id="re-special-remark" placeholder="请输入">
+                                            <div class="re-data-form-inline re-data-form-full re-notch-inline">
+                                                <div class="re-notch">
+                                                    <label class="re-form-label" for="re-special-remark">特殊备注</label>
+                                                    <input type="text" class="re-input" id="re-special-remark" placeholder="请输入">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="re-preview-box">
@@ -771,25 +779,32 @@
                             </div>
                         </div>
                         <div class="re-action-buttons">
-                            <button class="re-action-btn" id="re-btn-staff-assign">
-                                <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                客服分配
-                            </button>
-                            <button class="re-action-btn" id="re-btn-staff-remark">
-                                <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                客服备注
-                            </button>
-                            <button class="re-action-btn" id="re-btn-risk-remark">
-                                <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                风控备注
-                            </button>
+                            <div class="re-split" id="re-action-split">
+                                <button class="re-action-btn re-split-main" id="re-btn-auto-process">
+                                    <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"/><circle cx="12" cy="12" r="10"/></svg>
+                                    自动处理
+                                </button>
+                                <button class="re-action-btn re-split-toggle" id="re-split-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="re-split-menu" aria-label="更多操作">
+                                    <svg class="re-btn-icon re-split-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                </button>
+                                <div class="re-split-menu" id="re-split-menu" role="menu" aria-label="更多操作" hidden>
+                                    <button class="re-split-item" id="re-btn-staff-assign" type="button" role="menuitem">
+                                        <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        客服分配
+                                    </button>
+                                    <button class="re-split-item" id="re-btn-staff-remark" type="button" role="menuitem">
+                                        <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                        客服备注
+                                    </button>
+                                    <button class="re-split-item" id="re-btn-risk-remark" type="button" role="menuitem">
+                                        <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        风控备注
+                                    </button>
+                                </div>
+                            </div>
                             <button class="re-action-btn" id="re-btn-view-report">
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                 查看报告
-                            </button>
-                            <button class="re-action-btn" id="re-btn-auto-process">
-                                <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"/><circle cx="12" cy="12" r="10"/></svg>
-                                自动处理
                             </button>
                             <button class="re-action-btn" id="re-btn-no-lock">
                                 <svg class="re-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -797,36 +812,57 @@
                             </button>
                         </div>
                         <div class="re-contact-info" id="re-contact-section">
-                            <div class="re-contact-item">
-                                <span class="re-contact-label">姓名</span>
-                                <span class="re-contact-value" id="re-contact-name">【无参数】</span>
+                            <div class="re-contact-row">
+                                <span class="re-contact-item">
+                                    <span class="re-contact-label">姓名：</span>
+                                    <span class="re-contact-value" id="re-contact-name">【无参数】</span>
+                                </span>
+                                <span class="re-contact-item">
+                                    <span class="re-contact-label">关系：</span>
+                                    <span class="re-contact-value" id="re-contact-relation">本人</span>
+                                </span>
                             </div>
-                            <div class="re-contact-item">
-                                <span class="re-contact-label">关系</span>
-                                <span class="re-contact-value" id="re-contact-relation">本人</span>
-                            </div>
-                            <div class="re-contact-item">
-                                <span class="re-contact-label">手机号</span>
+                            <div class="re-contact-row re-contact-row-phone">
+                                <span class="re-contact-label">手机号：</span>
                                 <span class="re-contact-value" id="re-contact-phone">【无参数】</span>
+                                <span class="re-phone-duration" id="re-phone-duration" data-state="idle">【待查询】</span>
                             </div>
                             <div class="re-contact-actions">
                                 <button class="re-contact-btn" id="re-contact-query">查询</button>
                                 <button class="re-contact-btn" id="re-contact-edit">编辑</button>
-                                <span class="re-phone-duration" id="re-phone-duration"></span>
                             </div>
                         </div>
-                        <div class="re-risk-preview" id="re-risk-section">
+                        <div class="re-risk-preview re-section-collapsed" id="re-risk-section">
                             <div class="re-risk-preview-header">
                                 <span class="re-risk-preview-title">风控预览</span>
-                                <svg class="re-risk-copy-icon" id="re-risk-copy-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                <div class="re-risk-preview-actions">
+                                    <button class="re-section-toggle" id="re-risk-toggle" type="button" aria-expanded="false" aria-controls="re-risk-preview-text" aria-label="展开风控预览">
+                                        <svg class="re-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </button>
+                                    <svg class="re-risk-copy-icon" id="re-risk-copy-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                </div>
                             </div>
                             <div class="re-risk-preview-content" id="re-risk-preview-text">暂无数据</div>
-                            <div class="re-risk-reduction" id="re-risk-reduction"></div>
                         </div>
-                        <!-- 工作流预览：常驻展示自动处理将执行的节点链 -->
-                        <div class="re-workflow-bar re-workflow-hidden" id="re-workflow-bar">
-                            <div class="re-workflow-title">工作流<span class="re-workflow-hint" id="re-workflow-hint"> · 点自动处理时执行</span></div>
+                        <!-- 工作流预览：默认折叠，展开后展示自动处理将执行的节点链 -->
+                        <div class="re-workflow-bar re-workflow-hidden re-section-collapsed" id="re-workflow-bar">
+                            <div class="re-workflow-title">
+                                <span class="re-workflow-title-text">工作流<span class="re-workflow-hint" id="re-workflow-hint"> · 点自动处理时执行</span></span>
+                                <button class="re-section-toggle" id="re-workflow-toggle" type="button" aria-expanded="false" aria-controls="re-workflow-nodes" aria-label="展开工作流">
+                                    <svg class="re-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                </button>
+                            </div>
                             <div class="re-workflow-nodes" id="re-workflow-nodes"></div>
+                        </div>
+                        <!-- 审单客服：工作流下方常驻，点击整行复制 -->
+                        <div class="re-audit-staff-copy" id="re-audit-staff-copy" role="button" tabindex="0" aria-label="点击复制审单客服" title="点击复制审单客服">
+                            <span class="re-audit-staff-label">审单客服</span>
+                            <span class="re-audit-staff-bracket">【<span id="re-audit-staff-name">--</span>】</span>
+                        </div>
+                        <!-- 降低幅度：从风控预览拆出的独立模块（V8.1.12） -->
+                        <div class="re-reduction-card" id="re-reduction-card">
+                            <span class="re-reduction-title">降低幅度</span>
+                            <span class="re-risk-reduction" id="re-risk-reduction">--</span>
                         </div>
                     </div>
                 </div>
@@ -3532,7 +3568,7 @@
         }
 
         .re-flow-grid-5 {
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(10, minmax(0, 1fr));
         }
 
         .re-flow-grid-2 {
@@ -3555,6 +3591,16 @@
             grid-column: 1 / -1;
         }
 
+        /* 10 列轨道：普通字段跨 2 列 = 原 5 列宽度的 1/5；
+           手机成本/指导价格跨 2 列，共租情况/其他备注各跨 3 列，刚好并成一行 */
+        .re-flow-grid-5 > .re-flow-item {
+            grid-column: span 2;
+        }
+
+        .re-flow-grid-5 > .re-flow-item.re-flow-item-full {
+            grid-column: span 3;
+        }
+
         .re-flow-item .re-form-label {
             margin: 0;
             white-space: nowrap;
@@ -3564,6 +3610,137 @@
         .re-flow-item .re-input {
             flex: 1;
             min-width: 60px;
+        }
+
+        /* ===== 缺口描边（notched outline）输入框 V8.1.6 ===== */
+        .re-notch {
+            position: relative;
+            display: block;
+            min-width: 0;
+            min-inline-size: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .re-notch > .re-form-label {
+            position: absolute;
+            top: 0;
+            left: 11px;
+            z-index: 2;
+            transform: translateY(-50%);
+            padding: 0 5px;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, 0) 50%, var(--re-input-bg, rgba(255, 255, 255, 0.9)) 50%),
+                var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1;
+            color: #6b7280;
+            white-space: nowrap;
+            pointer-events: none;
+            transition: color 0.15s ease;
+        }
+
+        .re-notch > .re-input,
+        .re-notch > .re-price-wrapper {
+            width: 100%;
+            min-width: 0;
+            height: 40px;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            border-radius: 8px;
+            background: var(--re-input-bg, rgba(255, 255, 255, 0.9));
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+        }
+
+        .re-notch > .re-input {
+            padding: 0 10px;
+            font-size: 13px;
+            line-height: 1.2;
+            color: #374151;
+            outline: none;
+        }
+
+        .re-notch > .re-price-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 8px;
+        }
+
+        .re-notch > .re-price-wrapper > .re-input {
+            flex: 1 1 60px;
+            width: auto;
+            height: 100%;
+            min-height: 0;
+            padding: 0 4px !important;
+            border: 0 !important;
+            border-radius: 0;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .re-notch > .re-price-wrapper .re-price-diff {
+            margin-left: 0;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .re-notch:hover > .re-input,
+        .re-notch:hover > .re-price-wrapper {
+            border-color: rgba(107, 114, 128, 0.55);
+        }
+
+        .re-notch:focus-within > .re-input,
+        .re-notch:focus-within > .re-price-wrapper {
+            border-color: var(--re-switch-on-1, #3b82f6);
+            box-shadow: 0 0 0 3px var(--re-focus-ring, rgba(59, 130, 246, 0.1));
+        }
+
+        .re-notch:focus-within > .re-form-label {
+            color: var(--re-switch-on-1, #3b82f6);
+        }
+
+        .re-notch > .re-input::placeholder {
+            color: transparent;
+            transition: color 0.15s ease;
+        }
+
+        .re-notch:focus-within > .re-input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* 只读字段：虚线描边 + 浅灰底，与可编辑项区分 */
+        .re-notch-readonly > .re-input,
+        .re-notch-readonly > .re-price-wrapper {
+            border-style: dashed;
+            border-color: rgba(107, 114, 128, 0.35);
+            background: rgba(107, 114, 128, 0.1);
+        }
+
+        .re-notch-readonly > .re-form-label {
+            color: #9ca3af;
+        }
+
+        .re-notch-readonly > .re-price-wrapper > .re-input,
+        .re-notch-readonly > .re-input {
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        /* 指导价格自带 re-guide-price-input 的透明样式，这里恢复完整缺口输入框外观 */
+        .re-notch > .re-input.re-guide-price-input {
+            padding: 0 10px !important;
+            border: 1px solid rgba(107, 114, 128, 0.3) !important;
+            background: var(--re-input-bg, rgba(255, 255, 255, 0.9)) !important;
+            box-shadow: none !important;
+        }
+
+        .re-notch-readonly > .re-input.re-guide-price-input {
+            border-style: dashed !important;
+            border-color: rgba(107, 114, 128, 0.35) !important;
+            background: rgba(107, 114, 128, 0.1) !important;
         }
 
         .re-input,
@@ -4609,9 +4786,9 @@
             border-radius: 10px;
             border: 1px solid rgba(107, 114, 128, 0.15);
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
             overflow: hidden;
             max-height: 200px;
         }
@@ -4627,44 +4804,55 @@
             border: none;
         }
 
-        .re-contact-item {
+        .re-contact-row {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .re-contact-row-phone {
             gap: 4px;
-            flex: 1;
+        }
+
+        .re-contact-item {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 4px;
+            min-width: 0;
         }
 
         .re-contact-label {
             font-size: 11px;
             color: #6b7280;
+            white-space: nowrap;
         }
 
         .re-contact-value {
             font-size: 13px;
             font-weight: 500;
             color: #374151;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .re-phone-duration {
             font-size: 12px;
             color: #3b82f6;
-            margin-left: 8px;
+            margin-left: 2px;
             font-weight: 500;
-            display: flex;
-            align-items: center;
+            white-space: nowrap;
         }
 
         .re-contact-actions {
             display: flex;
             flex-direction: row;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             gap: 8px;
             width: 100%;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(107, 114, 128, 0.1);
+            margin-top: 2px;
         }
 
         .re-contact-btn {
@@ -4686,6 +4874,79 @@
         .re-contact-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        /* 审单客服：工作流下方的可复制字段（V8.1.9） */
+        .re-audit-staff-copy {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 9px 12px;
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            border: 1px solid rgba(107, 114, 128, 0.15);
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            min-width: 0;
+            transition: border-color .15s, background .15s, transform .15s, box-shadow .15s;
+        }
+
+        .re-audit-staff-copy:hover {
+            border-color: var(--re-switch-on-1, #3b82f6);
+            background: var(--re-accent-05, rgba(59, 130, 246, 0.05));
+        }
+
+        .re-audit-staff-copy:active {
+            transform: scale(0.995);
+        }
+
+        .re-audit-staff-copy:focus-visible {
+            outline: none;
+            border-color: var(--re-switch-on-1, #3b82f6);
+            box-shadow: 0 0 0 3px var(--re-focus-ring, rgba(59, 130, 246, 0.1));
+        }
+
+        .re-audit-staff-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .re-audit-staff-bracket {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        /* 降低幅度：审单客服下方的独立模块（V8.1.12） */
+        .re-reduction-card {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 9px 12px;
+            background: var(--re-comp-bg, rgba(255, 255, 255, 0.8));
+            border: 1px solid rgba(107, 114, 128, 0.15);
+            border-radius: 10px;
+            min-width: 0;
+        }
+
+        .re-reduction-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #re-system-panel.re-no-comp-bg .re-audit-staff-copy,
+        #re-system-panel.re-no-comp-bg .re-reduction-card {
+            background: transparent !important;
         }
 
         .re-contact-value.re-phone-alert {
@@ -4801,12 +5062,32 @@
         }
 
         .re-workflow-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
             font-size: 12px;
             font-weight: 600;
             color: #6b7280;
             margin-bottom: 8px;
             padding-bottom: 6px;
             border-bottom: 1px solid rgba(107, 114, 128, 0.12);
+        }
+
+        .re-workflow-title-text {
+            display: inline-flex;
+            align-items: baseline;
+            min-width: 0;
+        }
+
+        .re-workflow-bar.re-section-collapsed .re-workflow-title {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .re-workflow-bar.re-section-collapsed .re-workflow-nodes {
+            display: none;
         }
 
         /* 预览态提示：处理进行中自动隐藏 */
@@ -4935,10 +5216,58 @@
             border-bottom: 1px solid rgba(107, 114, 128, 0.15);
         }
 
+        .re-risk-preview-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .re-section-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background .15s, color .15s;
+        }
+
+        .re-section-toggle:hover {
+            background: var(--re-accent-10, rgba(59, 130, 246, 0.08));
+            color: var(--re-switch-on-1, #3b82f6);
+        }
+
+        .re-section-chevron {
+            width: 14px;
+            height: 14px;
+            transition: transform .18s;
+        }
+
+        .re-section-toggle[aria-expanded="true"] .re-section-chevron {
+            transform: rotate(180deg);
+        }
+
+        .re-risk-preview.re-section-collapsed .re-risk-preview-header {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .re-risk-preview.re-section-collapsed .re-risk-preview-content {
+            display: none;
+        }
+
         .re-risk-preview-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #374151;
+            color: #6b7280;
         }
 
         .re-risk-copy-icon {
@@ -4987,10 +5316,10 @@
         }
 
         .re-risk-reduction {
-            font-size: 12px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed rgba(107, 114, 128, 0.2);
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            line-height: 1.5;
             white-space: pre-line; /* 支持主行+拓展行两行展示 */
         }
 
@@ -5137,6 +5466,28 @@
             box-sizing: border-box;
             width: 100%;
             min-width: 0;
+        }
+
+        /* 审核价格 / 拓展价格 / 特殊备注：复用缺口描边输入框 */
+        #re-audit-row > .re-data-form-inline.re-notch-inline {
+            display: block;
+        }
+
+        .re-data-form-inline.re-notch-inline > .re-notch,
+        .re-expand-result-row > .re-notch-cell > .re-notch {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .re-expand-result-row > .re-notch-cell {
+            grid-column: 1 / 3;
+            min-width: 0;
+        }
+
+        .re-data-form-inline.re-notch-inline > .re-notch > .re-form-label,
+        .re-expand-result-row > .re-notch-cell > .re-notch > .re-form-label {
+            font-size: 11px;
+            font-weight: 500;
         }
 
         .re-rent-expand-select {
@@ -5870,6 +6221,116 @@
             transform: translateY(0);
         }
 
+        /* 分裂按钮：主操作「自动处理」+ 下拉选项（客服分配/客服备注/风控备注） */
+        .re-split {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            grid-column: 1 / -1;
+            min-width: 0;
+            transition: transform .15s, box-shadow .15s;
+        }
+
+        .re-split:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .re-split .re-action-btn:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .re-split .re-split-main {
+            flex: 1;
+            min-width: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .re-split .re-split-toggle {
+            flex: 0 0 36px;
+            width: 36px;
+            padding: 0;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-left: 1px solid rgba(107, 114, 128, 0.18);
+        }
+
+        .re-split .re-split-toggle .re-split-chevron {
+            width: 14px;
+            height: 14px;
+            transition: transform .18s;
+        }
+
+        .re-split .re-split-toggle[aria-expanded="true"] .re-split-chevron {
+            transform: rotate(180deg);
+        }
+
+        .re-split .re-split-toggle:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .re-split .re-split-main.processing::before {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .re-split .re-split-main.completed {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .re-split-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding: 6px;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+        }
+
+        .re-split-menu[hidden] {
+            display: none;
+        }
+
+        .re-split-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: #374151;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: left;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background .15s, color .15s;
+        }
+
+        .re-split-item .re-btn-icon {
+            width: 14px;
+            height: 14px;
+            stroke: #6b7280;
+        }
+
+        .re-split-item:hover {
+            background: var(--re-accent-10, rgba(59, 130, 246, 0.08));
+            color: var(--re-accent-dark, #1d4ed8);
+        }
+
+        .re-split-item:hover .re-btn-icon {
+            stroke: var(--re-accent-dark, #2563eb);
+        }
+
         .re-btn-icon {
             width: 14px;
             height: 14px;
@@ -5981,6 +6442,7 @@
         #re-system-panel.re-no-comp-bg .re-input,
         #re-system-panel.re-no-comp-bg .re-select,
         #re-system-panel.re-no-comp-bg .re-multi-select-header,
+        #re-system-panel.re-no-comp-bg .re-notch,
         #re-system-panel.re-no-comp-bg .re-form-group,
         #re-system-panel.re-no-comp-bg .re-data-section,
         #re-system-panel.re-no-comp-bg .re-info-card,
@@ -5996,8 +6458,16 @@
         #re-system-panel.re-no-comp-bg .re-history-search-input:focus {
             background: rgba(255, 255, 255, 0.15);
         }
+        #re-system-panel.re-no-comp-bg .re-notch > .re-input,
+        #re-system-panel.re-no-comp-bg .re-notch > .re-price-wrapper {
+            background: transparent !important;
+        }
         #re-system-panel.re-no-comp-bg .re-input[readonly] {
             background: rgba(107, 114, 128, 0.08);
+        }
+        #re-system-panel.re-no-comp-bg .re-notch-readonly > .re-input,
+        #re-system-panel.re-no-comp-bg .re-notch-readonly > .re-price-wrapper {
+            background: rgba(107, 114, 128, 0.08) !important;
         }
         #re-system-panel.re-no-comp-bg .re-history-month-header:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -10701,6 +11171,17 @@
         return row ? row.querySelector('td:nth-child(3)') : null;
     }
 
+    // 客服信息列（第 2 列）第一段「审单客服：xxx」；取不到时返回空串
+    function getCurrentAuditStaffName() {
+        const row = getCurrentOrderRow();
+        const cell = row ? row.querySelector('td:nth-child(2)') : null;
+        if (!cell) return '';
+        const paragraph = Array.from(cell.querySelectorAll('p'))
+            .find(p => /审单客服[：:]/.test(p.textContent || ''));
+        if (!paragraph) return '';
+        return (paragraph.textContent || '').replace(/^\s*审单客服[：:]\s*/, '').trim();
+    }
+
     function getCurrentIdCardElement() {
         const customerCell = getCurrentCustomerCell();
         return customerCell ? customerCell.querySelector('.id-card span') : null;
@@ -10721,6 +11202,7 @@
         panel.classList.remove('re-panel-hidden');
         panel.classList.add('re-panel-visible');
         panel.classList.remove('re-panel-closing');
+        resetCollapsibleSections();
         restorePanelPosition();
         initStaffName();
         initEditableSelects();
@@ -11050,6 +11532,58 @@
         });
     });
 
+    // 交互区分裂按钮：主按钮默认执行“自动处理”，下拉展开其余三项操作
+    const actionSplit = document.getElementById('re-action-split');
+    const splitToggle = document.getElementById('re-split-toggle');
+    const splitMenu = document.getElementById('re-split-menu');
+    const splitMain = document.getElementById('re-btn-auto-process');
+    if (actionSplit && splitToggle && splitMenu) {
+        function closeSplitMenu() {
+            splitMenu.hidden = true;
+            splitToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        splitToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const willOpen = splitMenu.hidden;
+            splitMenu.hidden = !willOpen;
+            splitToggle.setAttribute('aria-expanded', String(willOpen));
+            if (willOpen) {
+                const firstItem = splitMenu.querySelector('button');
+                if (firstItem) firstItem.focus();
+            }
+        });
+
+        splitMenu.addEventListener('click', function(e) {
+            if (e.target.closest('button')) closeSplitMenu();
+        });
+
+        actionSplit.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSplitMenu();
+                splitToggle.focus();
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!actionSplit.contains(e.target)) closeSplitMenu();
+        });
+
+        if (splitMain && window.MutationObserver) {
+            const syncSplitState = function() {
+                const busy = !!splitMain.disabled || splitMain.classList.contains('processing');
+                splitToggle.disabled = busy;
+                actionSplit.classList.toggle('is-processing', busy);
+                if (busy) closeSplitMenu();
+            };
+            new MutationObserver(syncSplitState).observe(splitMain, {
+                attributes: true,
+                attributeFilter: ['class', 'disabled']
+            });
+            syncSplitState();
+        }
+    }
+
     // 面板当前订单号：占位符视为未获取（不生成随机号兜底，避免真实订单未加载时误提交）
     function getPanelOrderNo() {
         const el = document.getElementById('re-order-no');
@@ -11285,6 +11819,9 @@
         }
         ['re-new-rent', 're-today-apply', 're-7day-apply', 're-30day-apply',
             're-risk-level', 're-v4-risk', 're-legal-status'].forEach(id => setText(id, ''));
+        setText('re-audit-staff-name', '--');
+        const auditStaffCopyEl = document.getElementById('re-audit-staff-copy');
+        if (auditStaffCopyEl) auditStaffCopyEl.title = '点击复制审单客服';
         const refreshIcon = document.getElementById('re-order-refresh');
         if (refreshIcon) refreshIcon.style.animation = '';
         setVal('re-phone-cost', '--');
@@ -11675,6 +12212,7 @@
             }
 
             const customerCell = getCurrentCustomerCell();
+            const auditStaffName = getCurrentAuditStaffName();
             cachedProductModel = readProductModel();
             syncHuaweiExpandRestriction();
             refreshAppStoreRestriction();
@@ -11801,6 +12339,15 @@
                 if (ageNum >= CONFIG.THRESHOLD.overageAge) {
                     showTooltip('超龄顾客', window.innerWidth / 2, window.innerHeight / 2);
                 }
+            }
+
+            const auditStaffNameEl = document.getElementById('re-audit-staff-name');
+            if (auditStaffNameEl) auditStaffNameEl.textContent = auditStaffName || '--';
+            const auditStaffCopyEl = document.getElementById('re-audit-staff-copy');
+            if (auditStaffCopyEl) {
+                auditStaffCopyEl.title = auditStaffName
+                    ? '点击复制：审单客服【' + auditStaffName + '】'
+                    : '未获取到审单客服';
             }
         } catch (e) {
         }
@@ -12671,7 +13218,7 @@
             const contactPhoneEl = document.getElementById('re-contact-phone');
             const phone = contactPhoneEl ? contactPhoneEl.textContent.trim() : '';
             if (/^1\d{10}$/.test(phone)) {
-                if (contactQueryBtn && phoneDuration && !phoneDuration.textContent.trim()) {
+                if (contactQueryBtn && phoneDuration && phoneDuration.dataset.state === 'idle') {
                     contactQueryBtn.click();
                 }
                 clearInterval(timer);
@@ -12689,7 +13236,10 @@
             contactPhoneReset.classList.remove('re-phone-alert');
         }
         const phoneDurationReset = document.getElementById('re-phone-duration');
-        if (phoneDurationReset) phoneDurationReset.textContent = '';
+        if (phoneDurationReset) {
+            phoneDurationReset.textContent = '【待查询】';
+            phoneDurationReset.dataset.state = 'idle';
+        }
 
         try {
             const linkXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr/td[1]/a[1]';
@@ -13529,16 +14079,16 @@
 
                 reductionEl.className = 're-risk-reduction';
                 if (parseFloat(reductionPercent) < 0) {
-                    reductionText = '降低幅度：降低' + Math.abs(reductionPercent) + '%';
+                    reductionText = '降低' + Math.abs(reductionPercent) + '%';
                     reductionEl.classList.add('decrease');
                     reductionEl.textContent = reductionText;
                 } else {
-                    reductionText = '降低幅度：提高' + reductionPercent + '%';
+                    reductionText = '提高' + reductionPercent + '%';
                     reductionEl.classList.add('increase');
                     reductionEl.textContent = reductionText;
                 }
             } else {
-                reductionEl.textContent = '';
+                reductionEl.textContent = '--';
                 reductionEl.className = 're-risk-reduction';
             }
         }
@@ -13554,19 +14104,19 @@
             if (phoneCost2 > 0 && v4Risk2 > 0) {
                 const expandPercent = ((expandPriceNum - v4Risk2) / phoneCost2 * 100).toFixed(1);
                 if (parseFloat(expandPercent) < 0) {
-                    expandReductionText = '拓展降低幅度：降低' + Math.abs(expandPercent) + '%';
+                    expandReductionText = '拓展：降低' + Math.abs(expandPercent) + '%';
                 } else {
-                    expandReductionText = '拓展降低幅度：提高' + expandPercent + '%';
+                    expandReductionText = '拓展：提高' + expandPercent + '%';
                 }
-                // 追加到降低幅度行下方展示（沿用配色规则）
+                // 追加到降低幅度模块内展示（沿用配色规则）
                 if (reductionEl) {
-                    reductionEl.textContent += '\n' + expandReductionText;
+                    const currentReduction = reductionEl.textContent.trim();
+                    reductionEl.textContent = (!currentReduction || currentReduction === '--')
+                        ? expandReductionText
+                        : currentReduction + '\n' + expandReductionText;
                 }
             }
         }
-
-        if (reductionText) addPart(2, reductionText);
-        if (expandReductionText) addPart(2, expandReductionText);
 
         const handleMethod = getCachedElement('handleMethod', '#re-handle-method')?.value || '';
         if (handleMethod) addPart(2, '办理方式：' + handleMethod);
@@ -13670,12 +14220,16 @@
 
             contactQueryBtn.disabled = true;
             contactQueryBtn.textContent = '查询中...';
+            phoneDuration.textContent = '【查询中…】';
+            phoneDuration.dataset.state = 'loading';
 
             const queryUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.mobileUseTime + `?mobile=${encodeURIComponent(phone)}`;
 
             if (typeof GM_xmlhttpRequest === 'undefined') {
                 contactQueryBtn.disabled = false;
                 contactQueryBtn.textContent = '查询';
+                phoneDuration.textContent = '【待查询】';
+                phoneDuration.dataset.state = 'idle';
                 return;
             }
 
@@ -13694,20 +14248,27 @@
                         const duration = durationEl ? durationEl.textContent.trim() : '';
 
                         if (duration) {
-                            phoneDuration.textContent = duration;
+                            phoneDuration.textContent = '【' + duration + '】';
+                            phoneDuration.dataset.state = 'done';
                             contactPhoneEl.classList.remove('re-phone-alert');
                             showSuccessToast('查询成功');
                         } else {
+                            phoneDuration.textContent = '【未查到】';
+                            phoneDuration.dataset.state = 'error';
                             contactPhoneEl.classList.add('re-phone-alert');
                             showErrorToast('该手机号未获取到使用时长，请核实真实性');
                         }
                     } catch (e) {
+                        phoneDuration.textContent = '【查询失败】';
+                        phoneDuration.dataset.state = 'error';
                         showTooltip('解析失败', window.innerWidth / 2, window.innerHeight / 2);
                     }
                 },
                 onerror: function(error) {
                     contactQueryBtn.disabled = false;
                     contactQueryBtn.textContent = '查询';
+                    phoneDuration.textContent = '【查询失败】';
+                    phoneDuration.dataset.state = 'error';
                     showTooltip('查询失败', window.innerWidth / 2, window.innerHeight / 2);
                 }
             });
@@ -13731,6 +14292,38 @@
     const collapsibleHeader = panel.querySelector('.re-collapsible-header');
     const contactSection = document.getElementById('re-contact-section');
     const riskSection = document.getElementById('re-risk-section');
+
+    // 风控预览 / 工作流：默认折叠（不写入任何存储），点击右侧箭头展开
+    function resetCollapsibleSections() {
+        [
+            ['re-risk-section', 're-risk-toggle', '风控预览'],
+            ['re-workflow-bar', 're-workflow-toggle', '工作流']
+        ].forEach(function(item) {
+            const section = document.getElementById(item[0]);
+            const toggle = document.getElementById(item[1]);
+            if (!section || !toggle) return;
+            section.classList.add('re-section-collapsed');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', '展开' + item[2]);
+        });
+    }
+
+    function bindCollapsibleSection(section, toggle, label) {
+        if (!section || !toggle) return;
+        const sync = function() {
+            const collapsed = section.classList.contains('re-section-collapsed');
+            toggle.setAttribute('aria-expanded', String(!collapsed));
+            toggle.setAttribute('aria-label', (collapsed ? '展开' : '收起') + label);
+        };
+        sync();
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            section.classList.toggle('re-section-collapsed');
+            sync();
+        });
+    }
+    bindCollapsibleSection(riskSection, document.getElementById('re-risk-toggle'), '风控预览');
+    bindCollapsibleSection(document.getElementById('re-workflow-bar'), document.getElementById('re-workflow-toggle'), '工作流');
 
     if (collapsibleHeader) {
         collapsibleHeader.classList.add('collapsed');
@@ -15122,7 +15715,37 @@
     `;
     document.head.appendChild(panelBtnStyle);
 
+    // 工作流下方的「审单客服」字段：点击/回车复制整行文本
+    function initAuditStaffCopy() {
+        const copyEl = document.getElementById('re-audit-staff-copy');
+        if (!copyEl || copyEl.dataset.copyBound === 'true') return;
+
+        const copyAuditStaff = function() {
+            const nameEl = document.getElementById('re-audit-staff-name');
+            const name = (nameEl?.textContent || '').trim();
+            if (!name || name === '--') {
+                showTooltip('未获取到审单客服姓名', window.innerWidth / 2, window.innerHeight / 2);
+                return;
+            }
+            navigator.clipboard.writeText(name).then(function() {
+                showSuccessToast('已复制：' + name);
+            }).catch(function() {
+                showTooltip('复制失败，请手动复制', window.innerWidth / 2, window.innerHeight / 2);
+            });
+        };
+
+        copyEl.addEventListener('click', copyAuditStaff);
+        copyEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                copyAuditStaff();
+            }
+        });
+        copyEl.dataset.copyBound = 'true';
+    }
+
     addPanelButton();
+    initAuditStaffCopy();
     applyFontSettings();
     applyHeaderSettings();
     applySwitchColor();
