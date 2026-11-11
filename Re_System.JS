@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.0.0
+// @version      8.1.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -138,7 +138,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.0.0</span>
+                    <span class="re-panel-version">V8.1.0</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -1227,7 +1227,8 @@
             margin-left: 0;
         }
 
-        .re-huawei-badge {
+        .re-huawei-badge,
+        .re-appstore-badge {
             display: inline-block;
             padding: 1px 8px;
             border: 1px solid #fecaca;
@@ -1237,6 +1238,10 @@
             font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
+        }
+
+        .re-appstore-badge {
+            cursor: help;
         }
 
         #re-rent-expand:disabled + .re-switch-slider {
@@ -7873,6 +7878,8 @@
         if (typeof noLockModeActive !== 'undefined' && noLockModeActive) tags.push('无锁模式');
         if (document.querySelector('#re-expand-restrict-badge .re-history-same-model')) tags.push('历史同机型');
         if (typeof isSameDeviceModel === 'function' && isSameDeviceModel()) tags.push('设备相同');
+        if (isHuaweiSeries()) tags.push('华为系列');
+        if (getCurrentAppStoreRestrictionLevel()) tags.push('AppStore限制');
         try {
             const headerText = panel.querySelector('.re-header-data')?.textContent || '';
             const orderCountMatch = headerText.match(/客户办单[：:](\d+)次/);
@@ -7882,6 +7889,16 @@
             const ageMatch = headerText.match(/(\d+)岁/);
             if (ageMatch && parseInt(ageMatch[1], 10) > CONFIG.THRESHOLD.overageAge) tags.push('超龄客户');
         } catch (e) {}
+        return tags;
+    }
+
+    // 兼容旧记录漏存的标签，只用记录自己的机型/备注快照补显，不改写原记录。
+    function getHistoryRecordTags(record) {
+        const tags = Array.isArray(record.tags) ? record.tags.slice() : [];
+        if (/huawei/i.test(record.model || '') && !tags.includes('华为系列')) tags.push('华为系列');
+        const hasAppStoreRemark = String(record.preview || '').split(/[；;]/)
+            .some(segment => segment.trim().replace(/^客服备注[：:]\s*/, '') === APPSTORE_RESTRICTION_REMARK);
+        if (hasAppStoreRemark && !tags.includes('AppStore限制')) tags.push('AppStore限制');
         return tags;
     }
 
@@ -7895,7 +7912,7 @@
     // 历史标签筛选状态（月份标题右侧下拉，全局生效）
     let historyTagFilter = '';
 
-    const HISTORY_TAG_OPTIONS = ['无锁模式', '复购客户', '超龄客户', '设备相同', '历史同机型'];
+    const HISTORY_TAG_OPTIONS = ['无锁模式', '复购客户', '超龄客户', '设备相同', '历史同机型', '华为系列', 'AppStore限制'];
 
     // 筛选下拉的选项 HTML（月份标题与空态操作栏共用）
     function buildTagFilterOptionsHtml() {
@@ -8091,7 +8108,8 @@
 
         if (!container) return;
 
-        getAllHistoryRecords().then(records => {
+        getAllHistoryRecords().then(savedRecords => {
+            const records = savedRecords.map(record => ({ ...record, tags: getHistoryRecordTags(record) }));
             let filteredRecords = records;
             const term = searchTerm.trim().toLowerCase();
 
@@ -10397,9 +10415,10 @@
 
     // 提交芝麻分：PATCH /api/v1/admin/reports/{report_id}（declared_income 原值带回，不覆盖运营手填值）
     // 支宝资产/微信余额随同一请求提交（alipay_balance/wechat_balance），未填写时不带该字段、不覆盖远端已有值
-    function submitZhimaScore(report, score, callback) {
+    function submitZhimaScore(report, score, serviceAgent, callback) {
+        // 客服姓名与芝麻分使用同一次提交的快照。
         const declaredIncome = parseFloat(String(report.declared_income ?? '0')) || 0;
-        const payload = { declared_income: declaredIncome, zhima_score: score };
+        const payload = { declared_income: declaredIncome, zhima_score: score, service_agent: serviceAgent };
         const alipayBalance = getFlowNumberValue('re-alipay-assets');
         const wechatBalance = getFlowNumberValue('re-wechat-balance');
         if (alipayBalance !== null) payload.alipay_balance = alipayBalance;
@@ -10449,6 +10468,12 @@
             if (!isTest) setWorkflowNode('zhima', 'skipped', '跳过芝麻分');
             return;
         }
+        const serviceAgent = (document.getElementById('re-staff-name')?.textContent || '').trim();
+        if (!serviceAgent) {
+            showErrorToast('客服姓名为空，请先在设置中填写客服姓名');
+            if (!isTest) setWorkflowNode('zhima', 'skipped', '跳过芝麻分');
+            return;
+        }
 
         zhimaSubmitting = true;
         const testBtn = document.getElementById('re-zhima-test-btn');
@@ -10478,7 +10503,7 @@
                 showErrorToast('未找到该客户的风控报告');
                 return;
             }
-            submitZhimaScore(report, score, function(submitErr, ok) {
+            submitZhimaScore(report, score, serviceAgent, function(submitErr, ok) {
                 if (!finish()) return;
                 if (ok) {
                     if (!isTest) setWorkflowNode('zhima', 'done', '已芝麻分');
@@ -10660,6 +10685,17 @@
         return currentOrderRow || document.querySelector('#table tbody tr');
     }
 
+    function getCurrentProductCell() {
+        return getCurrentOrderRow()?.querySelector('td:nth-child(4)') || null;
+    }
+
+    function readCurrentOrderNo() {
+        const cell = getCurrentProductCell();
+        const paragraph = cell ? Array.from(cell.querySelectorAll('p'))
+            .find(p => /^订单号[：:]/.test(p.textContent.trim())) : null;
+        return paragraph?.textContent.trim().match(/^订单号[：:]\s*(\d+)/)?.[1] || '';
+    }
+
     function getCurrentCustomerCell() {
         const row = getCurrentOrderRow();
         return row ? row.querySelector('td:nth-child(3)') : null;
@@ -10688,9 +10724,9 @@
         restorePanelPosition();
         initStaffName();
         initEditableSelects();
+        fetchOrderData();
         fetchPageData();
         fetchProductData();
-        fetchOrderData();
         if (autoFetchEnabled) {
             setTimeout(() => {
                 const newRentDisplay = document.getElementById('re-new-rent');
@@ -11061,16 +11097,10 @@
     let cachedProductModel = '';
 
     function readProductModel() {
-        try {
-            const checkEl = getElementByXPath(CONFIG.XPATH.MAIN_PAGE.valueAddedServiceCheck);
-            const checkText = checkEl ? checkEl.textContent.trim() : '';
-            const pOffset = checkText.includes('增值服务订单号') ? 1 : 0;
-            const modelEl = getElementByXPath(`/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[${2 + pOffset}]`);
-            let model = modelEl ? modelEl.textContent.trim() : '';
-            return model.replace(/^商品信息[：:]\s*/i, '').trim();
-        } catch (e) {
-            return '';
-        }
+        const cell = getCurrentProductCell();
+        const paragraph = cell ? Array.from(cell.querySelectorAll('p'))
+            .find(p => /^商品信息[：:]/.test(p.textContent.trim())) : null;
+        return paragraph ? paragraph.textContent.trim().replace(/^商品信息[：:]\s*/, '').trim() : '';
     }
 
     // 机型核心标识提取（数字+系列后缀，如 16pro/15promax），用于机型全等比对
@@ -11126,6 +11156,80 @@
         }
     }
 
+    // AppStore 管控：按本单商品及本单综合风险判断，独立于拓展/无锁开关。
+    const APPSTORE_RESTRICTION_REMARK = '【需限制AppStore】';
+    const APPSTORE_REFERENCE_SPEECH = '对客户：订单通过之后，会自动安装我们的【WebAppStore】作为替代下载渠道，主流应用的话都是可以正常下载的，您看这边可以接受吗？';
+    let appStoreRiskOrderNo = '';
+    let appStoreRiskText = '';
+    let riskRequestGeneration = 0;
+    let orderContextGeneration = 0;
+    let appStorePreviewReady = false;
+
+    function getAppStoreRestrictionLevel(model, riskText) {
+        const normalizedModel = String(model || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+        // 数字前界排除 118ProMax，字母后界排除其他后缀；容量/新旧描述不参与限制。
+        if (!/(?:^|[^0-9])18promax(?![a-z])/.test(normalizedModel)) return '';
+        const match = String(riskText || '').normalize('NFKC')
+            .match(/(?:^|[^a-z0-9])T\s*(10|[1-9])(?=$|[^a-z0-9.])/i);
+        const level = match ? Number(match[1]) : 0;
+        return level >= 7 && level <= 10 ? 'T' + level : '';
+    }
+
+    function getCurrentAppStoreRestrictionLevel() {
+        const orderNo = getPanelOrderNo();
+        if (!orderNo || orderNo !== appStoreRiskOrderNo || orderNo !== readCurrentOrderNo()) return '';
+        return getAppStoreRestrictionLevel(cachedProductModel, appStoreRiskText);
+    }
+
+    function composeAppStoreSpecialRemark(text, restricted) {
+        const original = String(text || '');
+        const segments = original.split(/[；;]/);
+        const count = segments.filter(segment => segment.trim() === APPSTORE_RESTRICTION_REMARK).length;
+        // 无需增删时保留原样；只处理独立的固定标记，保留用户句子及无锁文案。
+        if ((!restricted && count === 0) || (restricted && count === 1)) return original;
+        if (restricted && count === 0) {
+            const base = original.replace(/[；;]\s*$/, '');
+            return base.trim() ? base + '；' + APPSTORE_RESTRICTION_REMARK : APPSTORE_RESTRICTION_REMARK;
+        }
+        const base = segments.filter(segment => segment.trim() !== APPSTORE_RESTRICTION_REMARK)
+            .map(segment => segment.trim()).filter(Boolean).join('；');
+        return restricted ? (base ? base + '；' : '') + APPSTORE_RESTRICTION_REMARK : base;
+    }
+
+    // 仅同步 DOM/输入值，不在这里重绘预览，避免启动阶段读取尚未初始化的预览常量。
+    function syncAppStoreRestriction() {
+        const level = getCurrentAppStoreRestrictionLevel();
+        const badgeWrap = document.getElementById('re-expand-restrict-badge');
+        if (badgeWrap) {
+            let badge = badgeWrap.querySelector('.re-appstore-badge');
+            if (level) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 're-appstore-badge';
+                    badgeWrap.appendChild(badge);
+                }
+                badge.textContent = 'AppStore限制';
+                badge.title = '限制原因：18ProMax，综合风险 ' + level + '，需限制AppStore。\n\n参考话术：\n' + APPSTORE_REFERENCE_SPEECH;
+            } else if (badge) {
+                badge.remove();
+            }
+            badgeWrap.style.display = badgeWrap.children.length ? 'inline-flex' : 'none';
+        }
+        const input = document.getElementById('re-special-remark');
+        if (input) {
+            const next = composeAppStoreSpecialRemark(input.value, !!level);
+            if (input.value !== next) input.value = next;
+        }
+    }
+
+    function refreshAppStoreRestriction() {
+        syncAppStoreRestriction();
+        if (appStorePreviewReady) {
+            updatePreview();
+            updateRiskPreview();
+        }
+    }
+
     // 上锁字段名两态：非无锁「审核价格」；无锁内恒为「正常上锁」
     function getLockLabel() {
         if (!noLockModeActive) return '审核价格';
@@ -11166,6 +11270,15 @@
             const el = document.getElementById(id);
             if (el) el.value = text;
         };
+        // 切单使旧批次风控响应失效，并清空自动查询的 hasData 判断依据。
+        riskRequestGeneration++;
+        orderContextGeneration++;
+        appStoreRiskOrderNo = '';
+        appStoreRiskText = '';
+        ['re-new-rent', 're-today-apply', 're-7day-apply', 're-30day-apply',
+            're-risk-level', 're-v4-risk', 're-legal-status'].forEach(id => setText(id, ''));
+        const refreshIcon = document.getElementById('re-order-refresh');
+        if (refreshIcon) refreshIcon.style.animation = '';
         setVal('re-phone-cost', '--');
         setVal('re-guide-price', '--');
         setText('re-min-down-payment', '--');
@@ -11189,6 +11302,7 @@
         cachedDiscount = null;
         cachedProductModel = '';
         syncHuaweiExpandRestriction();
+        refreshAppStoreRestriction();
         cachedShop = '';
         cachedNewChainLink = null;
         // 年龄/性别缓存同样按单失效：未解密时不得沿用上一位客户的值
@@ -11555,6 +11669,7 @@
             const customerCell = getCurrentCustomerCell();
             cachedProductModel = readProductModel();
             syncHuaweiExpandRestriction();
+            refreshAppStoreRestriction();
             const nameParagraph = customerCell
                 ? Array.from(customerCell.querySelectorAll('p')).find(p => p.textContent.includes('姓名：'))
                 : null;
@@ -12005,8 +12120,7 @@
 
     function fetchProductData() {
         try {
-            const tdXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]';
-            const tdEl = getElementByXPath(tdXPath);
+            const tdEl = getCurrentProductCell();
             const tdText = tdEl ? tdEl.textContent || tdEl.innerText : '';
 
             function findShopRemark(text, label) {
@@ -12032,6 +12146,7 @@
             const productModel = readProductModel();
             cachedProductModel = productModel;
             syncHuaweiExpandRestriction();
+            refreshAppStoreRestriction();
 
             const minDownPaymentEl = getElementByXPath(minDownPaymentXPath);
             const minDownPaymentText = minDownPaymentEl ? minDownPaymentEl.textContent.trim() : '';
@@ -12131,9 +12246,10 @@
                     }
                 };
 
-                // 胶囊区重建后补回机型限制和无锁状态。
+                // 胶囊区重建后补回机型限制、AppStore 管控和无锁状态。
                 syncHuaweiExpandRestriction();
                 if (noLockModeActive) refreshNoLockUI();
+                refreshAppStoreRestriction();
             }
 
             updatePricePlaceholder();
@@ -12312,21 +12428,17 @@
 
     function fetchOrderData() {
         try {
-            const orderNoXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]/p[1]/text()';
-            const orderNoText = getPageDataByXPath(orderNoXPath);
-            const orderNoMatch = orderNoText.match(/\d+/);
-            const orderNo = orderNoMatch ? orderNoMatch[0] : '';
-
+            const orderNo = readCurrentOrderNo();
             const orderNoEl = document.getElementById('re-order-no');
-            if (orderNoEl && orderNo) {
-                const prevOrderNo = orderNoEl.textContent.trim();
-                orderNoEl.textContent = orderNo;
+            if (orderNoEl) {
+                const prevOrderNo = getPanelOrderNo();
+                orderNoEl.textContent = orderNo || '【无参数】';
                 // 无锁模式每单重置：订单号变化时自动退出
-                if (noLockModeActive && orderNo && noLockOrderSnapshot && orderNo !== noLockOrderSnapshot) {
+                if (noLockModeActive && noLockOrderSnapshot && orderNo !== noLockOrderSnapshot) {
                     exitNoLockMode();
                 }
                 // 流水宝开关每单重置：切单后新客户默认未开启
-                if (prevOrderNo && orderNo && prevOrderNo !== orderNo) {
+                if (prevOrderNo !== orderNo) {
                     resetLiushuiBaoSwitch();
                     // 换单先把上一单的抓取结果归位为未知态，避免金额/机型/年龄性别串单
                     resetOrderFields();
@@ -12346,10 +12458,15 @@
     function refreshOrderRiskData() {
         const orderNo = getPanelOrderNo();
 
-        if (!orderNo) {
+        if (!orderNo || orderNo !== readCurrentOrderNo()) {
             return;
         }
 
+        const requestGeneration = ++riskRequestGeneration;
+        const isCurrentRequest = () => requestGeneration === riskRequestGeneration
+            && orderNo === getPanelOrderNo() && orderNo === readCurrentOrderNo();
+        appStoreRiskOrderNo = '';
+        appStoreRiskText = '';
         const refreshIcon = document.getElementById('re-order-refresh');
         if (refreshIcon) {
             refreshIcon.style.animation = 're-spin 1s linear infinite';
@@ -12370,6 +12487,7 @@
         if (riskLevelDisplay) riskLevelDisplay.textContent = '';
         if (v4RiskDisplay) v4RiskDisplay.textContent = '';
         if (legalStatusDisplay) legalStatusDisplay.textContent = '';
+        refreshAppStoreRestriction();
 
         const multiRentUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.multiRentRisk + '?out_order_no=' + orderNo;
         const v4RiskUrl = CONFIG.API.BASE_URL + CONFIG.API.ENDPOINTS.v4Risk + '?out_order_no=' + orderNo;
@@ -12384,6 +12502,7 @@
         const totalRequests = 3;
 
         function checkAllCompleted() {
+            if (!isCurrentRequest()) return;
             completedRequests++;
             if (completedRequests >= totalRequests) {
                 if (refreshIcon) refreshIcon.style.animation = '';
@@ -12394,6 +12513,7 @@
             method: 'GET',
             url: multiRentUrl,
             onload: function(response) {
+                if (!isCurrentRequest()) return;
                 try {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(response.responseText, 'text/html');
@@ -12445,6 +12565,9 @@
                             riskLevelDisplay.classList.add('re-value-danger');
                         }
                     }
+                    appStoreRiskOrderNo = orderNo;
+                    appStoreRiskText = riskLevel;
+                    refreshAppStoreRestriction();
 
                 } catch (e) {
                 }
@@ -12459,6 +12582,7 @@
             method: 'GET',
             url: v4RiskUrl,
             onload: function(response) {
+                if (!isCurrentRequest()) return;
                 try {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(response.responseText, 'text/html');
@@ -12493,6 +12617,7 @@
             method: 'GET',
             url: legalUrl,
             onload: function(response) {
+                if (!isCurrentRequest()) return;
                 try {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(response.responseText, 'text/html');
@@ -12732,9 +12857,9 @@
         }
     }
 
+    fetchOrderData();
     fetchPageData();
     fetchProductData();
-    fetchOrderData();
     fetchLinkedPageData();
 
     const orderRefreshBtn = document.getElementById('re-order-refresh');
@@ -12752,6 +12877,7 @@
             if (this.classList.contains('empty')) {
                 return;
             }
+            updatePreview();
             const previewContentEl = document.getElementById('re-preview-content');
             const previewContent = previewContentEl ? previewContentEl.textContent.trim() : '';
 
@@ -13110,6 +13236,7 @@
     const previewRemark = document.getElementById('re-preview-remark');
 
     function updatePreview() {
+        syncAppStoreRestriction();
         const auditText = auditResultInput2?.value || '';
         const orderResult = orderResultSelect?.value || '';
         const expandChecked = rentExpandSwitch?.checked || false;
@@ -13278,6 +13405,7 @@
     }
 
     function updateRiskPreview() {
+        syncAppStoreRestriction();
         const parts = [];
 
         // 分组明细（V6.7.0 风控预览 Lightbox 浮窗渲染用）：0=基础情况 1=流水信息 2=方案备注 3=其他
@@ -13516,6 +13644,7 @@
         }
     });
     updateRiskPreview();
+    appStorePreviewReady = true;
 
     const contactQueryBtn = document.getElementById('re-contact-query');
     const contactEditBtn = document.getElementById('re-contact-edit');
@@ -13870,6 +13999,7 @@
                 return;
             }
 
+            updatePreview();
             const previewContentEl = document.getElementById('re-preview-content');
             const previewContent = previewContentEl ? previewContentEl.textContent.trim() : '';
 
@@ -13988,6 +14118,7 @@
                 return;
             }
 
+            const processOrderGeneration = orderContextGeneration;
             const orderResultSelect = document.getElementById('re-order-result');
             const orderResult = orderResultSelect ? orderResultSelect.value : '';
 
@@ -14030,6 +14161,18 @@
                     return;
                 }
 
+                // 等待客服名期间若已切单，不能把新单正文提交到旧订单（含 A→B→A）。
+                if (processOrderGeneration !== orderContextGeneration || orderNo !== getPanelOrderNo()
+                    || orderNo !== readCurrentOrderNo()) {
+                    autoProcessBtn.classList.remove('processing');
+                    autoProcessBtn.disabled = false;
+                    submitInProgress = false;
+                    abortWorkflow();
+                    showErrorToast('订单已切换，请在当前订单重新执行自动处理');
+                    return;
+                }
+                updatePreview();
+                updateRiskPreview();
                 const previewContentEl = document.getElementById('re-preview-content');
                 const previewContent = previewContentEl ? previewContentEl.textContent.trim() : '';
 
@@ -14041,6 +14184,8 @@
 
                 const productInfoEl = document.getElementById('re-product-info');
                 const model = productInfoEl ? productInfoEl.textContent.trim() : '';
+                // 与机型/备注一起固定提交时的标签，异步完成后不再读取可能已切换的面板。
+                const orderTags = collectOrderTags();
 
                 let name = cachedName || '';
                 let shop = cachedShop || '';
@@ -14079,7 +14224,7 @@
                                     model: model,
                                     shop: shop,
                                     preview: riskPreviewContent,
-                                    tags: collectOrderTags(),
+                                    tags: orderTags,
                                     date: now.toISOString().split('T')[0],
                                     time: now.toTimeString().split(' ')[0]
                                 };
