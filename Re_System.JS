@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.1.13
+// @version      8.2.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -109,6 +109,7 @@
             liushuiBaoMemoryKey: 're-liushui-bao-memory-enabled',
             liushuiBaoStateKey: 're-liushui-bao-state',
             autoRefreshKey: 're-auto-refresh-enabled',
+            autoRoundKey: 're-auto-round-enabled',
             lowPerfKey: 're-low-perf-enabled',
             restDaysKey: 're-rest-days',
             editedDaysKey: 're-edited-days'
@@ -138,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.1.13</span>
+                    <span class="re-panel-version">V8.2.0</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -384,6 +385,9 @@
                                                 <div class="re-notch">
                                                     <label class="re-form-label" id="re-audit-price-label" for="re-audit-result">审核价格</label>
                                                     <input type="text" class="re-input re-price-input" id="re-audit-result" placeholder="请输入">
+                                                    <button type="button" class="re-price-suggest-toggle" id="re-audit-suggest-toggle" aria-label="展开价格建议" aria-haspopup="listbox" aria-expanded="false" title="展开价格建议">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div class="re-data-form-inline">
@@ -403,6 +407,9 @@
                                                     <div class="re-notch">
                                                         <label class="re-form-label" id="re-expand-price-label" for="re-expand-result">拓展价格</label>
                                                         <input type="text" class="re-input re-price-input" id="re-expand-result" placeholder="请输入">
+                                                        <button type="button" class="re-price-suggest-toggle" id="re-expand-suggest-toggle" aria-label="展开价格建议" aria-haspopup="listbox" aria-expanded="false" title="展开价格建议">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 <label class="re-form-label">拓展结果</label>
@@ -525,7 +532,7 @@
                                                 </div>
                                             </div>
                                             <div class="re-set2-card re-set2-card-full">
-                                                <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#f97316;"></span><span class="re-set2-card-name">系统</span><span class="re-set2-card-count">2</span></div>
+                                                <div class="re-set2-card-head"><span class="re-set2-dot" style="background:#f97316;"></span><span class="re-set2-card-name">系统</span><span class="re-set2-card-count">3</span></div>
                                                 <div class="re-set2-half">
                                                     <div class="re-set2-slot" title="开启后流水宝开关跨订单保持，关闭则每单重置">
                                                         <div class="re-setting-icon re-setting-icon-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
@@ -540,6 +547,14 @@
                                                         <div class="re-set2-line"><span class="re-setting-name">低性能模式</span><span class="re-set2-inline-desc">禁用模糊动画提升流畅度</span></div>
                                                         <label class="re-switch re-switch-small">
                                                             <input type="checkbox" id="re-setting-low-perf">
+                                                            <span class="re-switch-slider"></span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="re-set2-slot" title="审核/拓展价格含小数时自动向上取整；关闭则弹窗询问是否取整">
+                                                        <div class="re-setting-icon re-setting-icon-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
+                                                        <div class="re-set2-line"><span class="re-setting-name">自动取整</span><span class="re-set2-inline-desc">价格小数自动向上取整</span></div>
+                                                        <label class="re-switch re-switch-small">
+                                                            <input type="checkbox" id="re-setting-auto-round">
                                                             <span class="re-switch-slider"></span>
                                                         </label>
                                                     </div>
@@ -3026,6 +3041,13 @@
             }
         }
 
+        /* 系统卡片第三个设置项独占一整行，避免留下半格边框。 */
+        #re-settings-basic .re-set2-half > .re-set2-slot:nth-child(3) {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--re-settings-divider);
+            border-left: none;
+        }
+
         .re-setting-icon {
             width: 36px;
             height: 36px;
@@ -3711,8 +3733,54 @@
             transition: color 0.15s ease;
         }
 
-        .re-notch:focus-within > .re-input::placeholder {
+        .re-notch:focus-within > .re-input::placeholder,
+        .re-notch > .re-price-input::placeholder {
             color: #9ca3af;
+        }
+
+        .re-notch > .re-price-input {
+            padding-right: 32px !important;
+        }
+
+        .re-price-suggest-toggle {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            transform: translateY(-50%);
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .re-price-suggest-toggle:hover {
+            color: var(--re-switch-on-1, #3b82f6);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .re-price-suggest-toggle:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .re-price-suggest-toggle svg {
+            width: 14px;
+            height: 14px;
+            pointer-events: none;
+            transition: transform 0.15s ease;
+        }
+
+        .re-price-suggest-toggle[aria-expanded="true"] svg {
+            transform: rotate(180deg);
         }
 
         /* 只读字段：虚线描边 + 浅灰底，与可编辑项区分 */
@@ -5619,10 +5687,10 @@
         }
 
         .re-price-suggest {
-            position: absolute;
-            top: 100%;
+            position: fixed;
+            top: 0;
             left: 0;
-            z-index: 100;
+            z-index: 2147483647;
             display: none;
             flex-direction: column;
             min-width: 160px;
@@ -5631,7 +5699,7 @@
             border: 1px solid rgba(107, 114, 128, 0.15);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-top: 2px;
+            margin-top: 0;
         }
 
         .re-price-suggest.re-suggest-visible {
@@ -10679,6 +10747,7 @@
     let autoContactQueryEnabled = false;
     let preventRefreshEnabled = false;
     let autoRefreshEnabled = true;
+    let autoRoundEnabled = false;
     let lowPerfEnabled = false;
     // 提交互斥锁：客服分配/客服备注/风控备注/自动处理 4 按钮共用，进行中拦截二次点击避免并发重复提交
     let submitInProgress = false;
@@ -10765,6 +10834,21 @@
     function saveAutoRefreshSetting(enabled) {
         localStorage.setItem(CONFIG.STORAGE.autoRefreshKey, enabled.toString());
         autoRefreshEnabled = enabled;
+    }
+
+    function loadAutoRoundSetting() {
+        const saved = localStorage.getItem(CONFIG.STORAGE.autoRoundKey);
+        autoRoundEnabled = saved === 'true';
+        const autoRoundCheckbox = document.getElementById('re-setting-auto-round');
+        if (autoRoundCheckbox) {
+            autoRoundCheckbox.checked = autoRoundEnabled;
+        }
+    }
+
+    function saveAutoRoundSetting(enabled) {
+        localStorage.setItem(CONFIG.STORAGE.autoRoundKey, enabled.toString());
+        autoRoundEnabled = enabled;
+        showSuccessToast(enabled ? '自动取整：已开启' : '自动取整：已关闭（小数价格将弹窗确认）');
     }
 
     // ===== 芝麻分自动提交（风控报告系统 riskanalysis.aixzu.com）=====
@@ -11017,6 +11101,7 @@
     loadLiushuiBaoMemorySetting();
     loadZhimaAutoSubmitSetting();
     loadAutoRefreshSetting();
+    loadAutoRoundSetting();
     loadLowPerfSetting();
 
     openStaffDB().then(() => {
@@ -11118,6 +11203,13 @@
     if (autoRefreshCheckbox) {
         autoRefreshCheckbox.addEventListener('change', function() {
             saveAutoRefreshSetting(this.checked);
+        });
+    }
+
+    const autoRoundCheckbox = document.getElementById('re-setting-auto-round');
+    if (autoRoundCheckbox) {
+        autoRoundCheckbox.addEventListener('change', function() {
+            saveAutoRoundSetting(this.checked);
         });
     }
 
@@ -11695,10 +11787,16 @@
     let orderContextGeneration = 0;
     let appStorePreviewReady = false;
 
-    function getAppStoreRestrictionLevel(model, riskText) {
+    function getAppStoreRestrictionModel(model) {
         const normalizedModel = String(model || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
-        // 数字前界排除 118ProMax，字母后界排除其他后缀；容量/新旧描述不参与限制。
-        if (!/(?:^|[^0-9])18promax(?![a-z])/.test(normalizedModel)) return '';
+        if (/(?:^|[^0-9])17promax(?![a-z])/.test(normalizedModel)) return '17ProMax';
+        if (/(?:^|[^0-9])18promax(?![a-z])/.test(normalizedModel)) return '18ProMax';
+        return '';
+    }
+
+    function getAppStoreRestrictionLevel(model, riskText) {
+        // 数字前界排除 118ProMax；支持 17ProMax / 18ProMax，字母后界排除其他后缀；容量/新旧描述不参与限制。
+        if (!getAppStoreRestrictionModel(model)) return '';
         const match = String(riskText || '').normalize('NFKC')
             .match(/(?:^|[^a-z0-9])T\s*(10|[1-9])(?=$|[^a-z0-9.])/i);
         const level = match ? Number(match[1]) : 0;
@@ -11739,7 +11837,8 @@
                     badgeWrap.appendChild(badge);
                 }
                 badge.textContent = 'AppStore限制';
-                badge.title = '限制原因：18ProMax，综合风险 ' + level + '，需限制AppStore。\n\n参考话术：\n' + APPSTORE_REFERENCE_SPEECH;
+                const modelName = getAppStoreRestrictionModel(cachedProductModel) || '18ProMax';
+                badge.title = '限制原因：' + modelName + '，综合风险 ' + level + '，需限制AppStore。\n\n参考话术：\n' + APPSTORE_REFERENCE_SPEECH;
             } else if (badge) {
                 badge.remove();
             }
@@ -13152,6 +13251,7 @@
                         }
                         // V4风控值刷新后重判无锁条件
                         if (typeof revalidateNoLock === 'function') revalidateNoLock();
+                        updatePriceSuggestToggleState();
                     }
 
                 } catch (e) {
@@ -13459,9 +13559,14 @@
     }
 
     const auditResultInput = document.getElementById('re-audit-result');
+    const auditSuggestToggle = document.getElementById('re-audit-suggest-toggle');
+    const expandPriceInput = document.getElementById('re-expand-result');
+    const expandSuggestToggle = document.getElementById('re-expand-suggest-toggle');
 
-    // 输入框聚焦时显示价格建议
+    // 价格建议改为：只有点输入框右侧的小箭头才展开，聚焦/打字不自动弹
     let activeSuggestMenu = null;
+    let activeSuggestInput = null;
+    let activeSuggestToggle = null;
 
     function getPriceSuggestions() {
         // 价格建议保留「最低结果」「初审结果」；最低首付易误点填错审核价格，已移除
@@ -13473,45 +13578,85 @@
         const v4RiskEl = document.getElementById('re-v4-risk');
         if (v4RiskEl) {
             const text = v4RiskEl.textContent.trim();
-            const priceMatch = text.match(/[\d,]+/);
+            // 初审结果直接取新版 V4 风控的完整数字（保留小数），不做取整/截断。
+            const priceMatch = text.match(/-?\d[\d,]*(?:\.\d+)?/);
             if (priceMatch) {
-                suggestions.push({ label: '初审结果', value: priceMatch[0] });
+                suggestions.push({ label: '初审结果', value: priceMatch[0].replace(/,/g, '') });
             }
         }
         return suggestions;
     }
 
-    function showPriceSuggest(inputEl) {
+    function updatePriceSuggestToggleState() {
+        const hasSuggestions = getPriceSuggestions().length > 0;
+        [
+            [document.getElementById('re-audit-result'), document.getElementById('re-audit-suggest-toggle')],
+            [document.getElementById('re-expand-result'), document.getElementById('re-expand-suggest-toggle')]
+        ].forEach(([input, toggle]) => {
+            if (!input || !toggle) return;
+            toggle.disabled = !hasSuggestions;
+            toggle.title = hasSuggestions ? '展开价格建议' : '暂无价格建议';
+            toggle.setAttribute('aria-disabled', hasSuggestions ? 'false' : 'true');
+        });
+    }
+
+    function showPriceSuggest(inputEl, toggleEl) {
         hidePriceSuggest();
         const suggestions = getPriceSuggestions();
-        if (suggestions.length === 0) return;
+        if (suggestions.length === 0) {
+            if (toggleEl) showTooltip('暂无价格建议', window.innerWidth / 2, window.innerHeight / 2);
+            return;
+        }
 
         const menu = document.createElement('div');
         menu.className = 're-price-suggest';
+        menu.setAttribute('role', 'listbox');
 
         suggestions.forEach(s => {
             const item = document.createElement('div');
             item.className = 're-price-suggest-item';
+            item.setAttribute('role', 'option');
             item.innerHTML = `<span>${s.value}</span><span class="re-price-suggest-label">${s.label}</span>`;
-            item.addEventListener('mousedown', function(e) {
+            item.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 inputEl.value = s.value;
                 inputEl.focus();
                 inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                // 标记来源：V4 初审结果原样带入，失焦时不再触发取整确认。
+                inputEl.dataset.priceSource = s.label === '初审结果' ? 'v4' : '';
+                delete inputEl.dataset.roundDecision;
                 hidePriceSuggest();
             });
             menu.appendChild(item);
         });
 
-        const parentInline = inputEl.closest('.re-data-form-inline');
-        if (parentInline) {
-            parentInline.style.position = 'relative';
-            parentInline.appendChild(menu);
+        // 挂到 body，避免被父容器裁切或盖住下一行；按输入框位置做上下翻转。
+        document.body.appendChild(menu);
+        menu.classList.add('re-suggest-visible');
+        menu.style.visibility = 'hidden';
+
+        const rect = inputEl.getBoundingClientRect();
+        const padding = 8;
+        const gap = 4;
+        const width = Math.max(160, Math.min(rect.width, window.innerWidth - padding * 2));
+        menu.style.width = width + 'px';
+        const menuRect = menu.getBoundingClientRect();
+        let left = Math.min(Math.max(rect.left, padding), window.innerWidth - width - padding);
+        let top = rect.bottom + gap;
+        if (top + menuRect.height > window.innerHeight - padding && rect.top - gap - menuRect.height >= padding) {
+            top = rect.top - gap - menuRect.height;
         }
+        top = Math.max(padding, Math.min(top, window.innerHeight - menuRect.height - padding));
+        menu.style.left = left + 'px';
+        menu.style.top = top + 'px';
+        menu.style.visibility = '';
 
         activeSuggestMenu = menu;
-        menu.classList.add('re-suggest-visible');
+        activeSuggestInput = inputEl;
+        activeSuggestToggle = toggleEl || null;
+        if (toggleEl) toggleEl.setAttribute('aria-expanded', 'true');
+        inputEl.focus();
     }
 
     function hidePriceSuggest() {
@@ -13519,26 +13664,57 @@
             activeSuggestMenu.remove();
             activeSuggestMenu = null;
         }
+        if (activeSuggestToggle) {
+            activeSuggestToggle.setAttribute('aria-expanded', 'false');
+            activeSuggestToggle = null;
+        }
+        activeSuggestInput = null;
     }
 
-    if (auditResultInput) {
-        auditResultInput.addEventListener('focus', function() {
-            showPriceSuggest(this);
-        });
-        auditResultInput.addEventListener('blur', function() {
-            setTimeout(hidePriceSuggest, 150);
+    function togglePriceSuggest(inputEl, toggleEl) {
+        if (activeSuggestMenu && activeSuggestInput === inputEl) {
+            hidePriceSuggest();
+        } else {
+            showPriceSuggest(inputEl, toggleEl);
+        }
+    }
+
+    if (auditResultInput && auditSuggestToggle) {
+        auditSuggestToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePriceSuggest(auditResultInput, auditSuggestToggle);
         });
     }
 
-    const expandPriceInput = document.getElementById('re-expand-result');
-    if (expandPriceInput) {
-        expandPriceInput.addEventListener('focus', function() {
-            showPriceSuggest(this);
-        });
-        expandPriceInput.addEventListener('blur', function() {
-            setTimeout(hidePriceSuggest, 150);
+    if (expandPriceInput && expandSuggestToggle) {
+        expandSuggestToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePriceSuggest(expandPriceInput, expandSuggestToggle);
         });
     }
+
+    [auditResultInput, expandPriceInput].forEach(input => {
+        if (input) input.addEventListener('input', hidePriceSuggest);
+    });
+
+    document.addEventListener('pointerdown', function(e) {
+        if (!activeSuggestMenu) return;
+        if (activeSuggestMenu.contains(e.target)) return;
+        if (activeSuggestToggle && activeSuggestToggle.contains(e.target)) return;
+        hidePriceSuggest();
+    }, true);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && activeSuggestMenu) {
+            hidePriceSuggest();
+            if (activeSuggestInput) activeSuggestInput.focus();
+        }
+    });
+
+    window.addEventListener('resize', hidePriceSuggest);
+    window.addEventListener('scroll', hidePriceSuggest, true);
 
     function updatePricePlaceholder() {
         const auditResultInput = document.getElementById('re-audit-result');
@@ -13548,6 +13724,7 @@
         if (!phoneCostEl || cachedDiscount === null) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
             if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : '请输入';
+            updatePriceSuggestToggleState();
             return;
         }
 
@@ -13555,30 +13732,24 @@
         if (cost === null || cost <= 0) {
             if (auditResultInput) auditResultInput.placeholder = '请输入';
             if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : '请输入';
+            updatePriceSuggestToggleState();
             return;
         }
 
-        // 提示与价格建议、校验共用公式：华为保留小数，其他机型向上取整。
+        // 提示与价格建议、校验共用公式：所有机型都保留原始计算结果，不向上取整。
         const finalMinPrice = calculateMinPrice(cost);
         const placeholderText = '最低结果：¥' + finalMinPrice;
 
         if (auditResultInput) auditResultInput.placeholder = placeholderText;
         if (expandResultInput) expandResultInput.placeholder = noLockModeActive ? getNoLockPlaceholderText() : placeholderText;
+        updatePriceSuggestToggleState();
     }
 
-    // 最低结果取整口径：有小数→往上进 1；无小数→保持标准计算结果
-    // 先 round 到 6 位小数消除浮点噪声（如 2340.0000000000005 会被误 ceil 进 1 元），再 ceil
-    function ceilMinPrice(v) {
-        const cleaned = Math.round(v * 1e6) / 1e6;
-        return Math.ceil(cleaned);
-    }
-
+    // 最低结果口径：所有机型都按原始计算结果保留小数，不做整数进位；
+    // 仅 round 到 6 位小数，消除 JS 浮点运算尾差（如 2340.0000000000005）。
     function calculateMinPrice(cost) {
-        if (isHuaweiSeries()) {
-            // 华为加 139 并保留小数；只消除浮点运算尾差，不进位到整数。
-            return Math.round((cost * cachedDiscount + 139) * 1e6) / 1e6;
-        }
-        return ceilMinPrice(cost * cachedDiscount + 50);
+        const offset = isHuaweiSeries() ? 139 : 50;
+        return Math.round((cost * cachedDiscount + offset) * 1e6) / 1e6;
     }
 
     function getMinPrice() {
@@ -13601,9 +13772,29 @@
         // 华为报价允许小数，新链路校验也不将其进位到整数。
         if (isNewChainLink && !isHuaweiSeries()) {
             const hasDecimal = input.value.includes('.') || !Number.isInteger(inputValue);
-            if (hasDecimal) {
-                inputValue = Math.ceil(inputValue);
-                input.value = inputValue;
+            const fromV4Suggestion = input.dataset.priceSource === 'v4';
+            const keepDecimal = input.dataset.roundDecision === 'keep';
+
+            // 初审结果来自 V4 原文，必须原样保留，不进入取整流程。
+            if (hasDecimal && !fromV4Suggestion && !keepDecimal) {
+                const roundedValue = Math.ceil(inputValue);
+                if (autoRoundEnabled) {
+                    inputValue = roundedValue;
+                    input.value = String(roundedValue);
+                    input.dataset.roundDecision = 'rounded';
+                } else {
+                    const shouldRound = confirm(
+                        '当前价格 ¥' + input.value + ' 含小数，是否取整为 ¥' + roundedValue + '？\n\n' +
+                        '确定：取整\n取消：保留小数'
+                    );
+                    if (shouldRound) {
+                        inputValue = roundedValue;
+                        input.value = String(roundedValue);
+                        input.dataset.roundDecision = 'rounded';
+                    } else {
+                        input.dataset.roundDecision = 'keep';
+                    }
+                }
             }
         }
 
@@ -13614,12 +13805,16 @@
             if (isNewChainLink) {
                 alert('最低售价为：¥' + minPrice + '，请重新输入！');
                 input.value = '';
+                delete input.dataset.priceSource;
+                delete input.dataset.roundDecision;
                 input.focus();
                 return false;
             } else {
                 const confirmed = confirm('最低售价为：¥' + minPrice + '，您确定要填入此价格吗？');
                 if (!confirmed) {
                     input.value = '';
+                    delete input.dataset.priceSource;
+                    delete input.dataset.roundDecision;
                     input.focus();
                     return false;
                 }
@@ -13644,6 +13839,15 @@
             }
         });
     }
+
+    // 用户手动改动价格后，清除“V4 原文/已确认保留小数”标记，下次失焦重新判断。
+    [auditResultInput, expandResultInput].forEach(input => {
+        if (!input) return;
+        input.addEventListener('input', function() {
+            delete this.dataset.priceSource;
+            delete this.dataset.roundDecision;
+        });
+    });
 
     const oldDeviceSwitch = document.getElementById('re-old-device');
     const oldDeviceContent = oldDeviceSwitch?.closest('.re-form-inline')?.querySelector('.re-switch-content');
