@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.2.0
+// @version      8.3.0
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.2.0</span>
+                    <span class="re-panel-version">V8.3.0</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -11791,11 +11791,13 @@
         const normalizedModel = String(model || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
         if (/(?:^|[^0-9])17promax(?![a-z])/.test(normalizedModel)) return '17ProMax';
         if (/(?:^|[^0-9])18promax(?![a-z])/.test(normalizedModel)) return '18ProMax';
+        if (/(?:^|[^0-9])17pro(?![a-z])/.test(normalizedModel)) return '17Pro';
+        if (/(?:^|[^0-9])16promax(?![a-z])/.test(normalizedModel)) return '16ProMax';
         return '';
     }
 
     function getAppStoreRestrictionLevel(model, riskText) {
-        // 数字前界排除 118ProMax；支持 17ProMax / 18ProMax，字母后界排除其他后缀；容量/新旧描述不参与限制。
+        // 数字前界排除 118ProMax；支持 17Pro / 16ProMax / 17ProMax / 18ProMax，字母后界排除其他后缀；容量/新旧描述不参与限制。
         if (!getAppStoreRestrictionModel(model)) return '';
         const match = String(riskText || '').normalize('NFKC')
             .match(/(?:^|[^a-z0-9])T\s*(10|[1-9])(?=$|[^a-z0-9.])/i);
