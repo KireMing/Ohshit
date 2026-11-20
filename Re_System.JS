@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.3.0
+// @version      8.3.1
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.3.0</span>
+                    <span class="re-panel-version">V8.3.1</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -12292,14 +12292,15 @@
 
     function fetchPageData() {
         try {
-            const checkEl = getElementByXPath(CONFIG.XPATH.MAIN_PAGE.valueAddedServiceCheck);
-            const checkText = checkEl ? checkEl.textContent.trim() : '';
-            const isValueAddedServiceOrder = checkText.includes('增值服务订单号');
+            const productCell = getCurrentProductCell();
+            const productCellText = productCell ? productCell.textContent.trim() : '';
+            const isValueAddedServiceOrder = productCellText.includes('增值服务订单号');
 
-            if (isValueAddedServiceOrder) {
-                const newChainLinkEl = getElementByXPath(CONFIG.XPATH.MAIN_PAGE.newChainLink);
-                const fullText = newChainLinkEl ? newChainLinkEl.textContent.trim() : '';
-                const match = fullText.match(/租机平台:\s*(.+)/);
+            if (isValueAddedServiceOrder && productCell) {
+                const chainParagraph = Array.from(productCell.querySelectorAll('p'))
+                    .find(p => /租机平台[：:]/.test(p.textContent || ''));
+                const fullText = chainParagraph ? chainParagraph.textContent.trim() : '';
+                const match = fullText.match(/租机平台[：:]\s*([\s\S]+)/);
                 if (match && match[1]) {
                     cachedNewChainLink = '新链路：' + match[1].trim();
                 }
@@ -12325,14 +12326,14 @@
             const idCardEl = getCurrentIdCardElement();
             const idCard = idCardEl ? idCardEl.textContent.trim() : '';
             const model = getCurrentModelText();
-            const shopContainerXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]';
-
-            // 店铺名：匹配"店铺："后面的文本，过滤【】括号内容
-            const shopContainerEl = getElementByXPath(shopContainerXPath);
+            // 店铺名：兼容新版「店铺名称：xxx【xxx商家】」结构，过滤【】括号内容
+            const shopParagraph = productCell
+                ? Array.from(productCell.querySelectorAll('p'))
+                    .find(p => /^店铺名称[：:]/.test(p.textContent.trim()))
+                : null;
             let shop = '';
-            if (shopContainerEl) {
-                const fullText = shopContainerEl.textContent.trim();
-                const shopMatch = fullText.match(/店铺：\s*(.+)/);
+            if (shopParagraph) {
+                const shopMatch = shopParagraph.textContent.trim().match(/^店铺名称[：:]\s*([\s\S]+)/);
                 if (shopMatch && shopMatch[1]) {
                     shop = shopMatch[1].replace(/【[^】]*】/g, '').trim();
                 }
@@ -12775,7 +12776,7 @@
             const tdText = tdEl ? tdEl.textContent || tdEl.innerText : '';
 
             function findShopRemark(text, label) {
-                const regex = new RegExp(label + '[：:]\\s*([\\s\\S]+?)(?=\\s*店铺历史成交单量)', 'i');
+                const regex = new RegExp(label + '[：:]\\s*([\\s\\S]+?)(?=\\s*(?:店铺注册时间|店铺订单通过数|店铺订单逾期率|店铺订单离线率|商家奖励))', 'i');
                 const match = text.match(regex);
                 return match ? match[1].trim() : '';
             }
@@ -12792,17 +12793,17 @@
                 return tdPTexts.find(t => t.startsWith(label + '：') || t.startsWith(label + ':')) || '';
             }
 
-            const minDownPaymentXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[6]/p[5]';
-
             const productModel = readProductModel();
             cachedProductModel = productModel;
             syncHuaweiExpandRestriction();
             refreshAppStoreRestriction();
 
-            const minDownPaymentEl = getElementByXPath(minDownPaymentXPath);
-            const minDownPaymentText = minDownPaymentEl ? minDownPaymentEl.textContent.trim() : '';
-            const minDownPaymentMatch = minDownPaymentText.match(/[\d.]+/);
-            const minDownPayment = minDownPaymentMatch ? minDownPaymentMatch[0] : '';
+            // 新版列表页不再有独立「最低首付」行，改用订单金额区的「首付预算」
+            const orderRow = tdEl ? tdEl.closest('tr') : null;
+            const amountCell = orderRow ? orderRow.querySelector('td:nth-child(5)') : null;
+            const amountText = amountCell ? amountCell.textContent.trim() : '';
+            const minDownPaymentMatch = amountText.match(/首付预算[：:]\s*([\d.]+)/);
+            const minDownPayment = minDownPaymentMatch ? minDownPaymentMatch[1] : '';
 
             const packageInfo1Text = findPTextByLabel('套餐');
             const packageInfo1Match = packageInfo1Text.match(/【([^】]+)】/);
@@ -12824,16 +12825,28 @@
                 packageInfo = packageInfo2;
             }
 
-            const shopOrderCount = findNumberAfterLabel(tdText, '店铺历史成交单量');
+            const shopOrderCount = findNumberAfterLabel(tdText, '店铺订单通过数');
 
-            const shopRemarkText = findShopRemark(tdText, '店铺备注');
+            const shopRemarkText = (findPTextByLabel('店铺备注') || '').replace(/^店铺备注[：:]\s*/, '').trim();
 
-            const shopCategoryText = findPTextByLabel('店铺');
+            const shopCategoryText = findPTextByLabel('店铺名称');
             const shopCategory = shopCategoryText.includes('出资商家') ? '出资商家' : '普通商家';
 
-            const shopOverdue = findNumberAfterLabel(tdText, '店铺逾期率');
+            const shopOverdue = findNumberAfterLabel(tdText, '店铺订单逾期率');
 
-            const shopOffline = findNumberAfterLabel(tdText, '店铺离线比例');
+            const shopOffline = findNumberAfterLabel(tdText, '店铺订单离线率');
+
+            // 新版列表的订单金额区直接带「成本」，作为手机成本（后续如能取到费用信息会再覆盖）
+            const phoneCostMatch = amountText.match(/成本[：:]\s*([\d.]+)/);
+            const phoneCostFromRow = phoneCostMatch ? phoneCostMatch[1] : '';
+            if (phoneCostFromRow) {
+                const phoneCostInput = document.getElementById('re-phone-cost');
+                if (phoneCostInput) {
+                    phoneCostInput.value = phoneCostFromRow;
+                    updatePricePlaceholder();
+                    if (typeof revalidateNoLock === 'function') revalidateNoLock();
+                }
+            }
 
             const storeIdMatch = tdText.match(/store_id=(\d+)/);
             const storeId = storeIdMatch ? storeIdMatch[1] : '';
@@ -12956,18 +12969,10 @@
                 }
 
                 shopOverdueEl.onclick = function() {
-                    const tdEl = getElementByXPath('/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]');
-                    if (tdEl) {
-                        const allP = tdEl.querySelectorAll('p');
-                        for (const p of allP) {
-                            if (p.textContent.includes('店铺逾期率')) {
-                                const viewLink = p.querySelector('a');
-                                if (viewLink && viewLink.textContent.trim() === '查看') {
-                                    openLayerLink(viewLink);
-                                    return;
-                                }
-                            }
-                        }
+                    const tdEl = getCurrentProductCell();
+                    const viewLink = tdEl ? tdEl.querySelector('a.show-overdue-data') : null;
+                    if (viewLink) {
+                        openLayerLink(viewLink);
                     }
                 };
             }
@@ -12986,23 +12991,10 @@
                 }
 
                 shopOfflineEl2.onclick = function() {
-                    const tdEl = getElementByXPath('/html/body/div[2]/div[2]/form/table/tbody/tr[1]/td[4]');
-                    if (tdEl) {
-                        const childNodes = tdEl.childNodes;
-                        for (let i = 0; i < childNodes.length; i++) {
-                            const node = childNodes[i];
-                            if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.ELEMENT_NODE) {
-                                if (node.textContent && node.textContent.includes('店铺离线比例')) {
-                                    for (let j = i + 1; j < childNodes.length; j++) {
-                                        const nextNode = childNodes[j];
-                                        if (nextNode.nodeType === Node.ELEMENT_NODE && nextNode.tagName === 'A' && nextNode.textContent.trim() === '查看') {
-                                            openLayerLink(nextNode);
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    const tdEl = getCurrentProductCell();
+                    const viewLink = tdEl ? tdEl.querySelector('a.show-offline-data') : null;
+                    if (viewLink) {
+                        openLayerLink(viewLink);
                     }
                 };
             }
@@ -13339,9 +13331,11 @@
         }
 
         try {
-            const linkXPath = '/html/body/div[2]/div[2]/form/table/tbody/tr/td[1]/a[1]';
-            const linkEl = getElementByXPath(linkXPath);
-            const href = linkEl ? linkEl.getAttribute('href') : '';
+            // 新版列表操作区第一个链接已不是审核页（变成「通过」），改为直接定位「去审核」链接
+            const orderRow = typeof getCurrentOrderRow === 'function' ? getCurrentOrderRow() : null;
+            const auditLinkEl = orderRow ? orderRow.querySelector('a[href*="/order-audit/index"]') : null;
+            const rawHref = auditLinkEl ? auditLinkEl.getAttribute('href') : '';
+            const href = rawHref ? new URL(rawHref, window.location.origin).href : '';
 
             if (!href) {
                 return;
@@ -13362,30 +13356,63 @@
                         // 通过匹配表头字段获取手机成本和指导价
                         let phoneCost = '';
                         let guidePrice = '';
-                        const feeH3s = doc.querySelectorAll('h3');
+                        let feeTable = null;
+                        const feeH3s = doc.querySelectorAll('h3, .cell-block-title, .panel-title, .box-title');
                         for (let i = 0; i < feeH3s.length; i++) {
                             if (feeH3s[i].textContent.includes('费用信息')) {
-                                let feeTable = feeH3s[i].nextElementSibling;
-                                while (feeTable && feeTable.tagName !== 'TABLE') {
-                                    feeTable = feeTable.nextElementSibling;
-                                }
-                                if (feeTable) {
-                                    const headers = feeTable.querySelectorAll('thead tr th');
-                                    const headerTexts = Array.from(headers).map(th => th.textContent.trim());
-                                    const phoneCostIdx = headerTexts.findIndex(t => t === '商品售价');
-                                    const guidePriceIdx = headerTexts.findIndex(t => t === '指导价');
-                                    const tbodyRow = feeTable.querySelector('tbody tr');
-                                    if (tbodyRow) {
-                                        const tds = tbodyRow.querySelectorAll('td');
-                                        if (phoneCostIdx >= 0 && tds[phoneCostIdx]) {
-                                            phoneCost = tds[phoneCostIdx].textContent.trim();
-                                        }
-                                        if (guidePriceIdx >= 0 && tds[guidePriceIdx]) {
-                                            guidePrice = tds[guidePriceIdx].textContent.trim();
-                                        }
+                                let candidate = feeH3s[i].nextElementSibling;
+                                while (candidate && candidate.tagName !== 'TABLE') {
+                                    const nestedTable = candidate.querySelector ? candidate.querySelector('table') : null;
+                                    if (nestedTable) {
+                                        candidate = nestedTable;
+                                        break;
                                     }
+                                    candidate = candidate.nextElementSibling;
                                 }
-                                break;
+                                if (candidate) {
+                                    feeTable = candidate;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 新版审核页费用表可能没有「费用信息」标题，按表头兜底查找
+                        if (!feeTable) {
+                            const tables = doc.querySelectorAll('table');
+                            for (const table of tables) {
+                                const headerTexts = Array.from(table.querySelectorAll('thead tr th'))
+                                    .map(th => th.textContent.trim());
+                                if (headerTexts.includes('商品售价') || headerTexts.includes('指导价')) {
+                                    feeTable = table;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 优先使用新版页面上稳定的价格元素 ID
+                        const directGoodsPriceEl = doc.getElementById('goods-price-value') || doc.getElementById('fee-goods-price-value');
+                        const directGuidePriceEl = doc.getElementById('guidance-price-value') || doc.getElementById('fee-guidance-price-value');
+                        if (directGoodsPriceEl) {
+                            phoneCost = directGoodsPriceEl.textContent.trim();
+                        }
+                        if (directGuidePriceEl) {
+                            guidePrice = directGuidePriceEl.textContent.trim();
+                        }
+
+                        if (feeTable) {
+                            const headers = feeTable.querySelectorAll('thead tr th');
+                            const headerTexts = Array.from(headers).map(th => th.textContent.trim());
+                            const phoneCostIdx = headerTexts.findIndex(t => t === '商品售价' || t === '商品成本');
+                            const guidePriceIdx = headerTexts.findIndex(t => t === '指导价' || t === '指导价格');
+                            const tbodyRow = feeTable.querySelector('tbody tr');
+                            if (tbodyRow) {
+                                const tds = tbodyRow.querySelectorAll('td');
+                                if (!phoneCost && phoneCostIdx >= 0 && tds[phoneCostIdx]) {
+                                    phoneCost = tds[phoneCostIdx].textContent.trim();
+                                }
+                                if (!guidePrice && guidePriceIdx >= 0 && tds[guidePriceIdx]) {
+                                    guidePrice = tds[guidePriceIdx].textContent.trim();
+                                }
                             }
                         }
 
@@ -13394,12 +13421,20 @@
                         let contactPhone = '';
                         let memberOrderAmount = '';
 
-                        const allH3 = doc.querySelectorAll('h3');
+                        const allH3 = doc.querySelectorAll('h3, .cell-block-title, .panel-title, .box-title');
                         for (let i = 0; i < allH3.length; i++) {
                             const h3Text = allH3[i].textContent.trim();
                             if (h3Text.includes('紧急联系人')) {
-                                const nextTable = allH3[i].nextElementSibling;
-                                if (nextTable && nextTable.tagName === 'TABLE') {
+                                let nextTable = allH3[i].nextElementSibling;
+                                while (nextTable && nextTable.tagName !== 'TABLE') {
+                                    const nestedTable = nextTable.querySelector ? nextTable.querySelector('table') : null;
+                                    if (nestedTable) {
+                                        nextTable = nestedTable;
+                                        break;
+                                    }
+                                    nextTable = nextTable.nextElementSibling;
+                                }
+                                if (nextTable) {
                                     const firstRow = nextTable.querySelector('tbody tr');
                                     if (firstRow) {
                                         const tds = firstRow.querySelectorAll('td');
@@ -13413,8 +13448,16 @@
                             }
 
                             if (h3Text.includes('客户信息')) {
-                                const nextTable = allH3[i].nextElementSibling;
-                                if (nextTable && nextTable.tagName === 'TABLE') {
+                                let nextTable = allH3[i].nextElementSibling;
+                                while (nextTable && nextTable.tagName !== 'TABLE') {
+                                    const nestedTable = nextTable.querySelector ? nextTable.querySelector('table') : null;
+                                    if (nestedTable) {
+                                        nextTable = nestedTable;
+                                        break;
+                                    }
+                                    nextTable = nextTable.nextElementSibling;
+                                }
+                                if (nextTable) {
                                     const ths = nextTable.querySelectorAll('thead tr th');
                                     let memberIndex = -1;
                                     ths.forEach((th, idx) => {
@@ -13439,6 +13482,8 @@
                         const guidePriceInput = document.getElementById('re-guide-price');
                         const phoneCostDiffContainer = document.getElementById('re-phone-cost-diff');
 
+                        phoneCost = String(phoneCost || '').replace(/[^\d.]/g, '');
+                        guidePrice = String(guidePrice || '').replace(/[^\d.]/g, '');
                         const phoneCostNum = parseFloat(phoneCost) || 0;
                         const guidePriceNum = parseFloat(guidePrice) || 0;
 
