@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.3.1
+// @version      8.3.2
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.3.1</span>
+                    <span class="re-panel-version">V8.3.2</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -9256,8 +9256,12 @@
             // td2 客服信息：视频面审客服（可能为空；DOM 优先，正则 fallback）
             const staffCell = tr.querySelector('td:nth-child(2)');
             let videoStaff = extractReviewField(staffCell, '视频面审客服');
+            // 防止空值占位把下一个字段「客服机编号」当成客服名（模板 p 合并时会出现）
+            if (videoStaff && /^(审单客服|视频面审客服|客服机编号|客服备注)/.test(videoStaff)) {
+                videoStaff = '';
+            }
             if (!videoStaff && staffCell) {
-                const m = (staffCell.textContent || '').match(/视频面审客服[：:]\s*([\u4e00-\u9fa5A-Za-z0-9·]{0,12})/);
+                const m = (staffCell.textContent || '').match(/视频面审客服[：:]\s*(?!(?:审单客服|客服机编号|客服备注)[：:]?)([^\s：:；;，,]{0,12})/);
                 if (m) videoStaff = m[1].trim();
             }
 
@@ -9269,8 +9273,8 @@
                 if (idMatch) idTail = idMatch[1].slice(-4);
             }
 
-            // td8 客服备注（⑤.1 比对用）
-            const remarkCell = tr.querySelector('td:nth-child(8)');
+            // 客服备注（⑤.1 比对用）：老版 8 列在 td8，新版主页 7 列在 td7，取最后一列兼容两者
+            const remarkCell = tr.querySelector('td:last-child');
             const remark = remarkCell ? (remarkCell.textContent || '').trim() : '';
 
             orders.push({
