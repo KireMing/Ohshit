@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.3.2
+// @version      8.3.3
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.3.2</span>
+                    <span class="re-panel-version">V8.3.3</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -11793,20 +11793,33 @@
 
     function getAppStoreRestrictionModel(model) {
         const normalizedModel = String(model || '').normalize('NFKC').replace(/\s+/g, '').toLowerCase();
-        if (/(?:^|[^0-9])17promax(?![a-z])/.test(normalizedModel)) return '17ProMax';
         if (/(?:^|[^0-9])18promax(?![a-z])/.test(normalizedModel)) return '18ProMax';
+        if (/(?:^|[^0-9])18pro(?![a-z])/.test(normalizedModel)) return '18Pro';
+        if (/(?:^|[^0-9])17promax(?![a-z])/.test(normalizedModel)) return '17ProMax';
         if (/(?:^|[^0-9])17pro(?![a-z])/.test(normalizedModel)) return '17Pro';
         if (/(?:^|[^0-9])16promax(?![a-z])/.test(normalizedModel)) return '16ProMax';
+        if (/(?:^|[^0-9])16pro(?![a-z])/.test(normalizedModel)) return '16Pro';
+        if (/(?:^|[^0-9])15promax(?![a-z])/.test(normalizedModel)) return '15ProMax';
+        // 兼容商品名里使用 15pm / 16p / 16pm / 17p / 17pm / 18p / 18pm 这类缩写
+        const aliasModels = [
+            ['18pm', '18ProMax'], ['18p', '18Pro'],
+            ['17pm', '17ProMax'], ['17p', '17Pro'],
+            ['16pm', '16ProMax'], ['16p', '16Pro'],
+            ['15pm', '15ProMax']
+        ];
+        for (const [alias, modelName] of aliasModels) {
+            if (new RegExp('(?:^|[^0-9])' + alias + '(?![a-z])').test(normalizedModel)) return modelName;
+        }
         return '';
     }
 
     function getAppStoreRestrictionLevel(model, riskText) {
-        // 数字前界排除 118ProMax；支持 17Pro / 16ProMax / 17ProMax / 18ProMax，字母后界排除其他后缀；容量/新旧描述不参与限制。
+        // 仅支持 15ProMax / 16Pro / 16ProMax / 17Pro / 17ProMax / 18Pro / 18ProMax，且综合风险必须为 T10。
         if (!getAppStoreRestrictionModel(model)) return '';
         const match = String(riskText || '').normalize('NFKC')
             .match(/(?:^|[^a-z0-9])T\s*(10|[1-9])(?=$|[^a-z0-9.])/i);
         const level = match ? Number(match[1]) : 0;
-        return level >= 7 && level <= 10 ? 'T' + level : '';
+        return level === 10 ? 'T10' : '';
     }
 
     function getCurrentAppStoreRestrictionLevel() {
