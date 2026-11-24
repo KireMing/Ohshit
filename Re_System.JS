@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.3.3
+// @version      8.3.4
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.3.3</span>
+                    <span class="re-panel-version">V8.3.4</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -11814,12 +11814,13 @@
     }
 
     function getAppStoreRestrictionLevel(model, riskText) {
-        // 仅支持 15ProMax / 16Pro / 16ProMax / 17Pro / 17ProMax / 18Pro / 18ProMax，且综合风险必须为 T10。
-        if (!getAppStoreRestrictionModel(model)) return '';
+        // 7 个指定机型：T7-T10 需限制；任意机型：T10 需限制。
         const match = String(riskText || '').normalize('NFKC')
             .match(/(?:^|[^a-z0-9])T\s*(10|[1-9])(?=$|[^a-z0-9.])/i);
         const level = match ? Number(match[1]) : 0;
-        return level === 10 ? 'T10' : '';
+        if (!level || level < 7 || level > 10) return '';
+        if (level === 10) return 'T10';
+        return getAppStoreRestrictionModel(model) ? 'T' + level : '';
     }
 
     function getCurrentAppStoreRestrictionLevel() {
@@ -11856,7 +11857,7 @@
                     badgeWrap.appendChild(badge);
                 }
                 badge.textContent = 'AppStore限制';
-                const modelName = getAppStoreRestrictionModel(cachedProductModel) || '18ProMax';
+                const modelName = getAppStoreRestrictionModel(cachedProductModel) || '非指定机型';
                 badge.title = '限制原因：' + modelName + '，综合风险 ' + level + '，需限制AppStore。\n\n参考话术：\n' + APPSTORE_REFERENCE_SPEECH;
             } else if (badge) {
                 badge.remove();
