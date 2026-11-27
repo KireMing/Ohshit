@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.3.4
+// @version      8.3.5
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.3.4</span>
+                    <span class="re-panel-version">V8.3.5</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -8430,7 +8430,7 @@
         const tags = Array.isArray(record.tags) ? record.tags.slice() : [];
         if (/huawei/i.test(record.model || '') && !tags.includes('华为系列')) tags.push('华为系列');
         const hasAppStoreRemark = String(record.preview || '').split(/[；;]/)
-            .some(segment => segment.trim().replace(/^客服备注[：:]\s*/, '') === APPSTORE_RESTRICTION_REMARK);
+            .some(segment => segment.trim().replace(/^客服备注[：:]\s*/, '') === APPSTORE_RESTRICTION_REMARK_LEGACY);
         if (hasAppStoreRemark && !tags.includes('AppStore限制')) tags.push('AppStore限制');
         return tags;
     }
@@ -11781,12 +11781,20 @@
         }
     }
 
-    // AppStore 管控：按本单商品及本单综合风险判断，独立于拓展/无锁开关。
-    const APPSTORE_RESTRICTION_REMARK = '【需限制AppStore】';
+    // AppStore 管控：按本单商品及本单综合风险判断；方案二必存在且固定限制。
+    const APPSTORE_RESTRICTION_REMARK_LEGACY = '【需限制AppStore】';
+    const APPSTORE_RESTRICTION_REMARK_BOTH = '【方案1和2均需限制AppStore】';
+    const APPSTORE_RESTRICTION_REMARK_PLAN2 = '【仅方案2需限制AppStore】';
+    const APPSTORE_RESTRICTION_REMARKS = [
+        APPSTORE_RESTRICTION_REMARK_LEGACY,
+        APPSTORE_RESTRICTION_REMARK_BOTH,
+        APPSTORE_RESTRICTION_REMARK_PLAN2
+    ];
     const APPSTORE_REFERENCE_SPEECH = '对客户：订单通过之后，会自动安装我们的【WebAppStore】作为替代下载渠道，主流应用的话都是可以正常下载的，您看这边可以接受吗？';
     let appStoreRiskOrderNo = '';
     let appStoreRiskText = '';
-    let appStoreRemarkInitialized = false; // 本次订单只自动填写一次，之后交由用户编辑。
+    let appStoreRemarkInitialized = false; // 本次订单首次自动写入标记；之后只替换自动标记，不覆盖用户手写内容。
+    let appStoreDesiredRemark = '';
     let riskRequestGeneration = 0;
     let orderContextGeneration = 0;
     let appStorePreviewReady = false;
@@ -11829,46 +11837,63 @@
         return getAppStoreRestrictionLevel(cachedProductModel, appStoreRiskText);
     }
 
-    function composeAppStoreSpecialRemark(text, restricted) {
+    function getAppStoreBadgeMode() {
+        return getCurrentAppStoreRestrictionLevel() ? 'both' : 'plan2';
+    }
+
+    function getAppStoreBadgeText(mode) {
+        return mode === 'both' ? '商店限制[双限]' : '商店限制[单限]';
+    }
+
+    function getAppStoreBadgeTooltip(mode) {
+        const base = mode === 'both'
+            ? '双限：方案1、方案2均需限制AppStore下载。\n方案1：限制AppStore，ID可更换。\n方案2：限制AppStore，ID不可更换。'
+            : '单限：仅方案2需限制AppStore下载。\n方案1：正常上锁，ID可更换。\n方案2：限制AppStore，ID不可更换。';
+        return base + '\n\n参考话术：\n' + APPSTORE_REFERENCE_SPEECH;
+    }
+
+    function getAppStoreSpecialRemarkText(mode) {
+        return mode === 'both' ? APPSTORE_RESTRICTION_REMARK_BOTH : APPSTORE_RESTRICTION_REMARK_PLAN2;
+    }
+
+    function composeAppStoreSpecialRemark(text, desiredRemark) {
         const original = String(text || '');
-        if (restricted) {
-            // 首次命中时补齐标记；已有标记就保留用户原文，不做去重或改写。
-            if (original.includes(APPSTORE_RESTRICTION_REMARK)) return original;
-            const base = original.replace(/[；;]\s*$/, '');
-            return base.trim() ? base + '；' + APPSTORE_RESTRICTION_REMARK : APPSTORE_RESTRICTION_REMARK;
-        }
-        // 仅切单时清理上单的独立标记，保留用户句子中主动提及的标记及无锁文案。
-        const segments = original.split(/[；;]/);
-        if (!segments.some(segment => segment.trim() === APPSTORE_RESTRICTION_REMARK)) return original;
-        return segments.filter(segment => segment.trim() !== APPSTORE_RESTRICTION_REMARK)
-            .map(segment => segment.trim()).filter(Boolean).join('；');
+        const segments = original.split(/[；;]/).map(segment => segment.trim()).filter(Boolean);
+        const base = segments.filter(segment => !APPSTORE_RESTRICTION_REMARKS.includes(segment)).join('；');
+        if (!desiredRemark) return base;
+        return base ? base + '；' + desiredRemark : desiredRemark;
     }
 
     // 仅同步 DOM/输入值，不在这里重绘预览，避免启动阶段读取尚未初始化的预览常量。
     function syncAppStoreRestriction() {
-        const level = getCurrentAppStoreRestrictionLevel();
+        const mode = getAppStoreBadgeMode();
         const badgeWrap = document.getElementById('re-expand-restrict-badge');
         if (badgeWrap) {
             let badge = badgeWrap.querySelector('.re-appstore-badge');
-            if (level) {
-                if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 're-appstore-badge';
-                    badgeWrap.appendChild(badge);
-                }
-                badge.textContent = 'AppStore限制';
-                const modelName = getAppStoreRestrictionModel(cachedProductModel) || '非指定机型';
-                badge.title = '限制原因：' + modelName + '，综合风险 ' + level + '，需限制AppStore。\n\n参考话术：\n' + APPSTORE_REFERENCE_SPEECH;
-            } else if (badge) {
-                badge.remove();
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 're-appstore-badge';
+                badgeWrap.appendChild(badge);
             }
+            badge.textContent = getAppStoreBadgeText(mode);
+            badge.title = getAppStoreBadgeTooltip(mode);
             badgeWrap.style.display = badgeWrap.children.length ? 'inline-flex' : 'none';
         }
         const input = document.getElementById('re-special-remark');
-        if (input && level && !appStoreRemarkInitialized) {
-            appStoreRemarkInitialized = true;
-            const next = composeAppStoreSpecialRemark(input.value, true);
+        if (!input) return;
+        const desired = getAppStoreSpecialRemarkText(mode);
+        if (!appStoreRemarkInitialized) {
+            const next = composeAppStoreSpecialRemark(input.value, desired);
             if (input.value !== next) input.value = next;
+            appStoreRemarkInitialized = true;
+            appStoreDesiredRemark = desired;
+            return;
+        }
+        // 风控数据回来后才可能从“单限”切到“双限”；只替换自动标记，不覆盖用户手写内容。
+        if (desired !== appStoreDesiredRemark && APPSTORE_RESTRICTION_REMARKS.some(marker => input.value.includes(marker))) {
+            const next = composeAppStoreSpecialRemark(input.value, desired);
+            if (input.value !== next) input.value = next;
+            appStoreDesiredRemark = desired;
         }
     }
 
@@ -11926,9 +11951,10 @@
         appStoreRiskOrderNo = '';
         appStoreRiskText = '';
         appStoreRemarkInitialized = false;
+        appStoreDesiredRemark = '';
         const remarkInput = document.getElementById('re-special-remark');
         if (remarkInput) {
-            const next = composeAppStoreSpecialRemark(remarkInput.value, false);
+            const next = composeAppStoreSpecialRemark(remarkInput.value, '');
             if (remarkInput.value !== next) remarkInput.value = next;
         }
         ['re-new-rent', 're-today-apply', 're-7day-apply', 're-30day-apply',
