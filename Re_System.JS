@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         系统管理面板
 // @namespace    http://tampermonkey.net/
-// @version      8.3.6
+// @version      8.3.8
 // @description  系统管理面板
 // @icon         https://p3-pc.douyinpic.com/img/aweme-avatar/douyin-user-image-file_d94be463567406ff89d93cbd2c6d4290~c5_300x300.jpeg
 // @author       KireMing
@@ -139,7 +139,7 @@
             <div class="re-panel-header">
                 <div class="re-panel-header-left">
                     <span class="re-panel-title">系统管理面板</span>
-                    <span class="re-panel-version">V8.3.6</span>
+                    <span class="re-panel-version">V8.3.8</span>
                     <span class="re-review-energy" id="re-review-energy" style="display:none;"><span class="re-review-energy-bar"><span class="re-review-energy-fill"></span><span class="re-review-energy-pct">0%</span></span><span class="re-review-energy-count">0/0</span></span>
                 </div>
                 <span class="re-header-data">【客户办单：数据丢失】 你 0岁 数据丢失【SJMM旗舰店】</span>
@@ -11862,10 +11862,25 @@
         return mode === 'both' ? APPSTORE_RESTRICTION_REMARK_BOTH : APPSTORE_RESTRICTION_REMARK_PLAN2;
     }
 
+    function isPlanTwoSelected() {
+        const expandSwitch = document.getElementById('re-rent-expand');
+        if (!expandSwitch || !expandSwitch.checked) return false;
+        const expandType = document.getElementById('re-expand-type');
+        return !!(expandType && String(expandType.value || '').includes('方案二'));
+    }
+
     function composeAppStoreSpecialRemark(text, desiredRemark) {
         const original = String(text || '');
         const segments = original.split(/[；;]/).map(segment => segment.trim()).filter(Boolean);
-        const base = segments.filter(segment => !APPSTORE_RESTRICTION_REMARKS.includes(segment)).join('；');
+        const stripMarker = (segment) => {
+            let value = segment;
+            for (const marker of APPSTORE_RESTRICTION_REMARKS) {
+                if (value === marker) return '';
+                if (value.startsWith(marker)) value = value.slice(marker.length).trim();
+            }
+            return value;
+        };
+        const base = segments.map(stripMarker).filter(Boolean).join('；');
         if (!desiredRemark) return base;
         return base ? base + '；' + desiredRemark : desiredRemark;
     }
@@ -11892,7 +11907,10 @@
         }
         const input = document.getElementById('re-special-remark');
         if (!input) return;
-        const desired = noLock ? '' : getAppStoreSpecialRemarkText(mode);
+        // 单限只限制方案二；拓展未打开时没有方案二，不能自动写特殊备注。
+        const desired = noLock || (mode === 'plan2' && !isPlanTwoSelected())
+            ? ''
+            : getAppStoreSpecialRemarkText(mode);
         if (!appStoreRemarkInitialized) {
             const next = composeAppStoreSpecialRemark(input.value, desired);
             if (input.value !== next) input.value = next;
